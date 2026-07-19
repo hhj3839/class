@@ -2,6 +2,42 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.relation-warning {
+  margin-top: 20px;
+}
+
+.actual-relations {
+  margin-top: 20px;
+}
+
+.actual-relations .network svg {
+  height: auto;
+  min-height: 420px;
+}
+
+.actual-relations .links .bridge {
+  stroke: #d2a24b;
+  stroke-dasharray: 7;
+}
+
+.actual-relations .group-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.actual-relations .group-list article {
+  padding: 10px;
+  border-radius: 9px;
+  background: var(--bg);
+}
+
+.actual-relations .group-list p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .analysis-card-tags {
   display: flex;
   align-items: center;
@@ -52,6 +88,10 @@
 }
 
 @media (max-width: 700px) {
+  .actual-relations .network svg {
+    min-height: 300px;
+  }
+
   .analysis-card footer {
     align-items: stretch;
     flex-direction: column;

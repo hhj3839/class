@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-2" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-3" />
 </head>
 <body>
   <div class="app-shell">
@@ -78,8 +78,8 @@
       </section>
 
       <section class="view" id="view-relations">
-        <div class="page-intro"><div><p class="eyebrow">추정과 불확실성 표시</p><h2>관계 분석</h2><p>응답률이 80% 이상일 때만 관계 구조를 참고할 수 있습니다.</p></div><span class="confidence good">분석 가능 · 응답률 86%</span></div>
-        <div class="relation-grid">
+        <div class="page-intro"><div><p class="eyebrow">추정과 불확실성 표시</p><h2>관계 분석</h2><p>응답률과 관계 문항 작성률이 80% 이상일 때만 관계 구조를 참고할 수 있습니다.</p></div><span class="confidence" id="relationConfidence">데이터 확인 중</span></div><div id="relationContent"></div>
+        <div class="relation-grid" hidden>
           <div class="panel network-panel"><div class="panel-head"><h3>관계망 미리보기</h3><button class="text-button" id="toggleNames">이름 표시</button></div><div class="network" id="network" aria-label="학생 관계망 추정도"><svg viewBox="0 0 600 340" role="img"><g class="links"><line x1="130" y1="100" x2="230" y2="70"/><line x1="130" y1="100" x2="210" y2="175"/><line x1="230" y1="70" x2="210" y2="175"/><line x1="380" y1="90" x2="480" y2="130"/><line x1="380" y1="90" x2="400" y2="210"/><line x1="480" y1="130" x2="400" y2="210"/><line class="bridge" x1="230" y1="70" x2="380" y2="90"/><line class="weak" x1="210" y1="175" x2="320" y2="280"/><line class="weak" x1="400" y1="210" x2="320" y2="280"/></g><g class="nodes"><g transform="translate(130 100)"><circle r="28"/><text>A</text><title>김하린</title></g><g transform="translate(230 70)"><circle r="28"/><text>B</text><title>박도윤</title></g><g transform="translate(210 175)"><circle r="28"/><text>C</text><title>이서준</title></g><g class="group-two" transform="translate(380 90)"><circle r="28"/><text>D</text><title>최유나</title></g><g class="group-two" transform="translate(480 130)"><circle r="28"/><text>E</text><title>정민재</title></g><g class="group-two" transform="translate(400 210)"><circle r="28"/><text>F</text><title>윤서아</title></g><g class="neutral" transform="translate(320 280)"><circle r="28"/><text>G</text><title>한지우</title></g></g></svg><div class="legend"><span><i class="dot one"></i>추정 집단 1</span><span><i class="dot two"></i>추정 집단 2</span><span><i class="line"></i>강한 상호 연결</span></div></div><p class="muted">상호 높은 평가가 반복되는 연결을 시각화한 추정 결과입니다.</p></div>
           <div class="relation-notes"><div class="panel"><span class="tag orange-tag">양극화 후보</span><h3>친구 집단에 따라 경험이 다를 가능성</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span><span><b>1.6</b>표준편차</span></div><p>특정 학생을 평가하지 말고, 모둠·놀이 상황별 반응을 확인해 주세요.</p></div><div class="panel"><span class="tag blue-tag">비대칭 관계 2쌍</span><h3>서로 느끼는 친밀감 차이</h3><p><strong>A → B 5점 · B → A 2점</strong></p><p class="muted">오해, 기대 차이, 일시적 감정 등 여러 가능성이 있습니다.</p></div></div>
         </div>
@@ -123,6 +123,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-8"></script>
+  <script src="app.js?v=20260719-9"></script>
 </body>
 </html>
