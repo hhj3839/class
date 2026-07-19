@@ -11,7 +11,7 @@ function payloadOf(item){let payload=item?.payload_json||item||{};try{if(typeof 
 function monthOf(item){return String(item?.survey_month||payloadOf(item).surveyMonth||item?.submitted_at||'').slice(0,7)}
 function previousMonth(month){const [year,value]=month.split('-').map(Number);const date=new Date(Date.UTC(year,value-2,1));return date.toISOString().slice(0,7)}
 function monthLabel(month){if(!/^\d{4}-\d{2}$/.test(month))return month;const [year,value]=month.split('-');return `${year}년 ${Number(value)}월`}
-function latestByStudent(responses,month){const latest=new Map();responses.filter(item=>monthOf(item)===month).sort((a,b)=>new Date(b.submitted_at||payloadOf(b).submittedAt||0)-new Date(a.submitted_at||payloadOf(a).submittedAt||0)).forEach(item=>{const number=Number(item.student_number||payloadOf(item).studentNumber);if(number&&!latest.has(number))latest.set(number,item)});return latest}
+function latestByStudent(responses,month){const latest=new Map();responses.filter(item=>monthOf(item)===month&&!item.analysis_excluded).sort((a,b)=>new Date(b.submitted_at||payloadOf(b).submittedAt||0)-new Date(a.submitted_at||payloadOf(a).submittedAt||0)).forEach(item=>{const number=Number(item.student_number||payloadOf(item).studentNumber);if(number&&!latest.has(number))latest.set(number,item)});return latest}
 function quoted(value,max=180){const text=String(value||'').trim();return text?`“${text.length>max?`${text.slice(0,max)}…`:text}”`:''}
 function signalTag(type){return type==='urgent'?'즉시 확인':type==='week'?'이번 주 확인':'지속 관찰'}
 function standardDeviation(values){if(!values.length)return 0;const average=values.reduce((sum,value)=>sum+value,0)/values.length;return Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)}
