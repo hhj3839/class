@@ -19,6 +19,7 @@ create table if not exists public.survey_responses (
   class_id text not null references public.classes(class_id) on delete cascade,
   student_number integer not null,
   student_name text not null,
+  survey_month date not null default date_trunc('month', current_date)::date,
   submitted_at timestamptz not null default now(),
   client_submitted_at timestamptz,
   payload_json jsonb not null
@@ -26,6 +27,13 @@ create table if not exists public.survey_responses (
 
 create index if not exists survey_responses_class_time_idx
   on public.survey_responses (class_id, submitted_at desc);
+
+alter table public.survey_responses
+  add column if not exists survey_month date;
+update public.survey_responses
+set survey_month = date_trunc('month', submitted_at)::date
+where survey_month is null;
+alter table public.survey_responses alter column survey_month set not null;
 
 alter table public.classes enable row level security;
 alter table public.students enable row level security;
@@ -72,11 +80,12 @@ begin
   end if;
 
   insert into public.survey_responses (
-    class_id, student_number, student_name, client_submitted_at, payload_json
+    class_id, student_number, student_name, survey_month, client_submitted_at, payload_json
   ) values (
     p_class_id,
     p_student_number,
     p_student_name,
+    to_date(coalesce(nullif(p_payload->>'surveyMonth',''), to_char(current_date,'YYYY-MM')) || '-01','YYYY-MM-DD'),
     nullif(p_payload->>'submittedAt','')::timestamptz,
     p_payload
   ) returning id into new_id;
@@ -127,7 +136,8 @@ begin
 end;
 $$;
 
-create or replace function public.teacher_get_responses(
+drop function if exists public.teacher_get_responses(text, text);
+create function public.teacher_get_responses(
   p_class_id text,
   p_secret text
 )
@@ -135,6 +145,7 @@ returns table (
   id uuid,
   student_number integer,
   student_name text,
+  survey_month date,
   submitted_at timestamptz,
   payload_json jsonb
 )
@@ -152,7 +163,7 @@ begin
   end if;
 
   return query
-  select r.id, r.student_number, r.student_name, r.submitted_at, r.payload_json
+  select r.id, r.student_number, r.student_name, r.survey_month, r.submitted_at, r.payload_json
   from public.survey_responses r
   where r.class_id = p_class_id
   order by r.submitted_at desc;
