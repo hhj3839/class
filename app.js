@@ -142,28 +142,11 @@ document.addEventListener('click',async event=>{const button=event.target.closes
 // 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
 // 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
 function buildRelationshipAnalysis(responses){
-  const months=[...new Set(responses.map(monthOf).filter(month=>/^\d{4}-\d{2}$/.test(month)))].sort();
-  const monthlyLatest=months.map(month=>latestByStudent(responses,month));
-  const submittedStudents=new Set();
-  const relationStudents=new Set();
-  const scoreSamples=new Map();
-  monthlyLatest.forEach(current=>current.forEach((item,rater)=>{
-    submittedStudents.add(Number(rater));
-    const relationships=payloadOf(item).relationships||[];
-    if(relationships.length)relationStudents.add(Number(rater));
-    relationships.forEach(row=>{
-      const target=Number(row.targetNumber),score=Number(row.score);
-      if(!target||!Number.isFinite(score))return;
-      const key=`${Number(rater)}:${target}`;
-      if(!scoreSamples.has(key))scoreSamples.set(key,[]);
-      scoreSamples.get(key).push(score);
-    });
-  }));
-  const scores=new Map([...scoreSamples].map(([key,values])=>[key,values.reduce((sum,value)=>sum+value,0)/values.length]));
+  const cumulative=IeumAnalysisCore.cumulativeScores(responses),months=cumulative.months,submittedStudents=cumulative.participants,relationStudents=cumulative.relationResponders,scoreSamples=cumulative.samples,scores=cumulative.scores;
   const total=classSettings.students.length;
   const submitted=submittedStudents.size;
   const relationCount=relationStudents.size;
-  const ready=total>0&&submitted/total>=.8&&relationCount/total>=.8;
+  const ready=IeumAnalysisCore.isRelationshipReady(total,submitted,relationCount);
   const students=classSettings.students.filter(student=>submittedStudents.has(Number(student.number))||[...scores.keys()].some(key=>Number(key.split(':')[1])===Number(student.number)));
   const mutual=[];
   students.forEach((student,index)=>students.slice(index+1).forEach(other=>{
