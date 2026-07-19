@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-6" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-7" />
 </head>
 <body>
   <div class="app-shell">
@@ -68,6 +68,7 @@
           <div class="panel link-panel"><h3>학생 참여 링크</h3><div class="copy-row"><code>class-ieum.local/join/5-2</code><button id="copyLink">복사</button></div></div>
           <div class="panel submission-panel"><div class="submission-head"><div><p class="eyebrow">월별 참여 확인</p><h3>제출 현황</h3></div><div class="submission-controls"><label for="surveyMonth"><span>조회 월</span><select id="surveyMonth" aria-label="제출 현황 월"></select></label><div class="participation-summary"><span>응답 인원</span><strong id="surveyParticipation">0 / 28명</strong></div></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div id="responseList" hidden></div></div>
         </div>
+        <section class="panel data-governance-panel"><div class="panel-head"><div><p class="eyebrow">교사 전용 데이터 관리</p><h3>응답 정정·분석 제외</h3></div><span class="confidence">영구 삭제 아님</span></div><p class="muted">선택한 월의 응답을 분석에서 제외하거나 소프트 삭제할 수 있습니다. 모든 작업에는 사유와 감사 로그가 남습니다.</p><div id="responseManagement"></div></section>
       </section>
 
       <section class="view" id="view-analysis">
@@ -113,6 +114,7 @@
             <p class="muted">번호와 이름을 직접 수정할 수 있습니다. 삭제한 학생의 기존 분석·관찰 기록은 이 데모에서 자동 삭제되지 않습니다.</p>
           </section>
         </div>
+        <section class="panel governance-settings"><div class="panel-head"><div><p class="eyebrow">개인정보 운영</p><h3>보존 정책과 감사 로그</h3></div><button class="secondary-button" id="refreshAuditLog" type="button">새로고침</button></div><div class="governance-policy"><label><span>보존 기간</span><select id="retentionMonths"><option value="6">6개월</option><option value="12" selected>12개월</option><option value="24">24개월</option><option value="36">36개월</option></select></label><label><span>학년도 종료 시</span><select id="endOfYearAction"><option value="review">교사 검토 후 결정</option><option value="anonymize">익명화 예정</option><option value="delete">삭제 예정</option></select></label><button class="primary-button" id="saveRetentionPolicy" type="button">보존 정책 저장</button></div><p class="muted">정책은 계획만 저장하며 자동 영구 삭제를 실행하지 않습니다.</p><div id="auditLogList" class="audit-log-list"></div></section>
       </section>
     </main>
   </div>
@@ -126,6 +128,6 @@
   <dialog id="authDialog"><form id="authForm"><div class="dialog-head"><div><p class="eyebrow">교사 전용</p><h2>교사 로그인</h2></div><button class="icon-button" data-close type="button" aria-label="닫기">×</button></div><div class="auth-dialog-content"><label><span>이메일</span><input id="authEmail" type="email" autocomplete="username" required></label><label><span>비밀번호</span><input id="authPassword" type="password" autocomplete="current-password" required></label><p class="muted">로그인 정보는 현재 브라우저 창을 닫으면 삭제됩니다.</p></div><div class="dialog-actions"><button class="secondary-button" data-close type="button">취소</button><button class="primary-button" type="submit">로그인</button></div></form></dialog>
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260719-2"></script>
-  <script src="app.js?v=20260719-17"></script>
+  <script src="app.js?v=20260719-18"></script>
 </body>
 </html>
