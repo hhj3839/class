@@ -1,0 +1,60 @@
+.analysis-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.change-badge {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--bg);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.signal-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.signal-summary p {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.protective-factors {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid #cbe8d8;
+  border-radius: 10px;
+  background: var(--green-soft);
+}
+
+.protective-factors strong {
+  color: var(--green);
+  font-size: 11px;
+}
+
+.protective-factors p {
+  margin: 3px 0 0;
+  color: #357453;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .analysis-card footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .analysis-card .evidence-button {
+    width: 100%;
+  }
+}
