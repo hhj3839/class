@@ -83,3 +83,78 @@ function renderStep(){ $('#surveyStep').innerHTML=steps[step];$('#stepLabel').te
 $('#openStudentSurvey').addEventListener('click',event=>{event.currentTarget.href=$('#copyLink').dataset.link});
 $('#prevStep').addEventListener('click',()=>{if(step){step--;renderStep()}});$('#nextStep').addEventListener('click',()=>{if(step<steps.length-1){step++;renderStep()}else{$('#studentDialog').close();showToast('미리보기 설문이 제출되었습니다.')}});
 selectedAnalysisMonth=new Date().toISOString().slice(0,7);syncSignalNames();renderClassIdentity();updateMonthSelector();renderAnalysisStatus();renderRelationships();renderHomeSignals();renderAnalysis();renderStudents();renderObservations();renderSettings();renderParticipationLink();renderResponses([]);normalizeParticipationLabel();if(classSettings.teacherSecret)refreshResponses(false);
+
+// 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
+// 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
+function buildRelationshipAnalysis(responses){
+  const months=[...new Set(responses.map(monthOf).filter(month=>/^\d{4}-\d{2}$/.test(month)))].sort();
+  const monthlyLatest=months.map(month=>latestByStudent(responses,month));
+  const submittedStudents=new Set();
+  const relationStudents=new Set();
+  const scoreSamples=new Map();
+  monthlyLatest.forEach(current=>current.forEach((item,rater)=>{
+    submittedStudents.add(Number(rater));
+    const relationships=payloadOf(item).relationships||[];
+    if(relationships.length)relationStudents.add(Number(rater));
+    relationships.forEach(row=>{
+      const target=Number(row.targetNumber),score=Number(row.score);
+      if(!target||!Number.isFinite(score))return;
+      const key=`${Number(rater)}:${target}`;
+      if(!scoreSamples.has(key))scoreSamples.set(key,[]);
+      scoreSamples.get(key).push(score);
+    });
+  }));
+  const scores=new Map([...scoreSamples].map(([key,values])=>[key,values.reduce((sum,value)=>sum+value,0)/values.length]));
+  const total=classSettings.students.length;
+  const submitted=submittedStudents.size;
+  const relationCount=relationStudents.size;
+  const ready=total>0&&submitted/total>=.8&&relationCount/total>=.8;
+  const students=classSettings.students.filter(student=>submittedStudents.has(Number(student.number))||[...scores.keys()].some(key=>Number(key.split(':')[1])===Number(student.number)));
+  const mutual=[];
+  students.forEach((student,index)=>students.slice(index+1).forEach(other=>{
+    const a=Number(student.number),b=Number(other.number),ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);
+    if(ab>=4&&ba>=4)mutual.push({a,b,strength:Math.min(ab,ba)});
+  }));
+  const adjacency=new Map(students.map(student=>[Number(student.number),new Set()]));
+  mutual.filter(edge=>edge.strength>=4.5).forEach(edge=>{adjacency.get(edge.a)?.add(edge.b);adjacency.get(edge.b)?.add(edge.a)});
+  const visited=new Set(),groups=[];
+  students.forEach(student=>{
+    const start=Number(student.number);if(visited.has(start))return;
+    const stack=[start],component=[];visited.add(start);
+    while(stack.length){const value=stack.pop();component.push(value);(adjacency.get(value)||[]).forEach(next=>{if(!visited.has(next)){visited.add(next);stack.push(next)}})}
+    if(component.length>=2)groups.push(component);
+  });
+  const groupByStudent=new Map();
+  groups.forEach((group,index)=>group.forEach(number=>groupByStudent.set(number,index)));
+  const connectionsFor=number=>mutual.filter(edge=>edge.a===number||edge.b===number);
+  const connectors=students.map(student=>{
+    const number=Number(student.number),touched=new Set();
+    connectionsFor(number).forEach(edge=>{const other=edge.a===number?edge.b:edge.a;const group=groupByStudent.get(other);if(group!==undefined)touched.add(group)});
+    return{number,name:student.name,groups:[...touched],connections:connectionsFor(number).length};
+  }).filter(item=>item.groups.length>=2);
+  const peripheral=students.map(student=>{const number=Number(student.number);return{number,name:student.name,connections:connectionsFor(number).length,group:groupByStudent.get(number)}}).filter(item=>item.connections<=1&&item.group===undefined);
+  const groupMetrics=[];
+  for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++){
+    const between=[],internal=[];
+    groups[i].forEach(a=>groups[j].forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)between.push(ab);if(ba!==undefined)between.push(ba)}));
+    [groups[i],groups[j]].forEach(group=>group.forEach((a,index)=>group.slice(index+1).forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)internal.push(ab);if(ba!==undefined)internal.push(ba)})));
+    if(between.length&&internal.length){const betweenAvg=between.reduce((sum,value)=>sum+value,0)/between.length,internalAvg=internal.reduce((sum,value)=>sum+value,0)/internal.length;if(internalAvg-betweenAvg>=1.2)groupMetrics.push({a:i,b:j,internalAvg,betweenAvg})}
+  }
+  return{ready,total,submitted,relationCount,months,students,scores,scoreSamples,mutual,groups,groupByStudent,connectors,peripheral,groupMetrics};
+}
+
+function renderRelationships(){
+  const content=$('#relationContent'),confidence=$('#relationConfidence');if(!content||!confidence)return;
+  const analysis=buildRelationshipAnalysis(allResponses);
+  const rate=analysis.total?Math.round(analysis.submitted/analysis.total*100):0,relationRate=analysis.total?Math.round(analysis.relationCount/analysis.total*100):0;
+  confidence.className=`confidence ${analysis.ready?'good':''}`;
+  confidence.textContent=analysis.ready?`분석 가능 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}% · ${analysis.months.length}개월`:`데이터 부족 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}%`;
+  if(!analysis.ready){content.innerHTML='<div class="notice warning relation-warning"><span>!</span><div><strong>관계 구조를 해석하기에는 누적 데이터가 부족합니다.</strong><p>전체 기간 중 한 번 이상 참여한 학생과 관계 문항 응답 학생이 각각 학급의 80% 이상일 때 관계망을 표시합니다. 결석·미제출 월은 0점으로 계산하지 않습니다.</p></div></div>';return}
+  const width=900,height=480,positions=new Map(),palette=['#d9edf4','#e8e0f4','#dff3e9','#fff0d8','#f7dfe3'];
+  analysis.groups.forEach((group,index)=>{const centerX=150+(index%4)*210,centerY=130+Math.floor(index/4)*210;group.forEach((number,nodeIndex)=>{const angle=2*Math.PI*nodeIndex/group.length;positions.set(number,{x:centerX+Math.cos(angle)*70,y:centerY+Math.sin(angle)*70,group:index})})});
+  analysis.students.filter(student=>!positions.has(Number(student.number))).forEach((student,index)=>positions.set(Number(student.number),{x:100+(index%8)*100,y:height-55-Math.floor(index/8)*75,group:-1}));
+  const lines=analysis.mutual.map(edge=>{const a=positions.get(edge.a),b=positions.get(edge.b);return`<line class="${a.group!==b.group?'bridge':''}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`}).join('');
+  const nodes=analysis.students.map(student=>{const pos=positions.get(Number(student.number)),fill=pos.group>=0?palette[pos.group%palette.length]:'#eef1f3';return`<g transform="translate(${pos.x} ${pos.y})" data-student-node><circle r="25" style="fill:${fill}"/><text>${escapeHTML(student.name)}</text><title>${escapeHTML(student.name)}</title></g>`}).join('');
+  const groupCards=analysis.groups.length?analysis.groups.map((group,index)=>`<article><strong>추정 집단 ${index+1} · ${group.length}명</strong><p>${group.map(number=>escapeHTML(classSettings.students.find(student=>Number(student.number)===number)?.name||`${number}번`)).join(', ')}</p></article>`).join(''):'<p class="muted">누적 평균 4.5점 이상의 상호 연결을 중심으로 구분되는 추정 집단이 없습니다.</p>';
+  content.innerHTML=`<div class="relation-grid actual-relations"><div class="panel network-panel"><div class="panel-head"><div><p class="eyebrow">전체 ${analysis.months.length}개월 누적 응답</p><h3>누적 관계망</h3></div><button class="text-button" id="toggleNames">이름 숨기기</button></div><div class="network show-names" id="network" aria-label="학생 누적 관계망 추정도"><svg viewBox="0 0 ${width} ${height}" role="img"><g class="links">${lines}</g><g class="nodes">${nodes}</g></svg></div><p class="muted">전체 월의 실제 응답만 평균했습니다. 결석·미제출 월은 평균에서 제외하며, 상호 평균 4점 이상 연결과 4.5점 이상 묶음을 표시합니다.</p></div><div class="relation-notes"><div class="panel"><span class="tag open">추정 집단 ${analysis.groups.length}개</span><h3>상호 높은 관계가 밀집된 묶음</h3><div class="group-list">${groupCards}</div><p class="muted">친한 무리나 고정 집단을 확정한 결과가 아닙니다.</p></div><div class="panel"><span class="tag blue-tag">집단 연결 역할 가능 ${analysis.connectors.length}명</span><h3>여러 집단과 연결된 학생</h3><p>${analysis.connectors.length?analysis.connectors.map(item=>`${escapeHTML(item.name)} (${item.groups.map(group=>`집단 ${group+1}`).join('·')})`).join('<br>'):'뚜렷한 후보 없음'}</p><p class="muted">관계 조정 부담이 있는지도 함께 관찰해 주세요.</p></div><div class="panel"><span class="tag watch">관계 연결 확인 ${analysis.peripheral.length}명</span><h3>강한 상호 연결이 적은 학생</h3><p>${analysis.peripheral.length?analysis.peripheral.map(item=>`${escapeHTML(item.name)} · 상호 연결 ${item.connections}명`).join('<br>'):'뚜렷한 후보 없음'}</p><p class="muted">실제 놀이·모둠 참여를 확인하기 위한 후보이며, 고립을 의미하지 않습니다.</p></div><div class="panel"><span class="tag orange-tag">집단 간 관계 차이 ${analysis.groupMetrics.length}건</span><h3>집단별 관계 경험 차이</h3><p>${analysis.groupMetrics.length?analysis.groupMetrics.map(item=>`집단 ${item.a+1}↔${item.b+1} · 내부 ${item.internalAvg.toFixed(1)} / 집단 간 ${item.betweenAvg.toFixed(1)}`).join('<br>'):'뚜렷한 차이 없음'}</p><p class="muted">모둠·체육·놀이 상황의 경쟁이나 배제 여부를 실제로 확인해 주세요.</p></div></div></div>`;
+}
