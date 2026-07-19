@@ -1,0 +1,46 @@
+.survey-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+.link-panel {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.link-panel h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.link-panel .copy-row {
+  margin: 0;
+  max-width: 900px;
+}
+
+.link-panel .copy-row code {
+  min-width: 0;
+  padding: 11px 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.link-panel .copy-row button {
+  padding: 0 18px;
+}
+
+@media (max-width: 700px) {
+  .link-panel {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .link-panel .copy-row {
+    width: 100%;
+  }
+}
