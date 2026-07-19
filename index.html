@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-7" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-8" />
 </head>
 <body>
   <div class="app-shell">
@@ -20,6 +20,7 @@
         <button class="nav-item active" data-view="home"><span>⌂</span> 교사 홈</button>
         <button class="nav-item" data-view="survey"><span>▤</span> 설문 관리</button>
         <button class="nav-item" data-view="analysis"><span>◫</span> 분석 대시보드</button>
+        <button class="nav-item" data-view="student-detail"><span>◎</span> 학생 상세</button>
         <button class="nav-item" data-view="relations"><span>⌘</span> 관계 분석</button>
         <button class="nav-item" data-view="observations"><span>✓</span> 관찰 기록</button>
         <button class="nav-item" data-view="settings"><span>⚙</span> 학급 설정</button>
@@ -78,6 +79,11 @@
         <div class="analysis-layout"><div class="signal-cards" id="analysisCards"></div></div>
       </section>
 
+      <section class="view" id="view-student-detail">
+        <div class="page-intro student-detail-intro"><div><p class="eyebrow">학생별 누적 기록</p><h2>학생 상세·월별 추세</h2><p>미제출 월은 비워 두고, 실제 제출한 월의 최신 응답만 연결합니다.</p></div><label class="student-picker"><span>학생 선택</span><select id="studentDetailSelect" aria-label="상세 정보를 확인할 학생"></select></label></div>
+        <div id="studentDetailContent" aria-live="polite"></div>
+      </section>
+
       <section class="view" id="view-relations">
         <div class="page-intro"><div><p class="eyebrow">추정과 불확실성 표시</p><h2>관계 분석</h2><p>전체 월의 실제 관계 응답을 누적 평균합니다. 결석·미제출 월은 0점이 아니라 평균에서 제외합니다.</p></div><span class="confidence" id="relationConfidence">데이터 확인 중</span></div>
         <div class="relation-view-tabs" id="relationTabs" role="tablist" aria-label="관계 분석 화면 선택"><button type="button" data-relation-tab="actual" role="tab">실제 자료 분석</button><button type="button" data-relation-tab="example" role="tab">예시 화면</button></div>
@@ -129,6 +135,6 @@
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260719-2"></script>
   <script src="analysis-core.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-19"></script>
+  <script src="app.js?v=20260719-20"></script>
 </body>
 </html>
