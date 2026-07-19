@@ -24,6 +24,15 @@
   stroke-dasharray: 7;
 }
 
+.actual-relations .network,#relationPreview .network { position: relative; }
+.relation-legend { position: absolute; right: 12px; bottom: 8px; display: grid; gap: 7px; padding: 10px 12px; border: 1px solid #dfe7eb; border-radius: 10px; background: rgba(255,255,255,.94); color: var(--muted); font-size: 10px; box-shadow: 0 5px 16px rgba(42,75,92,.08); }
+.relation-legend span { display: flex; align-items: center; gap: 7px; }
+.relation-legend i { display: inline-block; flex: 0 0 auto; }
+.relation-legend .solid-line,.relation-legend .dashed-line { width: 24px; border-top: 4px solid #8db5c8; border-radius: 4px; }
+.relation-legend .dashed-line { border-top-style: dashed; border-top-color: #d2a24b; }
+.relation-legend .group-colors { width: 24px; height: 11px; border-radius: 6px; background: linear-gradient(90deg,#d9edf4 0 20%,#e8e0f4 20% 40%,#dff3e9 40% 60%,#fff0d8 60% 80%,#f7dfe3 80%); }
+.relation-legend .neutral-color { width: 11px; height: 11px; border-radius: 50%; background: #eef1f3; border: 1px solid #8b9ba3; }
+
 .actual-relations .group-list {
   display: grid;
   gap: 9px;
