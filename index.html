@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="학생의 월별 생활과 관계 변화를 근거 중심으로 살피는 교사용 웹앱" />
+  <title>우리반 이음</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#home" aria-label="우리반 이음 홈">
+        <span class="brand-mark">이음</span>
+        <span><strong>우리반 이음</strong><small>관찰과 대화를 잇다</small></span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <button class="nav-item active" data-view="home"><span>⌂</span> 교사 홈</button>
+        <button class="nav-item" data-view="survey"><span>▤</span> 설문 관리</button>
+        <button class="nav-item" data-view="analysis"><span>◫</span> 분석 대시보드</button>
+        <button class="nav-item" data-view="relations"><span>⌘</span> 관계 분석</button>
+        <button class="nav-item" data-view="observations"><span>✓</span> 관찰 기록</button>
+      </nav>
+      <div class="privacy-card">
+        <span class="privacy-icon">⌾</span>
+        <div><strong>안전한 데모</strong><p>모든 데이터는 이 기기에만 저장됩니다.</p></div>
+      </div>
+      <div class="profile"><span class="avatar">홍</span><div><strong>홍현진 선생님</strong><small>5학년 2반 담임</small></div></div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menuButton" aria-label="메뉴 열기">☰</button>
+        <div><p class="eyebrow">2026학년도 · 5학년 2반</p><h1 id="pageTitle">안녕하세요, 선생님</h1></div>
+        <div class="top-actions"><span class="status-dot"></span><span>7월 설문 진행 중</span><button class="icon-button" aria-label="알림">♢</button></div>
+      </header>
+
+      <section class="view active" id="view-home">
+        <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong>24 <small>/ 28명</small></strong><div class="progress"><span style="width:86%"></span></div><p>86% 참여 · 미제출 4명</p></article>
+          <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong>1 <small>건</small></strong><p class="red-text">도움 요청 응답이 있어요</p></article>
+          <article class="stat-card"><div class="stat-head"><span>이번 주 확인</span><i class="orange">◷</i></div><strong>3 <small>명</small></strong><p>겹치는 신호 또는 큰 변화</p></article>
+          <article class="stat-card"><div class="stat-head"><span>긍정 변화</span><i class="green">↑</i></div><strong>8 <small>명</small></strong><p class="green-text">친절·성장 언급 증가</p></article>
+        </div>
+        <div class="dashboard-grid">
+          <div class="panel priority-panel">
+            <div class="panel-head"><div><p class="eyebrow">지원 신호</p><h2>먼저 살펴볼 내용</h2></div><button class="text-button" data-go="analysis">전체 보기 →</button></div>
+            <div id="signalList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><p class="eyebrow">이번 달 흐름</p><h2>학급 변화</h2></div><span class="confidence">응답률 86%</span></div>
+            <div class="trend-chart" aria-label="최근 4개월 학급 관계 안정감 추세">
+              <div class="chart-line"><span style="height:42%"><b>3.6</b></span><span style="height:56%"><b>3.8</b></span><span style="height:50%"><b>3.7</b></span><span class="current" style="height:68%"><b>4.0</b></span></div>
+              <div class="chart-labels"><span>4월</span><span>5월</span><span>6월</span><span>7월</span></div>
+            </div>
+            <div class="insight"><span>↗</span><p><strong>상호 존중 응답이 지난달보다 8% 늘었어요.</strong><br>모둠 활동에서 서로 설명해 준 사례가 많이 언급됐습니다.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-survey">
+        <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2><p>참여 링크를 공유하고 제출 현황을 확인하세요.</p></div><button class="primary-button" id="openStudentSurvey">학생 설문 미리보기</button></div>
+        <div class="survey-layout">
+          <div class="panel link-panel"><span class="tag open">진행 중</span><h3>7월 우리 반 마음 살피기</h3><p>2026. 7. 15. ~ 7. 22.</p><label>학생 참여 링크</label><div class="copy-row"><code>class-ieum.local/join/5-2-july</code><button id="copyLink">복사</button></div><div class="qr-placeholder">▦<small>QR 코드</small></div></div>
+          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><strong>24 / 28명</strong></div><div class="progress large"><span style="width:86%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 아직 제출하지 않았습니다.</p></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-analysis">
+        <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2><p>지원 시점별로 확인하고, 반드시 원문과 함께 살펴보세요.</p></div><select aria-label="분석 월"><option>2026년 7월</option><option>2026년 6월</option></select></div>
+        <div class="filter-tabs"><button class="active" data-filter="all">전체 5</button><button data-filter="urgent">즉시 확인 1</button><button data-filter="week">이번 주 3</button><button data-filter="watch">지속 관찰 1</button></div>
+        <div class="analysis-layout"><div class="signal-cards" id="analysisCards"></div><aside class="panel principles"><h3>읽는 방법</h3><ol><li><strong>신호</strong>를 먼저 확인해요.</li><li><strong>근거 원문</strong>을 직접 읽어요.</li><li><strong>복수 가설</strong> 중 실제 상황을 살펴요.</li><li><strong>관찰·대화</strong>로 확인해요.</li></ol><div class="notice warning"><span>!</span><p>설문만으로 학생이나 관계를 단정할 수 없습니다.</p></div></aside></div>
+      </section>
+
+      <section class="view" id="view-relations">
+        <div class="page-intro"><div><p class="eyebrow">추정과 불확실성 표시</p><h2>관계 분석</h2><p>응답률이 80% 이상일 때만 관계 구조를 참고할 수 있습니다.</p></div><span class="confidence good">분석 가능 · 응답률 86%</span></div>
+        <div class="relation-grid">
+          <div class="panel network-panel"><div class="panel-head"><h3>관계망 미리보기</h3><button class="text-button" id="toggleNames">이름 표시</button></div><div class="network" id="network" aria-label="학생 관계망 추정도"><svg viewBox="0 0 600 340" role="img"><g class="links"><line x1="130" y1="100" x2="230" y2="70"/><line x1="130" y1="100" x2="210" y2="175"/><line x1="230" y1="70" x2="210" y2="175"/><line x1="380" y1="90" x2="480" y2="130"/><line x1="380" y1="90" x2="400" y2="210"/><line x1="480" y1="130" x2="400" y2="210"/><line class="bridge" x1="230" y1="70" x2="380" y2="90"/><line class="weak" x1="210" y1="175" x2="320" y2="280"/><line class="weak" x1="400" y1="210" x2="320" y2="280"/></g><g class="nodes"><g transform="translate(130 100)"><circle r="28"/><text>A</text><title>김하린</title></g><g transform="translate(230 70)"><circle r="28"/><text>B</text><title>박도윤</title></g><g transform="translate(210 175)"><circle r="28"/><text>C</text><title>이서준</title></g><g class="group-two" transform="translate(380 90)"><circle r="28"/><text>D</text><title>최유나</title></g><g class="group-two" transform="translate(480 130)"><circle r="28"/><text>E</text><title>정민재</title></g><g class="group-two" transform="translate(400 210)"><circle r="28"/><text>F</text><title>윤서아</title></g><g class="neutral" transform="translate(320 280)"><circle r="28"/><text>G</text><title>한지우</title></g></g></svg><div class="legend"><span><i class="dot one"></i>추정 집단 1</span><span><i class="dot two"></i>추정 집단 2</span><span><i class="line"></i>강한 상호 연결</span></div></div><p class="muted">상호 높은 평가가 반복되는 연결을 시각화한 추정 결과입니다.</p></div>
+          <div class="relation-notes"><div class="panel"><span class="tag orange-tag">양극화 후보</span><h3>친구 집단에 따라 경험이 다를 가능성</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span><span><b>1.6</b>표준편차</span></div><p>특정 학생을 평가하지 말고, 모둠·놀이 상황별 반응을 확인해 주세요.</p></div><div class="panel"><span class="tag blue-tag">비대칭 관계 2쌍</span><h3>서로 느끼는 친밀감 차이</h3><p><strong>A → B 5점 · B → A 2점</strong></p><p class="muted">오해, 기대 차이, 일시적 감정 등 여러 가능성이 있습니다.</p></div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-observations">
+        <div class="page-intro"><div><p class="eyebrow">교사의 확인이 중심</p><h2>관찰 기록</h2><p>추천 과제를 저장하고 확인한 사실과 해석을 구분해 기록하세요.</p></div><button class="primary-button" id="addObservation">+ 새 관찰 기록</button></div>
+        <div class="observation-board" id="observationBoard"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="evidenceDialog"><div class="dialog-head"><div><p class="eyebrow">근거 원문 확인</p><h2 id="dialogTitle">학생 지원 신호</h2></div><button class="icon-button" data-close aria-label="닫기">×</button></div><div id="dialogContent"></div><div class="dialog-actions"><button class="secondary-button" data-close>닫기</button><button class="primary-button" id="saveObservation">관찰 과제로 저장</button></div></dialog>
+
+  <dialog id="studentDialog" class="student-dialog"><div class="student-survey"><div class="student-brand"><span class="brand-mark">이음</span><strong>7월 우리 반 마음 살피기</strong><button class="icon-button" data-close aria-label="닫기">×</button></div><div class="student-progress"><span id="stepLabel">1 / 3</span><div class="progress"><span id="surveyProgress" style="width:33%"></span></div></div><div id="surveyStep"></div><div class="dialog-actions"><button class="secondary-button" id="prevStep">이전</button><button class="primary-button" id="nextStep">다음</button></div></div></dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
