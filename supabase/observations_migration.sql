@@ -4,7 +4,7 @@
 create table if not exists public.observations (
   id uuid primary key default gen_random_uuid(),
   class_id text not null references public.classes(class_id) on delete cascade,
-  student_number integer not null,
+  student_number integer,
   survey_month date,
   title text not null,
   planned_action text not null default '',
