@@ -33,7 +33,7 @@
       <header class="topbar">
         <button class="icon-button menu-button" id="menuButton" aria-label="메뉴 열기">☰</button>
         <div><p class="eyebrow" id="classEyebrow">2026학년도 · 5학년 2반</p><h1 id="pageTitle">안녕하세요, 선생님</h1></div>
-        <div class="top-actions"><span class="status-dot"></span><span>설문 상시 참여 가능</span><button class="icon-button" aria-label="알림">♢</button></div>
+        <div class="top-actions"><button class="icon-button" aria-label="알림">♢</button></div>
       </header>
 
       <section class="view active" id="view-home">
@@ -63,8 +63,8 @@
       <section class="view" id="view-survey">
         <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2><p>참여 링크를 공유하고 제출 현황을 확인하세요.</p></div><div class="roster-actions"><button class="secondary-button" id="refreshResponses">응답 새로고침</button><a class="primary-button button-link" id="openStudentSurvey" href="student.html">학생 설문 미리보기</a></div></div>
         <div class="survey-layout">
-          <div class="panel link-panel"><span class="tag open">상시 참여</span><h3>우리 반 학교생활 돌아보기</h3><p>제출 기간과 횟수 제한이 없습니다.</p><label>학생 참여 링크</label><div class="copy-row"><code>class-ieum.local/join/5-2</code><button id="copyLink">복사</button></div><div class="qr-placeholder">▦<small>QR 코드</small></div></div>
-          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><strong id="surveyParticipation">24 / 28명</strong></div><div class="progress large"><span id="surveyParticipationBar" style="width:86%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 아직 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div class="response-list" id="responseList"></div></div>
+          <div class="panel link-panel"><h3>학생 참여 링크</h3><div class="copy-row"><code>class-ieum.local/join/5-2</code><button id="copyLink">복사</button></div></div>
+          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><div class="roster-actions"><select id="surveyMonth" aria-label="제출 현황 월"></select><strong id="surveyParticipation">0 / 28명</strong></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div class="response-list" id="responseList"></div></div>
         </div>
       </section>
 
@@ -121,6 +121,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-5"></script>
+  <script src="app.js?v=20260719-6"></script>
 </body>
 </html>
