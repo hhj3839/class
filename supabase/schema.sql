@@ -97,13 +97,23 @@ set search_path = public, pg_temp
 as $$
 declare
   synced_count integer;
+  supplied_secret_hash text := encode(extensions.digest(p_secret, 'sha256'), 'hex');
 begin
-  if not exists (
-    select 1 from public.classes
-    where class_id = p_class_id
-      and teacher_secret_hash = encode(extensions.digest(p_secret, 'sha256'), 'hex')
-  ) then
-    raise exception '교사용 DB 접근 코드가 올바르지 않습니다.';
+  if exists (select 1 from public.classes where class_id = p_class_id) then
+    if not exists (
+      select 1 from public.classes
+      where class_id = p_class_id and teacher_secret_hash = supplied_secret_hash
+    ) then
+      raise exception '교사용 DB 접근 코드가 올바르지 않습니다.';
+    end if;
+  else
+    if not exists (
+      select 1 from public.classes where teacher_secret_hash = supplied_secret_hash
+    ) then
+      raise exception '교사용 DB 접근 코드가 올바르지 않습니다.';
+    end if;
+    insert into public.classes (class_id, teacher_secret_hash)
+    values (p_class_id, supplied_secret_hash);
   end if;
 
   delete from public.students where class_id = p_class_id;
