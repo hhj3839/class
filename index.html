@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-5" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-6" />
 </head>
 <body>
   <div class="app-shell">
@@ -35,7 +35,7 @@
       <header class="topbar">
         <button class="icon-button menu-button" id="menuButton" aria-label="메뉴 열기">☰</button>
         <div><p class="eyebrow" id="classEyebrow">2026학년도 · 5학년 2반</p><h1 id="pageTitle">안녕하세요, 선생님</h1></div>
-        <div class="top-actions"><button class="icon-button" aria-label="알림">♢</button></div>
+        <div class="top-actions"><span id="authStatus">로그인 필요</span><button class="secondary-button" id="authButton" type="button">교사 로그인</button></div>
       </header>
 
       <section class="view active" id="view-home">
@@ -103,9 +103,9 @@
               <label><span>학년</span><input id="grade" type="number" min="1" max="6" required></label>
               <label><span>반</span><input id="classNumber" type="number" min="1" max="30" required></label>
               <label><span>학급 ID</span><input id="classId" maxlength="30" placeholder="예: 2026-5-2"></label>
-              <label><span>교사용 DB 접근 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="교사 전용 코드"></label>
+              <label><span>최초 학급 연결 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="최초 연결 후 저장되지 않습니다"></label>
             </div>
-            <div class="notice safe compact"><span>✓</span><div><strong>Supabase DB에 연결됩니다.</strong><p>학생 응답은 DB에 누적되며 교사용 접근 코드로만 조회할 수 있습니다.</p></div></div>
+            <div class="notice safe compact"><span>✓</span><div><strong>교사 로그인으로 보호됩니다.</strong><p>최초 한 번만 기존 접근 코드로 학급을 연결한 뒤에는 로그인 계정으로 조회합니다.</p></div></div><button class="secondary-button" id="claimClass" type="button">로그인 계정에 학급 연결</button>
           </form>
           <section class="panel roster-panel">
             <div class="panel-head"><div><p class="eyebrow">학생 관리</p><h3>학생 명단 <span class="roster-count" id="rosterCount">28명</span></h3></div><div class="roster-actions"><button class="secondary-button" id="pasteRoster" type="button">명단 붙여넣기</button><button class="primary-button" id="addStudent" type="button">+ 학생 추가</button></div></div>
@@ -123,8 +123,9 @@
 
   <dialog id="pasteDialog"><div class="dialog-head"><div><p class="eyebrow">빠른 명단 등록</p><h2>학생 명단 붙여넣기</h2></div><button class="icon-button" data-close aria-label="닫기">×</button></div><div class="paste-content"><p>한 줄에 한 명씩 입력하세요. <code>번호, 이름</code> 또는 이름만 입력할 수 있습니다.</p><textarea id="rosterPaste" placeholder="1, 학생01&#10;2, 학생02&#10;3, 학생03"></textarea></div><div class="dialog-actions"><button class="secondary-button" data-close>취소</button><button class="primary-button" id="applyRosterPaste">명단 적용</button></div></dialog>
 
+  <dialog id="authDialog"><form id="authForm"><div class="dialog-head"><div><p class="eyebrow">교사 전용</p><h2>교사 로그인</h2></div><button class="icon-button" data-close type="button" aria-label="닫기">×</button></div><div class="auth-dialog-content"><label><span>이메일</span><input id="authEmail" type="email" autocomplete="username" required></label><label><span>비밀번호</span><input id="authPassword" type="password" autocomplete="current-password" required></label><p class="muted">로그인 정보는 현재 브라우저 창을 닫으면 삭제됩니다.</p></div><div class="dialog-actions"><button class="secondary-button" data-close type="button">취소</button><button class="primary-button" type="submit">로그인</button></div></form></dialog>
   <div class="toast" id="toast" role="status"></div>
-  <script src="supabase.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-15"></script>
+  <script src="supabase.js?v=20260719-2"></script>
+  <script src="app.js?v=20260719-16"></script>
 </body>
 </html>

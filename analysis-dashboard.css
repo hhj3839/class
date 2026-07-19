@@ -17,6 +17,9 @@
 .relationship-action h4 { margin: 8px 0 3px; }
 .relationship-action p { margin: 4px 0; color: var(--muted); font-size: 12px; }
 @media (max-width: 700px) { .relationship-action-list { grid-template-columns: 1fr; } }
+.auth-dialog-content { display: grid; gap: 14px; padding: 22px 25px; }
+.auth-dialog-content label { display: grid; gap: 6px; font-size: 12px; font-weight: 800; }
+.auth-dialog-content input { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; }
 
 .actual-relations {
   margin-top: 20px;
