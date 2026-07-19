@@ -10,6 +10,13 @@
 .relation-view-tabs button { min-width: 110px; padding: 9px 15px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-weight: 800; }
 .relation-view-tabs button.active { background: #fff; color: var(--blue); box-shadow: 0 2px 8px rgba(42,75,92,.1); }
 #relationPreview { margin-top: 20px; }
+.relationship-actions { margin-top: 18px; }
+.relationship-action-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.relationship-action { padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.relationship-action header,.relationship-action footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.relationship-action h4 { margin: 8px 0 3px; }
+.relationship-action p { margin: 4px 0; color: var(--muted); font-size: 12px; }
+@media (max-width: 700px) { .relationship-action-list { grid-template-columns: 1fr; } }
 
 .actual-relations {
   margin-top: 20px;
