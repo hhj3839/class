@@ -7,8 +7,10 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
 test('교사용 앱은 로그인 전 숨겨지고 전용 로그인 게이트만 표시된다',()=>{
   const html=read('index.html');
+  const css=read('analysis-dashboard.css');
   assert.match(html,/id="authGate"/);
   assert.match(html,/id="teacherApp" hidden/);
+  assert.match(css,/\[hidden\]\{display:none!important\}/);
 });
 
 test('교사용 개인정보를 localStorage에 저장하지 않는다',()=>{
