@@ -20,25 +20,26 @@
         <button class="nav-item" data-view="analysis"><span>◫</span> 분석 대시보드</button>
         <button class="nav-item" data-view="relations"><span>⌘</span> 관계 분석</button>
         <button class="nav-item" data-view="observations"><span>✓</span> 관찰 기록</button>
+        <button class="nav-item" data-view="settings"><span>⚙</span> 학급 설정</button>
       </nav>
       <div class="privacy-card">
         <span class="privacy-icon">⌾</span>
         <div><strong>안전한 데모</strong><p>모든 데이터는 이 기기에만 저장됩니다.</p></div>
       </div>
-      <div class="profile"><span class="avatar">홍</span><div><strong>홍현진 선생님</strong><small>5학년 2반 담임</small></div></div>
+      <div class="profile"><span class="avatar" id="profileAvatar">홍</span><div><strong id="profileTeacher">홍현진 선생님</strong><small id="profileClass">5학년 2반 담임</small></div></div>
     </aside>
 
     <main>
       <header class="topbar">
         <button class="icon-button menu-button" id="menuButton" aria-label="메뉴 열기">☰</button>
-        <div><p class="eyebrow">2026학년도 · 5학년 2반</p><h1 id="pageTitle">안녕하세요, 선생님</h1></div>
+        <div><p class="eyebrow" id="classEyebrow">2026학년도 · 5학년 2반</p><h1 id="pageTitle">안녕하세요, 선생님</h1></div>
         <div class="top-actions"><span class="status-dot"></span><span>7월 설문 진행 중</span><button class="icon-button" aria-label="알림">♢</button></div>
       </header>
 
       <section class="view active" id="view-home">
         <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
         <div class="stats-grid">
-          <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong>24 <small>/ 28명</small></strong><div class="progress"><span style="width:86%"></span></div><p>86% 참여 · 미제출 4명</p></article>
+          <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
           <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong>1 <small>건</small></strong><p class="red-text">도움 요청 응답이 있어요</p></article>
           <article class="stat-card"><div class="stat-head"><span>이번 주 확인</span><i class="orange">◷</i></div><strong>3 <small>명</small></strong><p>겹치는 신호 또는 큰 변화</p></article>
           <article class="stat-card"><div class="stat-head"><span>긍정 변화</span><i class="green">↑</i></div><strong>8 <small>명</small></strong><p class="green-text">친절·성장 언급 증가</p></article>
@@ -63,7 +64,7 @@
         <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2><p>참여 링크를 공유하고 제출 현황을 확인하세요.</p></div><button class="primary-button" id="openStudentSurvey">학생 설문 미리보기</button></div>
         <div class="survey-layout">
           <div class="panel link-panel"><span class="tag open">진행 중</span><h3>7월 우리 반 마음 살피기</h3><p>2026. 7. 15. ~ 7. 22.</p><label>학생 참여 링크</label><div class="copy-row"><code>class-ieum.local/join/5-2-july</code><button id="copyLink">복사</button></div><div class="qr-placeholder">▦<small>QR 코드</small></div></div>
-          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><strong>24 / 28명</strong></div><div class="progress large"><span style="width:86%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 아직 제출하지 않았습니다.</p></div>
+          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><strong id="surveyParticipation">24 / 28명</strong></div><div class="progress large"><span id="surveyParticipationBar" style="width:86%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 아직 제출하지 않았습니다.</p></div>
         </div>
       </section>
 
@@ -85,12 +86,35 @@
         <div class="page-intro"><div><p class="eyebrow">교사의 확인이 중심</p><h2>관찰 기록</h2><p>추천 과제를 저장하고 확인한 사실과 해석을 구분해 기록하세요.</p></div><button class="primary-button" id="addObservation">+ 새 관찰 기록</button></div>
         <div class="observation-board" id="observationBoard"></div>
       </section>
+
+      <section class="view" id="view-settings">
+        <div class="page-intro"><div><p class="eyebrow">내 학급 관리</p><h2>학급 설정</h2><p>교사 정보와 학생 명단을 수정하면 모든 화면에 바로 반영됩니다.</p></div><button class="primary-button" id="saveSettings">변경사항 저장</button></div>
+        <div class="settings-layout">
+          <form class="panel settings-form" id="classSettingsForm">
+            <div class="panel-head"><div><p class="eyebrow">기본 정보</p><h3>교사와 학급</h3></div></div>
+            <div class="form-grid">
+              <label><span>교사 이름</span><input id="teacherName" maxlength="20" required placeholder="예: 홍현진"></label>
+              <label><span>학년도</span><input id="schoolYear" type="number" min="2020" max="2100" required></label>
+              <label><span>학년</span><input id="grade" type="number" min="1" max="6" required></label>
+              <label><span>반</span><input id="classNumber" type="number" min="1" max="30" required></label>
+            </div>
+            <div class="notice safe compact"><span>✓</span><div><strong>이 기기에만 저장됩니다.</strong><p>현재 데모에서는 브라우저 로컬 저장소를 사용합니다.</p></div></div>
+          </form>
+          <section class="panel roster-panel">
+            <div class="panel-head"><div><p class="eyebrow">학생 관리</p><h3>학생 명단 <span class="roster-count" id="rosterCount">28명</span></h3></div><div class="roster-actions"><button class="secondary-button" id="pasteRoster" type="button">명단 붙여넣기</button><button class="primary-button" id="addStudent" type="button">+ 학생 추가</button></div></div>
+            <div class="roster-table-wrap"><table class="roster-table"><thead><tr><th>번호</th><th>학생 이름</th><th>관리</th></tr></thead><tbody id="rosterBody"></tbody></table></div>
+            <p class="muted">번호와 이름을 직접 수정할 수 있습니다. 삭제한 학생의 기존 분석·관찰 기록은 이 데모에서 자동 삭제되지 않습니다.</p>
+          </section>
+        </div>
+      </section>
     </main>
   </div>
 
   <dialog id="evidenceDialog"><div class="dialog-head"><div><p class="eyebrow">근거 원문 확인</p><h2 id="dialogTitle">학생 지원 신호</h2></div><button class="icon-button" data-close aria-label="닫기">×</button></div><div id="dialogContent"></div><div class="dialog-actions"><button class="secondary-button" data-close>닫기</button><button class="primary-button" id="saveObservation">관찰 과제로 저장</button></div></dialog>
 
   <dialog id="studentDialog" class="student-dialog"><div class="student-survey"><div class="student-brand"><span class="brand-mark">이음</span><strong>7월 우리 반 마음 살피기</strong><button class="icon-button" data-close aria-label="닫기">×</button></div><div class="student-progress"><span id="stepLabel">1 / 3</span><div class="progress"><span id="surveyProgress" style="width:33%"></span></div></div><div id="surveyStep"></div><div class="dialog-actions"><button class="secondary-button" id="prevStep">이전</button><button class="primary-button" id="nextStep">다음</button></div></div></dialog>
+
+  <dialog id="pasteDialog"><div class="dialog-head"><div><p class="eyebrow">빠른 명단 등록</p><h2>학생 명단 붙여넣기</h2></div><button class="icon-button" data-close aria-label="닫기">×</button></div><div class="paste-content"><p>한 줄에 한 명씩 입력하세요. <code>번호, 이름</code> 또는 이름만 입력할 수 있습니다.</p><textarea id="rosterPaste" placeholder="1, 김하린&#10;2, 박도윤&#10;3, 이서준"></textarea></div><div class="dialog-actions"><button class="secondary-button" data-close>취소</button><button class="primary-button" id="applyRosterPaste">명단 적용</button></div></dialog>
 
   <div class="toast" id="toast" role="status"></div>
   <script src="app.js"></script>
