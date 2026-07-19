@@ -4,6 +4,7 @@ const SHEET_RESPONSES = 'Responses';
 function doGet(e) {
   const action = String(e.parameter.action || 'health');
   if (action === 'verify') return json_(verifyStudent_(e.parameter.classId, e.parameter.code));
+  if (action === 'roster') return json_(publicRoster_(e.parameter.classId));
   if (action === 'responses') return json_(listResponses_(e.parameter.classId, e.parameter.secret));
   return json_({ ok: true, service: '우리반 이음', version: '1.0' });
 }
@@ -30,9 +31,16 @@ function verifyStudent_(classId, accessCode) {
   };
 }
 
+function publicRoster_(classId) {
+  const roster = rosterRows_().filter(row => String(row.class_id) === String(classId));
+  return { ok: true, students: roster.map(row => ({ number: Number(row.number), name: row.name })) };
+}
+
 function saveResponse_(payload) {
-  const verified = verifyStudent_(payload.classId, payload.accessCode);
-  if (!verified.ok || Number(verified.student.number) !== Number(payload.studentNumber)) throw new Error('학생 확인에 실패했습니다.');
+  const roster = rosterRows_().filter(row => String(row.class_id) === String(payload.classId));
+  const row = roster.find(student => Number(student.number) === Number(payload.studentNumber) && String(student.name) === String(payload.studentName));
+  if (!row) throw new Error('학생 확인에 실패했습니다.');
+  const verified = { student: { number: Number(row.number), name: row.name } };
   const sheet = sheet_(SHEET_RESPONSES, ['response_id','class_id','student_number','student_name','submitted_at','help_now','payload_json']);
   const existing = sheet.getDataRange().getValues().slice(1).findIndex(row => String(row[1]) === String(payload.classId) && Number(row[2]) === Number(payload.studentNumber));
   const values = [Utilities.getUuid(), payload.classId, payload.studentNumber, verified.student.name, new Date(), payload.helpNow, JSON.stringify(payload)];

@@ -13,9 +13,9 @@
 
     <section class="student-card login-card" id="loginCard">
       <p class="kicker">학생 참여</p><h1>이번 달 학교생활을 돌아봐요</h1>
-      <p>선생님에게 받은 개인 코드를 입력하세요. 다른 친구의 응답은 볼 수 없어요.</p>
-      <label class="field"><span>개인 코드</span><input id="accessCode" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="6자리 코드"></label>
-      <button class="primary" id="verifyCode">설문 시작하기</button><p class="message" id="loginMessage" role="status"></p>
+      <p>내 이름을 선택하세요. 다른 친구의 응답은 볼 수 없어요.</p>
+      <label class="field"><span>내 이름</span><select id="studentSelect"><option value="">명단을 불러오는 중이에요…</option></select></label>
+      <button class="primary" id="verifyStudent">설문 시작하기</button><p class="message" id="loginMessage" role="status"></p>
       <div class="safety-note"><strong>꼭 기억해요</strong><ul><li>친구를 평가하거나 벌주기 위한 설문이 아니에요.</li><li>직접 겪은 일, 본 일, 들은 일을 구분해 주세요.</li><li>급한 도움이 필요하면 설문을 기다리지 말고 바로 선생님께 알려 주세요.</li></ul></div>
     </section>
 
