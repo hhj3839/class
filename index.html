@@ -6,7 +6,7 @@
   <meta name="description" content="학생의 월별 생활과 관계 변화를 근거 중심으로 살피는 교사용 웹앱" />
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="survey-layout.css?v=20260719-1" />
+  <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
 </head>
 <body>
   <div class="app-shell">
@@ -65,7 +65,7 @@
         <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2><p>참여 링크를 공유하고 제출 현황을 확인하세요.</p></div><div class="roster-actions"><button class="secondary-button" id="refreshResponses">응답 새로고침</button><a class="primary-button button-link" id="openStudentSurvey" href="student.html">학생 설문 미리보기</a></div></div>
         <div class="survey-layout">
           <div class="panel link-panel"><h3>학생 참여 링크</h3><div class="copy-row"><code>class-ieum.local/join/5-2</code><button id="copyLink">복사</button></div></div>
-          <div class="panel"><div class="panel-head"><h3>제출 현황</h3><div class="roster-actions"><select id="surveyMonth" aria-label="제출 현황 월"></select><strong id="surveyParticipation">0 / 28명</strong></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div class="response-list" id="responseList"></div></div>
+          <div class="panel submission-panel"><div class="submission-head"><div><p class="eyebrow">월별 참여 확인</p><h3>제출 현황</h3></div><div class="submission-controls"><label for="surveyMonth"><span>조회 월</span><select id="surveyMonth" aria-label="제출 현황 월"></select></label><div class="participation-summary"><span>응답 인원</span><strong id="surveyParticipation">0 / 28명</strong></div></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div id="responseList" hidden></div></div>
         </div>
       </section>
 
@@ -122,6 +122,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-6"></script>
+  <script src="app.js?v=20260719-7"></script>
 </body>
 </html>
