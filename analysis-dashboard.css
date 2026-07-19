@@ -15,6 +15,10 @@
   min-height: 420px;
 }
 
+.actual-relations .network.show-names .nodes text {
+  font-size: 11px;
+}
+
 .actual-relations .links .bridge {
   stroke: #d2a24b;
   stroke-dasharray: 7;
