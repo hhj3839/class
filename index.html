@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260720-2" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260720-3" />
 </head>
 <body>
   <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><small>학생은 담임 선생님이 공유한 참여 링크를 이용해 주세요.</small></div></section>
@@ -45,7 +45,7 @@
         <div class="stats-grid">
           <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
           <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>건</small></strong><p class="red-text">도움 요청 응답을 확인해요</p></article>
-          <article class="stat-card"><div class="stat-head"><span>이번 주 확인</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>겹치는 신호 또는 큰 변화</p></article>
+          <article class="stat-card"><div class="stat-head"><span>관찰 확인</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>실제 상황에서 확인할 신호</p></article>
           <article class="stat-card"><div class="stat-head"><span>긍정 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친절·성장 서술 응답</p></article>
         </div>
         <div class="dashboard-grid">
@@ -66,18 +66,23 @@
 
       <section class="view" id="view-survey">
         <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2><p>참여 링크를 공유하고 제출 현황을 확인하세요.</p></div><div class="roster-actions"><button class="secondary-button" id="refreshResponses">응답 새로고침</button><a class="primary-button button-link" id="openStudentSurvey" href="student.html">학생 설문 미리보기</a></div></div>
+        <div class="survey-admin-tabs" role="tablist" aria-label="설문 관리 화면 선택"><button class="active" type="button" data-survey-admin-tab="overview" role="tab" aria-selected="true">설문 관리</button><button type="button" data-survey-admin-tab="correction" role="tab" aria-selected="false">응답 정정·분석 제외</button></div>
+        <div id="surveyOverviewPanel" role="tabpanel">
         <div class="survey-layout">
           <div class="panel link-panel"><h3>학생 참여 링크</h3><div class="copy-row"><code>class-ieum.local/join/5-2</code><button id="copyLink">복사</button></div></div>
           <div class="panel submission-panel"><div class="submission-head"><div><p class="eyebrow">월별 참여 확인</p><h3>제출 현황</h3></div><div class="submission-controls"><label for="surveyMonth"><span>조회 월</span><select id="surveyMonth" aria-label="제출 현황 월"></select></label><div class="participation-summary"><span>응답 인원</span><strong id="surveyParticipation">0 / 28명</strong></div></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div id="responseList" hidden></div></div>
         </div>
+        </div>
+        <div id="responseCorrectionPanel" role="tabpanel" hidden>
         <section class="panel data-governance-panel"><div class="panel-head"><div><p class="eyebrow">교사 전용 데이터 관리</p><h3>응답 정정·분석 제외</h3></div><span class="confidence">영구 삭제 아님</span></div><p class="muted">선택한 월의 응답을 분석에서 제외하거나 소프트 삭제할 수 있습니다. 모든 작업에는 사유와 감사 로그가 남습니다.</p><div id="responseManagement"></div></section>
+        </div>
       </section>
 
       <section class="view" id="view-analysis">
         <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2><p>지원 시점별로 확인하고, 반드시 원문과 함께 살펴보세요.</p></div><div class="analysis-actions"><select id="analysisMonth" aria-label="분석 월"></select><button class="primary-button" id="runAiAnalysis" type="button">AI 보조 분석</button></div></div>
         <div id="analysisDataStatus" class="notice safe" aria-live="polite"></div>
         <section class="panel ai-analysis-panel" id="aiAnalysisPanel" hidden><div class="panel-head"><div><p class="eyebrow">서버 측 보조 분석</p><h3>AI 관찰 보조</h3></div><span class="confidence" id="aiAnalysisMeta">참고용</span></div><div class="notice warning compact"><span>!</span><p>AI 결과는 진단이나 사실 판정이 아닙니다. 설문 원문과 실제 관찰·대화로 반드시 확인하세요.</p></div><div id="aiAnalysisContent"></div></section>
-        <div class="filter-tabs"><button class="active" data-filter="all">전체 5</button><button data-filter="urgent">즉시 확인 1</button><button data-filter="week">이번 주 3</button><button data-filter="watch">지속 관찰 1</button></div>
+        <div class="filter-tabs"><button class="active" data-filter="all">전체 5</button><button data-filter="urgent">즉시 확인 1</button><button data-filter="watch">지속 관찰 1</button></div>
         <div class="analysis-layout"><div class="signal-cards" id="analysisCards"></div></div>
       </section>
 
@@ -92,7 +97,7 @@
         <div id="relationActualPanel" role="tabpanel"><div id="relationContent"></div><div id="relationshipActions"></div></div>
         <div class="relation-grid" id="relationPreview" hidden>
           <div class="panel network-panel"><div class="panel-head"><h3>관계망 미리보기</h3><button class="text-button" id="toggleNames">이름 표시</button></div><div class="network" id="network" aria-label="학생 관계망 추정도"><svg viewBox="0 0 600 340" role="img"><g class="links"><line x1="130" y1="100" x2="230" y2="70"/><line x1="130" y1="100" x2="210" y2="175"/><line x1="230" y1="70" x2="210" y2="175"/><line x1="380" y1="90" x2="480" y2="130"/><line x1="380" y1="90" x2="400" y2="210"/><line x1="480" y1="130" x2="400" y2="210"/><line class="bridge" x1="230" y1="70" x2="380" y2="90"/><line class="weak" x1="210" y1="175" x2="320" y2="280"/><line class="weak" x1="400" y1="210" x2="320" y2="280"/></g><g class="nodes"><g transform="translate(130 100)"><circle r="28"/><text>A</text><title>학생A</title></g><g transform="translate(230 70)"><circle r="28"/><text>B</text><title>학생B</title></g><g transform="translate(210 175)"><circle r="28"/><text>C</text><title>학생C</title></g><g class="group-two" transform="translate(380 90)"><circle r="28"/><text>D</text><title>학생D</title></g><g class="group-two" transform="translate(480 130)"><circle r="28"/><text>E</text><title>학생E</title></g><g class="group-two" transform="translate(400 210)"><circle r="28"/><text>F</text><title>학생F</title></g><g class="neutral" transform="translate(320 280)"><circle r="28"/><text>G</text><title>학생G</title></g></g></svg><div class="legend"><span><i class="dot one"></i>추정 집단 1</span><span><i class="dot two"></i>추정 집단 2</span><span><i class="line"></i>강한 상호 연결</span></div></div><p class="muted">상호 높은 평가가 반복되는 연결을 시각화한 추정 결과입니다.</p></div>
-          <div class="relation-notes"><div class="panel"><span class="tag orange-tag">양극화 후보</span><h3>친구 집단에 따라 경험이 다를 가능성</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span><span><b>1.6</b>표준편차</span></div><p>특정 학생을 평가하지 말고, 모둠·놀이 상황별 반응을 확인해 주세요.</p></div><div class="panel"><span class="tag blue-tag">비대칭 관계 2쌍</span><h3>서로 느끼는 친밀감 차이</h3><p><strong>A → B 5점 · B → A 2점</strong></p><p class="muted">오해, 기대 차이, 일시적 감정 등 여러 가능성이 있습니다.</p></div></div>
+          <div class="relation-notes"><div class="panel"><span class="tag orange-tag">양극화 후보</span><h3>친구 집단에 따라 경험이 다를 가능성</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span><span><b>1.6</b>표준편차</span></div><p>특정 학생을 평가하지 말고, 모둠·놀이 상황별 반응을 확인해 주세요.</p></div></div>
         </div>
       </section>
 
@@ -136,7 +141,7 @@
   <dialog id="authDialog"><form id="authForm"><div class="dialog-head"><div><p class="eyebrow">교사 전용</p><h2>교사 로그인</h2></div><button class="icon-button" data-close type="button" aria-label="닫기">×</button></div><div class="auth-dialog-content"><label><span>이메일</span><input id="authEmail" type="email" autocomplete="username" required></label><label><span>비밀번호</span><input id="authPassword" type="password" autocomplete="current-password" required></label><p class="muted">로그인 정보는 현재 브라우저 창을 닫으면 삭제됩니다.</p></div><div class="dialog-actions"><button class="secondary-button" data-close type="button">취소</button><button class="primary-button" type="submit">로그인</button></div></form></dialog>
   <div class="toast" id="toast" role="status"></div>
   <script src="supabase.js?v=20260720-1"></script>
-  <script src="analysis-core.js?v=20260719-1"></script>
-  <script src="app.js?v=20260720-1"></script>
+  <script src="analysis-core.js?v=20260720-2"></script>
+  <script src="app.js?v=20260720-2"></script>
 </body>
 </html>
