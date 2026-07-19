@@ -88,7 +88,7 @@
       </section>
 
       <section class="view" id="view-settings">
-        <div class="page-intro"><div><p class="eyebrow">내 학급 관리</p><h2>학급 설정</h2><p>교사 정보와 학생 명단을 수정하면 모든 화면에 바로 반영됩니다.</p></div><div class="roster-actions"><button class="secondary-button" id="syncRoster">Google Sheet 명단 동기화</button><button class="primary-button" id="saveSettings">변경사항 저장</button></div></div>
+        <div class="page-intro"><div><p class="eyebrow">내 학급 관리</p><h2>학급 설정</h2><p>교사 정보와 학생 명단을 수정하면 모든 화면에 바로 반영됩니다.</p></div><div class="roster-actions"><button class="secondary-button" id="syncRoster">DB 명단 동기화</button><button class="primary-button" id="saveSettings">변경사항 저장</button></div></div>
         <div class="settings-layout">
           <form class="panel settings-form" id="classSettingsForm">
             <div class="panel-head"><div><p class="eyebrow">기본 정보</p><h3>교사와 학급</h3></div></div>
@@ -97,11 +97,10 @@
               <label><span>학년도</span><input id="schoolYear" type="number" min="2020" max="2100" required></label>
               <label><span>학년</span><input id="grade" type="number" min="1" max="6" required></label>
               <label><span>반</span><input id="classNumber" type="number" min="1" max="30" required></label>
-              <label class="wide-field"><span>Apps Script 웹앱 URL</span><input id="apiUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
               <label><span>학급 ID</span><input id="classId" maxlength="30" placeholder="예: 2026-5-2"></label>
-              <label><span>교사용 비밀키</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="Apps Script 설정값"></label>
+              <label><span>교사용 DB 접근 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="교사 전용 코드"></label>
             </div>
-            <div class="notice safe compact"><span>✓</span><div><strong>이 기기에만 저장됩니다.</strong><p>현재 데모에서는 브라우저 로컬 저장소를 사용합니다.</p></div></div>
+            <div class="notice safe compact"><span>✓</span><div><strong>Supabase DB에 연결됩니다.</strong><p>학생 응답은 DB에 누적되며 교사용 접근 코드로만 조회할 수 있습니다.</p></div></div>
           </form>
           <section class="panel roster-panel">
             <div class="panel-head"><div><p class="eyebrow">학생 관리</p><h3>학생 명단 <span class="roster-count" id="rosterCount">28명</span></h3></div><div class="roster-actions"><button class="secondary-button" id="pasteRoster" type="button">명단 붙여넣기</button><button class="primary-button" id="addStudent" type="button">+ 학생 추가</button></div></div>
@@ -120,6 +119,7 @@
   <dialog id="pasteDialog"><div class="dialog-head"><div><p class="eyebrow">빠른 명단 등록</p><h2>학생 명단 붙여넣기</h2></div><button class="icon-button" data-close aria-label="닫기">×</button></div><div class="paste-content"><p>한 줄에 한 명씩 입력하세요. <code>번호, 이름</code> 또는 이름만 입력할 수 있습니다.</p><textarea id="rosterPaste" placeholder="1, 김하린&#10;2, 박도윤&#10;3, 이서준"></textarea></div><div class="dialog-actions"><button class="secondary-button" data-close>취소</button><button class="primary-button" id="applyRosterPaste">명단 적용</button></div></dialog>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js"></script>
+  <script src="supabase.js?v=20260719-1"></script>
+  <script src="app.js?v=20260719-1"></script>
 </body>
 </html>
