@@ -1,3 +1,7 @@
+.analysis-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .analysis-card-tags {
   display: flex;
   align-items: center;
