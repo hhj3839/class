@@ -40,9 +40,9 @@
         <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
         <div class="stats-grid">
           <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
-          <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong>1 <small>건</small></strong><p class="red-text">도움 요청 응답이 있어요</p></article>
-          <article class="stat-card"><div class="stat-head"><span>이번 주 확인</span><i class="orange">◷</i></div><strong>3 <small>명</small></strong><p>겹치는 신호 또는 큰 변화</p></article>
-          <article class="stat-card"><div class="stat-head"><span>긍정 변화</span><i class="green">↑</i></div><strong>8 <small>명</small></strong><p class="green-text">친절·성장 언급 증가</p></article>
+          <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>건</small></strong><p class="red-text">도움 요청 응답을 확인해요</p></article>
+          <article class="stat-card"><div class="stat-head"><span>이번 주 확인</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>겹치는 신호 또는 큰 변화</p></article>
+          <article class="stat-card"><div class="stat-head"><span>긍정 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친절·성장 서술 응답</p></article>
         </div>
         <div class="dashboard-grid">
           <div class="panel priority-panel">
@@ -69,7 +69,7 @@
       </section>
 
       <section class="view" id="view-analysis">
-        <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2><p>지원 시점별로 확인하고, 반드시 원문과 함께 살펴보세요.</p></div><select aria-label="분석 월"><option>2026년 7월</option><option>2026년 6월</option></select></div>
+        <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2><p>지원 시점별로 확인하고, 반드시 원문과 함께 살펴보세요.</p></div><select id="analysisMonth" aria-label="분석 월"></select></div>
         <div class="filter-tabs"><button class="active" data-filter="all">전체 5</button><button data-filter="urgent">즉시 확인 1</button><button data-filter="week">이번 주 3</button><button data-filter="watch">지속 관찰 1</button></div>
         <div class="analysis-layout"><div class="signal-cards" id="analysisCards"></div><aside class="panel principles"><h3>읽는 방법</h3><ol><li><strong>신호</strong>를 먼저 확인해요.</li><li><strong>근거 원문</strong>을 직접 읽어요.</li><li><strong>복수 가설</strong> 중 실제 상황을 살펴요.</li><li><strong>관찰·대화</strong>로 확인해요.</li></ol><div class="notice warning"><span>!</span><p>설문만으로 학생이나 관계를 단정할 수 없습니다.</p></div></aside></div>
       </section>
