@@ -37,13 +37,28 @@
 }
 
 .actual-relations .network svg {
-  height: auto;
-  min-height: 420px;
+  display: block;
+  width: 900px;
+  height: 520px;
+  min-height: 0;
 }
 
 .actual-relations .network.show-names .nodes text {
   font-size: 11px;
 }
+.actual-relations .nodes rect { stroke: #356a8a; stroke-width: 2px; }
+.network-fixed-frame { width: 100%; overflow: auto; border: 1px solid #e2e9ec; border-radius: 14px; background: linear-gradient(#fff,#fbfdfd); }
+.network-fixed-frame .network { width: 900px; height: 520px; }
+.relation-dashboard { display: grid; gap: 18px; margin-top: 20px; }
+.relation-summary-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.relation-summary-grid .panel { min-height: 190px; position: relative; padding-bottom: 46px; }
+.evidence-level { position: absolute; left: 22px; bottom: 18px; color: var(--muted); font-size: 10px; font-weight: 800; }
+.relation-tools { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.relation-tools label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
+.relation-tools select { min-width: 150px; padding-block: 7px; }
+.actual-relations [data-student-node],.actual-relations [data-relation-edge] { transition: opacity .18s,stroke .18s,stroke-width .18s; }
+.actual-relations .relation-dimmed { opacity: .12; }
+.actual-relations [data-relation-edge].relation-highlighted { opacity: 1; stroke: #257b98; stroke-width: 7; }
 
 .actual-relations .links .bridge {
   stroke: #d2a24b;
@@ -128,8 +143,11 @@
 
 @media (max-width: 700px) {
   .actual-relations .network svg {
-    min-height: 300px;
+    width: 900px;
+    height: 520px;
   }
+  .relation-summary-grid { grid-template-columns: 1fr; }
+  .relation-tools { width: 100%; justify-content: flex-start; }
 
   .analysis-card footer {
     align-items: stretch;
