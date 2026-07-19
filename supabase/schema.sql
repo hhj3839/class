@@ -180,21 +180,9 @@ grant execute on function public.submit_response(text, integer, text, jsonb) to 
 grant execute on function public.teacher_sync_roster(text, text, jsonb) to anon, authenticated;
 grant execute on function public.teacher_get_responses(text, text) to anon, authenticated;
 
+-- 최초 실행 전 아래 두 자리표시자를 운영 환경 값으로 바꾸세요.
+-- 실제 학급명·학생 명단·접근 코드는 공개 저장소에 커밋하지 않습니다.
 insert into public.classes (class_id, teacher_secret_hash)
-values ('2026-5-2', encode(digest('__TEACHER_DB_CODE__', 'sha256'), 'hex'))
+values ('__CLASS_ID__', encode(digest('__TEACHER_DB_CODE__', 'sha256'), 'hex'))
 on conflict (class_id) do update
 set teacher_secret_hash = excluded.teacher_secret_hash;
-
-insert into public.students (class_id, student_number, student_name) values
-('2026-5-2',1,'김하린'),('2026-5-2',2,'박도윤'),('2026-5-2',3,'이서준'),
-('2026-5-2',4,'최유나'),('2026-5-2',5,'정민재'),('2026-5-2',6,'윤서아'),
-('2026-5-2',7,'한지우'),('2026-5-2',8,'강민준'),('2026-5-2',9,'송지민'),
-('2026-5-2',10,'임다온'),('2026-5-2',11,'오시우'),('2026-5-2',12,'신예린'),
-('2026-5-2',13,'조하준'),('2026-5-2',14,'권나윤'),('2026-5-2',15,'안지호'),
-('2026-5-2',16,'문서윤'),('2026-5-2',17,'장도현'),('2026-5-2',18,'배유진'),
-('2026-5-2',19,'백시온'),('2026-5-2',20,'류아린'),('2026-5-2',21,'차민서'),
-('2026-5-2',22,'남도하'),('2026-5-2',23,'유준서'),('2026-5-2',24,'서하은'),
-('2026-5-2',25,'진우성'),('2026-5-2',26,'표가은'),('2026-5-2',27,'노현우'),
-('2026-5-2',28,'마지안')
-on conflict (class_id, student_number) do update
-set student_name = excluded.student_name, active = true;
