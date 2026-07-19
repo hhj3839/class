@@ -1,0 +1,22 @@
+.self-row {
+  background: #eef8fb;
+  border: 2px solid #b9d7e5;
+}
+
+.self-smile {
+  width: 48px;
+  height: 42px;
+  border: 1px solid #9bbfce;
+  border-radius: 10px;
+  background: #fff;
+  color: #78919d;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.self-smile.selected {
+  background: #fff2a8;
+  border-color: #e2bb3f;
+  color: #9b7200;
+  box-shadow: 0 0 0 3px #fff7cf;
+}
