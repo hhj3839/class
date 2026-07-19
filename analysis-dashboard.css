@@ -6,6 +6,11 @@
   margin-top: 20px;
 }
 
+.relation-view-tabs { display: inline-flex; gap: 5px; margin: 0 0 2px; padding: 5px; border: 1px solid var(--line); border-radius: 12px; background: #eef3f5; }
+.relation-view-tabs button { min-width: 110px; padding: 9px 15px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-weight: 800; }
+.relation-view-tabs button.active { background: #fff; color: var(--blue); box-shadow: 0 2px 8px rgba(42,75,92,.1); }
+#relationPreview { margin-top: 20px; }
+
 .actual-relations {
   margin-top: 20px;
 }
