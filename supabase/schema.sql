@@ -101,7 +101,7 @@ begin
   if not exists (
     select 1 from public.classes
     where class_id = p_class_id
-      and teacher_secret_hash = encode(digest(p_secret, 'sha256'), 'hex')
+      and teacher_secret_hash = encode(extensions.digest(p_secret, 'sha256'), 'hex')
   ) then
     raise exception '교사용 DB 접근 코드가 올바르지 않습니다.';
   end if;
@@ -136,7 +136,7 @@ begin
   if not exists (
     select 1 from public.classes
     where class_id = p_class_id
-      and teacher_secret_hash = encode(digest(p_secret, 'sha256'), 'hex')
+      and teacher_secret_hash = encode(extensions.digest(p_secret, 'sha256'), 'hex')
   ) then
     raise exception '교사용 DB 접근 코드가 올바르지 않습니다.';
   end if;
