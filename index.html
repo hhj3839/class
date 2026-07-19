@@ -7,10 +7,11 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="survey-layout.css?v=20260719-2" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260719-9" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260720-1" />
 </head>
 <body>
-  <div class="app-shell">
+  <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><small>학생은 담임 선생님이 공유한 참여 링크를 이용해 주세요.</small></div></section>
+  <div class="app-shell" id="teacherApp" hidden>
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#home" aria-label="우리반 이음 홈">
         <span class="brand-mark">이음</span>
@@ -29,7 +30,7 @@
         <span class="privacy-icon">⌾</span>
         <div><strong>안전한 DB 연결</strong><p>학생 응답은 교사만 조회할 수 있습니다.</p></div>
       </div>
-      <div class="profile"><span class="avatar" id="profileAvatar">홍</span><div><strong id="profileTeacher">홍현진 선생님</strong><small id="profileClass">5학년 2반 담임</small></div></div>
+      <div class="profile"><span class="avatar" id="profileAvatar">교</span><div><strong id="profileTeacher">담임교사</strong><small id="profileClass">학급 정보</small></div></div>
     </aside>
 
     <main>
@@ -106,11 +107,11 @@
           <form class="panel settings-form" id="classSettingsForm">
             <div class="panel-head"><div><p class="eyebrow">기본 정보</p><h3>교사와 학급</h3></div></div>
             <div class="form-grid">
-              <label><span>교사 이름</span><input id="teacherName" maxlength="20" required placeholder="예: 홍현진"></label>
+              <label><span>교사 이름</span><input id="teacherName" maxlength="20" required placeholder="교사 이름"></label>
               <label><span>학년도</span><input id="schoolYear" type="number" min="2020" max="2100" required></label>
               <label><span>학년</span><input id="grade" type="number" min="1" max="6" required></label>
               <label><span>반</span><input id="classNumber" type="number" min="1" max="30" required></label>
-              <label><span>학급 ID</span><input id="classId" maxlength="30" placeholder="예: 2026-5-2"></label>
+              <label><span>학급 ID</span><input id="classId" maxlength="30" placeholder="학급 연결 ID"></label>
               <label><span>최초 학급 연결 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="최초 연결 후 저장되지 않습니다"></label>
             </div>
             <div class="notice safe compact"><span>✓</span><div><strong>교사 로그인으로 보호됩니다.</strong><p>최초 한 번만 기존 접근 코드로 학급을 연결한 뒤에는 로그인 계정으로 조회합니다.</p></div></div><button class="secondary-button" id="claimClass" type="button">로그인 계정에 학급 연결</button>
@@ -134,8 +135,8 @@
 
   <dialog id="authDialog"><form id="authForm"><div class="dialog-head"><div><p class="eyebrow">교사 전용</p><h2>교사 로그인</h2></div><button class="icon-button" data-close type="button" aria-label="닫기">×</button></div><div class="auth-dialog-content"><label><span>이메일</span><input id="authEmail" type="email" autocomplete="username" required></label><label><span>비밀번호</span><input id="authPassword" type="password" autocomplete="current-password" required></label><p class="muted">로그인 정보는 현재 브라우저 창을 닫으면 삭제됩니다.</p></div><div class="dialog-actions"><button class="secondary-button" data-close type="button">취소</button><button class="primary-button" type="submit">로그인</button></div></form></dialog>
   <div class="toast" id="toast" role="status"></div>
-  <script src="supabase.js?v=20260719-3"></script>
+  <script src="supabase.js?v=20260720-1"></script>
   <script src="analysis-core.js?v=20260719-1"></script>
-  <script src="app.js?v=20260719-21"></script>
+  <script src="app.js?v=20260720-1"></script>
 </body>
 </html>
