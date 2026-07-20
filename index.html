@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="safety-signals.css?v=20260720-2" />
   <link rel="stylesheet" href="safety-signals-workflow.css?v=20260720-1" />
   <link rel="stylesheet" href="student-support-timeline.css?v=20260720-1" />
+  <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
 </head>
 <body>
   <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><div class="auth-callback-notice" id="authCallbackNotice" role="status" hidden></div><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><div class="auth-gate-actions"><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><button class="secondary-button" id="gateSignupButton" type="button">교사 회원가입</button></div><small>학생은 담임 선생님이 공유한 참여 링크를 이용해 주세요.</small></div></section>
@@ -58,6 +59,7 @@
             <div class="insight" id="classTrendInsight"><span>ⓘ</span><p>월별 응답을 불러오면 실제 변화가 표시됩니다.</p></div>
           </div>
         </div>
+        <section class="panel student-priority-panel" aria-labelledby="studentPriorityTitle"><div class="panel-head"><div><p class="eyebrow">학생 단위 통합 보기</p><h2 id="studentPriorityTitle">담임 확인 우선순위</h2></div><span class="confidence" id="studentPriorityCount">확인 항목 계산 중</span></div><p class="muted">위험도 순위가 아니라, 미처리 신호와 후속 확인일을 기준으로 먼저 살펴볼 학생을 정리합니다.</p><div class="student-priority-list" id="studentPriorityList"><p class="muted">자료를 불러오는 중입니다.</p></div></section>
         <section class="panel signal-review-panel" aria-labelledby="signalReviewTitle">
           <div class="panel-head"><div><p class="eyebrow">응답에서 확인까지</p><h2 id="signalReviewTitle">안전 신호 확인함</h2></div><span class="confidence" id="signalReviewCount">0건 확인 필요</span></div>
           <p class="muted">AI가 확정한 위험이 아니라, 학생 응답에서 담임 확인이 필요한 항목입니다. 실제 대화와 관찰을 거쳐 상태를 기록해 주세요.</p>
@@ -158,5 +160,6 @@
   <script src="app.js?v=20260720-22"></script>
   <script src="safety-signals.js?v=20260720-2"></script>
   <script src="student-support-timeline.js?v=20260720-1"></script>
+  <script src="student-priority.js?v=20260720-1"></script>
 </body>
 </html>

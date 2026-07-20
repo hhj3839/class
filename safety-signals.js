@@ -26,6 +26,7 @@ document.addEventListener('click',async event=>{
     });
     await refreshSignalReviews();
     renderSignalInbox();
+    if(typeof renderStudentPriorityBoard==='function')renderStudentPriorityBoard();
     showToast('안전 신호 확인 상태를 저장했습니다.');
   }catch(error){showToast(`상태 저장 실패: ${error.message}`)}finally{button.disabled=false}
 });
