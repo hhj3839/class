@@ -44,9 +44,20 @@ test('파일럿 준비 화면은 배포·세션·DB 상태를 한 번에 다시 
 test('파일럿 점검 결과는 개인정보 없이 내려받는다',()=>{
   assert.match(html,/id="exportPilotReadiness"/);
   assert.match(app,/class-ieum-pilot-readiness-v1/);
-  assert.match(app,/학생 이름, 응답 원문, 교사 이메일, 학급 ID를 포함하지 않음/);
+  assert.match(app,/학생 이름, 응답 원문, 교사 이메일, 학급 ID와 전체 브라우저 식별정보를 포함하지 않음/);
   assert.match(app,/classSummary:\{schoolYear:/);
   assert.match(app,/downloadJson\(report,/);
   const exportBlock=app.match(/\$\('#exportPilotReadiness'\)[\s\S]*?showToast\('개인정보를 제외한 파일럿 점검 결과를 저장했습니다.'\)\}\);/)?.[0]||'';
   assert.doesNotMatch(exportBlock,/teacherName|student_name|payload_json|classId|authEmail/);
+});
+
+test('파일럿 준비 상태는 태블릿 핵심 기능만 비식별 점검한다',()=>{
+  assert.match(app,/태블릿 화면 크기/);
+  assert.match(app,/임시 저장공간/);
+  assert.match(app,/QR·PDF 파일 기능/);
+  assert.match(app,/window\.innerWidth>=360/);
+  assert.match(app,/document\.createElement\('canvas'\)\.getContext/);
+  assert.match(app,/touchCapable:navigator\.maxTouchPoints>0/);
+  assert.doesNotMatch(app,/navigator\.userAgent/);
+  assert.match(app,/전체 브라우저 식별정보를 포함하지 않음/);
 });
