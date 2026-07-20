@@ -1,6 +1,3 @@
-const renderHomeSignalsBeforeStudentPriority=renderHomeSignals;
-const renderObservationsBeforeStudentPriority=renderObservations;
-
 function buildStudentPriorities(){
   const today=new Date().toISOString().slice(0,10),resolved=new Set(['support_connected','no_issue','closed']),groups=new Map(),ensure=number=>{number=Number(number);if(!number)return null;if(!groups.has(number)){const student=classSettings.students.find(item=>Number(item.number)===number);groups.set(number,{number,name:student?.name||`${number}번`,score:0,urgent:0,overdue:0,signals:0,observations:0,nextDates:[],reasons:[]})}return groups.get(number)};
   signals.filter(signal=>signal.studentNumber).forEach(signal=>{const review=signalReviewFor(signal),status=review?.status||'unreviewed';if(resolved.has(status))return;const group=ensure(signal.studentNumber);if(!group)return;group.signals++;group.score+=signal.type==='urgent'?100:30;if(signal.type==='urgent')group.urgent++;if(status==='unreviewed')group.score+=35;if(review?.follow_up_date){group.nextDates.push(review.follow_up_date);if(review.follow_up_date<today){group.overdue++;group.score+=80}}group.reasons.push(signal.title)});
@@ -11,7 +8,6 @@ function buildStudentPriorities(){
 function renderStudentPriorityBoard(){
   const target=$('#studentPriorityList'),count=$('#studentPriorityCount');if(!target||!count)return;const priorities=buildStudentPriorities();count.textContent=priorities.length?`${priorities.length}명 확인 필요`:'미처리 항목 없음';count.classList.toggle('good',!priorities.length);if(!priorities.length){target.innerHTML='<div class="student-priority-empty"><strong>현재 학생별 미처리 확인 항목이 없습니다.</strong><p>새 안전 신호나 관찰 예정 항목이 생기면 여기에 학생 단위로 묶어 표시합니다.</p></div>';return}target.innerHTML=priorities.slice(0,6).map((item,index)=>`<article class="student-priority-card ${item.urgent?'urgent':''} ${item.overdue?'overdue':''}"><div class="priority-rank">${index+1}</div><div class="priority-body"><header><strong>${escapeHTML(item.name)}</strong><div>${item.urgent?`<span class="tag urgent">즉시 확인 ${item.urgent}</span>`:''}${item.overdue?`<span class="tag week">기한 경과 ${item.overdue}</span>`:''}</div></header><p>${[...new Set(item.reasons)].slice(0,2).map(escapeHTML).join(' · ')}</p><footer><span>안전 신호 ${item.signals}건 · 관찰 진행 ${item.observations}건${item.nextDate?` · 다음 확인 ${item.nextDate}`:''}</span><button class="text-button" type="button" data-priority-student="${item.number}">학생 상세 보기</button></footer></div></article>`).join('')}
 
-renderHomeSignals=()=>{renderHomeSignalsBeforeStudentPriority();renderStudentPriorityBoard()};
-renderObservations=()=>{renderObservationsBeforeStudentPriority();renderStudentPriorityBoard()};
+document.addEventListener('class-ieum:data-updated',renderStudentPriorityBoard);
 document.addEventListener('click',event=>{const button=event.target.closest('[data-priority-student]');if(!button)return;$('.nav-item[data-view="student-detail"]').click();$('#studentDetailSelect').value=button.dataset.priorityStudent;renderStudentDetail()});
 renderStudentPriorityBoard();

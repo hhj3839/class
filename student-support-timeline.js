@@ -1,5 +1,3 @@
-const renderStudentDetailBeforeSupportTimeline=renderStudentDetail;
-
 function studentSupportItems(student){
   const number=Number(student.number),studentId=student.studentId||null,items=[];
   studentMonthlyResponses(number).forEach(({month,item})=>items.push({kind:'survey',date:item.submitted_at||`${month}-01`,label:'설문 제출',title:`${monthLabel(month)} 학교생활 돌아보기`,detail:payloadOf(item).helpNow||'도움 요청 없음',tone:/바로|즉시/.test(payloadOf(item).helpNow||'')?'urgent':'survey'}));
@@ -16,5 +14,5 @@ function renderStudentSupportTimeline(){
   const summary=content.querySelector('.student-summary-grid');if(summary)summary.after(panel);else content.append(panel);
 }
 
-renderStudentDetail=()=>{renderStudentDetailBeforeSupportTimeline();renderStudentSupportTimeline()};
 $('#studentDetailSelect').addEventListener('change',renderStudentSupportTimeline);
+document.addEventListener('class-ieum:data-updated',renderStudentSupportTimeline);
