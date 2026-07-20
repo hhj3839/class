@@ -55,15 +55,17 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 900 / 520;
+  aspect-ratio: 1100 / 640;
   min-height: 0;
 }
 
 .actual-relations .network.show-names .nodes text {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 900;
 }
-.actual-relations .nodes rect { stroke: #356a8a; stroke-width: 2px; }
-.network-fixed-frame { width: 100%; overflow: hidden; border: 1px solid #e2e9ec; border-radius: 14px; background: linear-gradient(#fff,#fbfdfd); }
+.actual-relations .nodes rect { stroke: #356a8a; stroke-width: 2.4px; filter: drop-shadow(0 3px 4px rgba(35,79,104,.13)); }
+.actual-relations .links line { stroke-width: 4.5; opacity: .8; }
+.network-fixed-frame { width: 100%; overflow: hidden; border: 1px solid #d9e4e8; border-radius: 14px; background: radial-gradient(circle at center,#fff 0,#f8fbfc 72%,#eef5f7 100%); }
 .network-fixed-frame .network { width: 100%; height: auto; display: grid; }
 .relation-dashboard { display: grid; gap: 18px; margin-top: 20px; }
 .relation-summary-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
