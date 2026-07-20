@@ -70,6 +70,9 @@ test('AI 결과에서 영문 내부 키와 확인되지 않은 직접 경험 표
   assert.match(edge,/현재 입력에는 직접 경험·직접 목격·전해 들음의 구분 정보가 없으므로/);
   assert.match(edge,/직접 호소\/g,'학생이 작성한 서술'/);
   assert.match(edge,/localizeAnalysisValues\(JSON\.parse\(outputText\)\)/);
+  assert.match(edge,/analysisVersion='2026\.07\.20-korean-fields-v2'/);
+  assert.match(edge,/analysis:localizeAnalysisValues\(row\.result_json\)/);
+  assert.match(app,/meta\.analysisVersion\|\|'버전 확인 불가'/);
 });
 
 test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{

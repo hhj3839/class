@@ -6,6 +6,7 @@ const corsHeaders={
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
+const analysisVersion='2026.07.20-korean-fields-v2';
 const internalLabelMap:[RegExp,string][]=[
   [/직접 호소/g,'학생이 작성한 서술'],[/직접 경험/g,'경험 여부가 확인되지 않은 서술'],[/직접 목격/g,'목격 여부가 확인되지 않은 서술'],
   [/received_average_delta/gi,'받은 관계 점수 평균 변화'],[/received_relationships/gi,'받은 관계 평가'],[/monthly_changes/gi,'전월 대비 변화'],[/self_rating_deltas/gi,'자기평가 변화'],
@@ -32,7 +33,7 @@ Deno.serve(async request=>{
     if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
     const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
     const surveyMonth=`${month}-01`;
-    if(!force){const cached=await callRpc('teacher_get_cached_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:row.result_json,meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true}})}}
+    if(!force){const cached=await callRpc('teacher_get_cached_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:localizeAnalysisValues(row.result_json),meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true,analysisVersion}})}}
     const runId=await callRpc('teacher_begin_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});
     const rpc=await fetch(`${supabaseUrl}/rest/v1/rpc/teacher_get_responses_auth`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify({p_class_id:classId})});
     const rows=await rpc.json().catch(()=>null);
@@ -65,6 +66,6 @@ Deno.serve(async request=>{
     if(!outputText){await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:ai.headers.get('x-request-id')||''}).catch(()=>null);return json({error:'AI 분석 결과를 읽지 못했습니다.'},502)}
     const analysis=localizeAnalysisValues(JSON.parse(outputText)),generatedAt=new Date().toISOString();
     await callRpc('teacher_complete_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_result:analysis,p_model:model,p_response_count:evidence.length,p_request_id:ai.headers.get('x-request-id')||''});
-    return json({analysis,meta:{runId,model,month,responseCount:evidence.length,generatedAt,cached:false}});
+    return json({analysis,meta:{runId,model,month,responseCount:evidence.length,generatedAt,cached:false,analysisVersion}});
   }catch(error){return json({error:error instanceof Error?error.message:'서버 분석 중 오류가 발생했습니다.'},500)}
 });
