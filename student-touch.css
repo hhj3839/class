@@ -1,0 +1,17 @@
+.help-now label {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.rating-options label {
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  cursor: pointer;
+}

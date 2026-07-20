@@ -77,3 +77,10 @@ test('학생 관계 선택 접근성 문구는 이름 받침에 맞는 조사를
   assert.match(student,/aria-label="\$\{relationshipLabel\(student\.name\)\}"/);
   assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20260720-4/);
 });
+
+test('학생 설문의 태블릿 터치 선택 영역은 최소 44px이다',()=>{
+  const touchCss=fs.readFileSync('student-touch.css','utf8');
+  assert.match(touchCss,/\.help-now label \{[\s\S]*min-height: 44px/);
+  assert.match(touchCss,/\.rating-options label \{[\s\S]*min-height: 48px/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student-touch\.css\?v=20260720-1/);
+});
