@@ -195,7 +195,7 @@ function cumulativeCoverage(){const months=[...new Set(allResponses.map(monthOf)
 function renderRelationshipsV2(){
   const content=$('#relationContent'),confidence=$('#relationConfidence'),preview=$('#relationPreview');if(!content||!confidence)return;
   const hasResponses=allResponses.length>0,tabs=$('#relationTabs');if(tabs&&!tabs.dataset.initialized){tabs.dataset.initialized='true';setRelationshipTab('example')}
-  const analysis=buildRelationshipAnalysis(allResponses),rate=analysis.total?Math.round(analysis.submitted/analysis.total*100):0,relationRate=analysis.total?Math.round(analysis.relationCount/analysis.total*100):0;
+  const analysis=buildCumulativeRelationshipAnalysis(allResponses),rate=analysis.total?Math.round(analysis.submitted/analysis.total*100):0,relationRate=analysis.total?Math.round(analysis.relationCount/analysis.total*100):0;
   if(!hasResponses){const sampleLegend=preview?.querySelector('.legend');if(sampleLegend){sampleLegend.className='relation-legend';sampleLegend.innerHTML='<span><i class="solid-line"></i>실선 · 같은 집단의 강한 상호 연결</span><span><i class="dashed-line"></i>점선 · 서로 다른 집단을 잇는 연결</span><span><i class="group-colors"></i>색상 · 같은 색은 같은 추정 집단</span><span><i class="neutral-color"></i>회색 · 특정 집단으로 묶이지 않음</span>'}confidence.className='confidence';confidence.textContent='등록 자료 0건 · 미리보기';content.innerHTML='<div class="notice safe"><span>ⓘ</span><div><strong>아직 등록된 설문 자료가 없습니다.</strong><p>아래 미리보기는 관계망 표시 방식의 예시이며 실제 학생 분석 결과가 아닙니다.</p></div></div>';return}
   confidence.className=`confidence ${analysis.ready?'good':''}`;confidence.textContent=analysis.ready?`분석 가능 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}% · ${analysis.months.length}개월`:`데이터 부족 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}%`;
   if(!analysis.ready){content.innerHTML='<div class="notice warning relation-warning"><span>!</span><div><strong>관계 구조를 해석하기에는 누적 데이터가 부족합니다.</strong><p>전체 기간 중 한 번 이상 참여한 학생과 관계 문항 응답 학생이 각각 학급의 80% 이상일 때 관계망을 표시합니다. 결석·미제출 월은 0점으로 계산하지 않습니다.</p></div></div>';return}
@@ -225,7 +225,7 @@ function setRelationshipTab(tab){
 document.addEventListener('click',event=>{const button=event.target.closest('[data-relation-tab]');if(button){$('#relationTabs').dataset.userSelected='true';setRelationshipTab(button.dataset.relationTab)}});
 
 function renderRelationshipActions(){
-  const container=$('#relationshipActions');if(!container)return;const analysis=buildRelationshipAnalysis(allResponses);if(!analysis.ready){container.innerHTML='';return}
+  const container=$('#relationshipActions');if(!container)return;const analysis=buildCumulativeRelationshipAnalysis(allResponses);if(!analysis.ready){container.innerHTML='';return}
   const byNumber=new Map(),nameOf=number=>classSettings.students.find(student=>Number(student.number)===Number(number))?.name||`${number}번`;
   const add=(number,reason,check)=>byNumber.set(number,{number,name:nameOf(number),reason,check});
   analysis.students.forEach(student=>{const number=Number(student.number),values=analysis.students.filter(other=>Number(other.number)!==number).map(other=>analysis.scores.get(`${Number(other.number)}:${number}`)).filter(value=>value!==undefined);if(values.length<4)return;const low=values.filter(value=>value<=2).length,high=values.filter(value=>value>=4).length,avg=values.reduce((sum,value)=>sum+value,0)/values.length,sd=Math.sqrt(values.reduce((sum,value)=>sum+(value-avg)**2,0)/values.length);if(low&&high&&sd>=1.2)add(number,`친구별 평가 편차 ${sd.toFixed(1)}`,`놀이·모둠·수업 상황별로 관계 경험이 달라지는지 관찰하고 긍정 관계가 나타나는 조건을 기록`)});
@@ -235,7 +235,7 @@ function renderRelationshipActions(){
 
 // 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
 // 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
-function buildRelationshipAnalysis(responses){
+function buildCumulativeRelationshipAnalysis(responses){
   const cumulative=IeumAnalysisCore.cumulativeScores(responses),months=cumulative.months,submittedStudents=cumulative.participants,relationStudents=cumulative.relationResponders,scoreSamples=cumulative.samples,scores=cumulative.scores;
   const total=classSettings.students.length;
   const submitted=submittedStudents.size;
@@ -275,9 +275,9 @@ function buildRelationshipAnalysis(responses){
   return{ready,total,submitted,relationCount,months,students,scores,scoreSamples,mutual,groups,groupByStudent,connectors,peripheral,groupMetrics};
 }
 
-function renderRelationships(){
+function renderCumulativeRelationships(){
   const content=$('#relationContent'),confidence=$('#relationConfidence');if(!content||!confidence)return;
-  const analysis=buildRelationshipAnalysis(allResponses);
+  const analysis=buildCumulativeRelationshipAnalysis(allResponses);
   const rate=analysis.total?Math.round(analysis.submitted/analysis.total*100):0,relationRate=analysis.total?Math.round(analysis.relationCount/analysis.total*100):0;
   confidence.className=`confidence ${analysis.ready?'good':''}`;
   confidence.textContent=analysis.ready?`분석 가능 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}% · ${analysis.months.length}개월`:`데이터 부족 · 누적 참여 ${rate}% · 관계 문항 ${relationRate}%`;
