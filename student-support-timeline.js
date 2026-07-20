@@ -1,0 +1,20 @@
+const renderStudentDetailBeforeSupportTimeline=renderStudentDetail;
+
+function studentSupportItems(student){
+  const number=Number(student.number),studentId=student.studentId||null,items=[];
+  studentMonthlyResponses(number).forEach(({month,item})=>items.push({kind:'survey',date:item.submitted_at||`${month}-01`,label:'설문 제출',title:`${monthLabel(month)} 학교생활 돌아보기`,detail:payloadOf(item).helpNow||'도움 요청 없음',tone:/바로|즉시/.test(payloadOf(item).helpNow||'')?'urgent':'survey'}));
+  signalReviews.filter(review=>(studentId&&review.student_id===studentId)||Number(review.student_number)===number).forEach(review=>items.push({kind:'signal',date:review.updated_at||review.follow_up_date||'',label:'안전 신호 확인',title:review.source_snapshot?.title||'응답 확인 신호',detail:signalReviewStatuses[review.status]||review.status,tone:['support_connected','no_issue','closed'].includes(review.status)?'done':review.status==='unreviewed'?'urgent':'progress',followUpDate:review.follow_up_date,note:review.note}));
+  getObservations().filter(item=>(studentId&&item.studentId===studentId)||Number(item.studentNumber)===number).forEach(item=>items.push({kind:'observation',id:item.id,date:item.followUpDate||item.date||'',label:'관찰 확인',title:item.title,detail:item.status==='done'?({support:'지원 연결',no_issue:'특이사항 없음',continue:'계속 관찰'}[item.outcome]||'확인 완료'):item.status==='doing'?'관찰 중':'관찰 예정',tone:item.status==='done'?'done':'progress',note:item.observedFact||item.detail}));
+  return items.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+
+function renderStudentSupportTimeline(){
+  const select=$('#studentDetailSelect'),content=$('#studentDetailContent');if(!select?.value||!content)return;
+  const student=classSettings.students.find(row=>Number(row.number)===Number(select.value));if(!student)return;
+  const items=studentSupportItems(student),openSignals=signalReviews.filter(review=>((student.studentId&&review.student_id===student.studentId)||Number(review.student_number)===Number(student.number))&&!['support_connected','no_issue','closed'].includes(review.status)),openObservations=getObservations().filter(item=>Number(item.studentNumber)===Number(student.number)&&item.status!=='done'),today=new Date().toISOString().slice(0,10),nextDate=[...openSignals.map(item=>item.follow_up_date),...openObservations.map(item=>item.followUpDate)].filter(date=>date&&date>=today).sort()[0];
+  const panel=document.createElement('section');panel.className='panel student-support-panel';panel.innerHTML=`<div class="panel-head"><div><p class="eyebrow">응답 → 확인 → 지원</p><h3>학생 지원 타임라인</h3></div><span class="confidence ${openSignals.length+openObservations.length?'':'good'}">진행 중 ${openSignals.length+openObservations.length}건</span></div><div class="student-support-summary"><article><span>설문</span><strong>${items.filter(item=>item.kind==='survey').length}</strong></article><article><span>안전 신호</span><strong>${items.filter(item=>item.kind==='signal').length}</strong></article><article><span>관찰 확인</span><strong>${items.filter(item=>item.kind==='observation').length}</strong></article><article><span>다음 확인일</span><strong>${nextDate||'미정'}</strong></article></div><div class="student-support-list">${items.length?items.map(item=>`<article class="student-support-item ${item.tone}"><span class="support-dot"></span><div><header><span>${escapeHTML(item.label)}</span><time>${escapeHTML(String(item.date||'날짜 미정').slice(0,10))}</time></header><h4>${escapeHTML(item.title)}</h4><p><strong>${escapeHTML(item.detail||'')}</strong>${item.note?`<br>${escapeHTML(item.note)}`:''}</p>${item.kind==='observation'?`<button class="text-button" type="button" data-edit-observation="${item.id}">관찰 기록 열기</button>`:''}</div></article>`).join(''):'<p class="muted">아직 연결할 설문·신호·관찰 기록이 없습니다.</p>'}</div></section>`;
+  const summary=content.querySelector('.student-summary-grid');if(summary)summary.after(panel);else content.append(panel);
+}
+
+renderStudentDetail=()=>{renderStudentDetailBeforeSupportTimeline();renderStudentSupportTimeline()};
+$('#studentDetailSelect').addEventListener('change',renderStudentSupportTimeline);
