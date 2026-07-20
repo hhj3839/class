@@ -75,7 +75,7 @@ test('학생 관계 선택 접근성 문구는 이름 받침에 맞는 조사를
   assert.match(student,/\(last-0xac00\)%28!==0/);
   assert.match(student,/hasFinal\?'과':'와'/);
   assert.match(student,/aria-label="\$\{relationshipLabel\(student\.name\)\}"/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20260720-4/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20260720-5/);
 });
 
 test('학생 설문의 태블릿 터치 선택 영역은 최소 44px이다',()=>{
@@ -83,4 +83,17 @@ test('학생 설문의 태블릿 터치 선택 영역은 최소 44px이다',()=>
   assert.match(touchCss,/\.help-now label \{[\s\S]*min-height: 44px/);
   assert.match(touchCss,/\.rating-options label \{[\s\S]*min-height: 48px/);
   assert.match(fs.readFileSync('student.html','utf8'),/student-touch\.css\?v=20260720-1/);
+});
+
+test('학생 제출은 고유 ID로 네트워크 재시도 중복을 방지한다',()=>{
+  const idempotent=fs.readFileSync('supabase/migrations/20260720235960_idempotent_student_submissions.sql','utf8');
+  assert.match(student,/let submissionId=crypto\.randomUUID\(\)/);
+  assert.match(student,/submissionId=payload\.submissionId\|\|submissionId/);
+  assert.match(student,/function submissionPayload\(\)/);
+  assert.match(student,/const payload=submissionPayload\(\)/);
+  assert.match(idempotent,/add column if not exists submission_id uuid/);
+  assert.match(idempotent,/unique index if not exists survey_responses_submission_id_key/);
+  assert.match(idempotent,/on conflict\(submission_id\) where submission_id is not null do nothing/);
+  assert.match(idempotent,/r\.class_id=target_class and r\.student_id=target_student_id/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20260720-5/);
 });
