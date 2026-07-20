@@ -37,11 +37,11 @@
       <section class="student-card"><label class="field"><span>9. 지금, 우리반 친구들 중에 속상한 마음이 남아있는 친구가 있나요? 무슨 일이 있었는지, 그 친구가 어떻게 노력을 하면 관계가 더 나아질 수 있겠는지 그 친구에게 바라는 점을 적어주세요!</span><textarea id="unresolvedDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
         <fieldset class="help-now"><legend>지금 선생님의 도움이 필요한가요?</legend><label><input type="radio" name="helpNow" value="괜찮음" checked> 지금은 괜찮아요</label><label><input type="radio" name="helpNow" value="이번 주"> 이번 주에 이야기하고 싶어요</label><label><input type="radio" name="helpNow" value="즉시"> 바로 도와주세요</label></fieldset>
       </section>
-      <div class="submit-area"><label class="check-field"><input type="checkbox" id="confirmAnswer" required> 사실과 생각을 구분해 솔직하게 작성했습니다.</label><button class="primary" type="submit" id="submitSurvey">응답 제출하기</button><p class="message" id="submitMessage" role="status"></p></div>
+      <div class="submit-area"><p class="draft-status" id="draftStatus" role="status">작성 내용은 이 탭에만 임시 저장되며 제출 후 즉시 삭제됩니다.</p><label class="check-field"><input type="checkbox" id="confirmAnswer" required> 사실과 생각을 구분해 솔직하게 작성했습니다.</label><button class="primary" type="submit" id="submitSurvey">응답 제출하기</button><p class="message" id="submitMessage" role="status"></p></div>
     </form>
     <section class="student-card complete-card" id="completeCard" hidden><div class="complete-icon">✓</div><h1>응답을 제출했어요</h1><p>선생님이 내용을 확인하고 필요한 도움을 함께 생각할 거예요.</p><a href="index.html">우리반 이음 홈으로</a></section>
   </main>
   <script src="supabase.js?v=20260719-1"></script>
-  <script src="student.js?v=20260719-5"></script>
+  <script src="student.js?v=20260720-2"></script>
 </body>
 </html>

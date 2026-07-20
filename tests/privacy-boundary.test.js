@@ -23,7 +23,8 @@ test('교사용 개인정보를 localStorage에 저장하지 않는다',()=>{
 test('학생 설문은 교사용 브라우저 저장공간에 의존하지 않는다',()=>{
   const student=read('student.js');
   assert.doesNotMatch(student,/localStorage|ieum-class-settings|ieum-observations/);
-  assert.match(student,/params\.get\('class'\)\|\|''/);
+  assert.match(student,/params\.get\('join'\)\|\|''/);
+  assert.match(student,/sessionStorage/);
 });
 
 test('소스 기본값에 실제 교사 이름과 운영 학급 ID가 없다',()=>{

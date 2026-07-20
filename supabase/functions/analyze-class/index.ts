@@ -13,10 +13,14 @@ Deno.serve(async request=>{
   const authorization=request.headers.get('Authorization')||'';
   if(!authorization.startsWith('Bearer '))return json({error:'교사 로그인이 필요합니다.'},401);
   try{
-    const {classId,month}=await request.json();
+    const {classId,month,force=false}=await request.json();
     if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 월을 확인해 주세요.'},400);
     const supabaseUrl=Deno.env.get('SUPABASE_URL')!,anonKey=Deno.env.get('SUPABASE_ANON_KEY')!,openaiKey=Deno.env.get('OPENAI_API_KEY');
     if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
+    const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
+    const surveyMonth=`${month}-01`;
+    if(!force){const cached=await callRpc('teacher_get_cached_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:row.result_json,meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true}})}}
+    const runId=await callRpc('teacher_begin_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});
     const rpc=await fetch(`${supabaseUrl}/rest/v1/rpc/teacher_get_responses_auth`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify({p_class_id:classId})});
     const rows=await rpc.json().catch(()=>null);
     if(!rpc.ok)return json({error:rpc.status===401?'로그인이 만료되었습니다.':'담당 학급 권한을 확인해 주세요.'},rpc.status===401?401:403);
@@ -34,9 +38,11 @@ Deno.serve(async request=>{
     const prompt=`당신은 초등학교 담임교사의 관찰을 돕는 보조 분석가입니다. ${month} 설문을 분석하세요. 학생을 진단·낙인·확정하지 말고 입력에 직접 있는 근거만 쓰세요. 이름은 입력의 학생-N 표기를 그대로 유지하세요. 폭력·자해·즉각적 도움 요청은 즉시 확인으로 우선 표시하세요. 결석·미제출은 부정 신호로 해석하지 마세요. 관계 점수만으로 고립이나 집단을 확정하지 마세요. 가능한 해석은 복수 가설로, 교사 확인은 실제 관찰이나 비공개 대화 질문으로 제안하세요.`;
     const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.6-terra',reasoning:{effort:'low'},instructions:prompt,input:JSON.stringify({response_count:evidence.length,responses:evidence}),max_output_tokens:2600,text:{format:{type:'json_schema',name:'class_support_analysis',strict:true,schema}}})});
     const result=await ai.json().catch(()=>null);
-    if(!ai.ok)return json({error:'AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.',requestId:ai.headers.get('x-request-id')},502);
+    if(!ai.ok){await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:ai.headers.get('x-request-id')||''}).catch(()=>null);return json({error:'AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.',requestId:ai.headers.get('x-request-id')},502)}
     const outputText=(result?.output||[]).flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
-    if(!outputText)return json({error:'AI 분석 결과를 읽지 못했습니다.'},502);
-    return json({analysis:JSON.parse(outputText),meta:{model:'gpt-5.6-terra',month,responseCount:evidence.length,generatedAt:new Date().toISOString()}});
+    if(!outputText){await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:ai.headers.get('x-request-id')||''}).catch(()=>null);return json({error:'AI 분석 결과를 읽지 못했습니다.'},502)}
+    const analysis=JSON.parse(outputText),generatedAt=new Date().toISOString();
+    await callRpc('teacher_complete_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_result:analysis,p_model:'gpt-5.6-terra',p_response_count:evidence.length,p_request_id:ai.headers.get('x-request-id')||''});
+    return json({analysis,meta:{runId,model:'gpt-5.6-terra',month,responseCount:evidence.length,generatedAt,cached:false}});
   }catch(error){return json({error:error instanceof Error?error.message:'서버 분석 중 오류가 발생했습니다.'},500)}
 });
