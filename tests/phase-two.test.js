@@ -38,14 +38,26 @@ test('AI 자연어 결과를 한국어로만 요청한다',()=>{
   assert.match(edge,/영어 문장, 영어 제목, 영어 우선순위 표기는 사용하지 마세요/);
 });
 
-test('AI 분석은 받은 평가 기반 3명과 코칭 방향·종합 판단을 만든다',()=>{
+test('AI 분석은 받은 평가 기반 최대 3명과 코칭 방향·종합 판단을 만든다',()=>{
   assert.match(edge,/received_relationships/);
   assert.match(edge,/maxItems:3/);
   assert.match(edge,/overall_judgment/);
   assert.match(edge,/coaching_direction/);
-  assert.match(edge,/주의 깊게 볼 학생을 반드시 정확히 3명/);
+  assert.match(edge,/의미 있는 복수 신호나 즉시 도움 요청이 있는 학생만/);
+  assert.match(edge,/최대 3명까지 선정/);
+  assert.match(edge,/근거가 약하면 3명을 채우지 말고/);
   assert.match(app,/주의 깊게 볼 학생 \$\{priority\.length\}명/);
   assert.match(app,/담임 관찰 포인트·코칭 방향/);
+});
+
+test('AI 분석은 전월 변화와 유형별 근거를 분리한다',()=>{
+  assert.match(edge,/previousMonth/);
+  assert.match(edge,/self_rating_deltas/);
+  assert.match(edge,/received_average_delta/);
+  assert.match(edge,/\[계산 결과\].*\[학생 원문\].*\[친구 관찰\]/);
+  assert.match(app,/function aiEvidenceHTML\(/);
+  assert.match(app,/순위가 아닌 지원 확인 대상/);
+  assert.match(app,/추가 확인 학생 없음/);
 });
 
 test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
