@@ -6,6 +6,7 @@
 .pilot-metrics{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid #e4ecef}
 .pilot-metric-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
 .pilot-metric-head h4{margin:3px 0 0;font-size:20px}.pilot-metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+.pilot-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .ai-usefulness{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:20px;padding:16px;border-radius:16px;background:#f4f8fa;border:1px solid #dae7ec}
 .ai-usefulness>div{display:flex;gap:8px;flex-wrap:wrap}.ai-usefulness button{border:1px solid #b8cdd6;background:#fff;color:#355d70;border-radius:999px;padding:8px 13px;font-weight:800;cursor:pointer}.ai-usefulness button.selected{background:#356a8a;color:#fff;border-color:#356a8a}
 .ai-source-button{margin-top:6px;width:100%}.source-evidence{padding:16px 0;border-bottom:1px solid #e3eaed}.source-evidence>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.source-evidence p{margin:12px 0 0;white-space:pre-wrap;line-height:1.65}

@@ -40,3 +40,13 @@ test('파일럿 준비 화면은 배포·세션·DB 상태를 한 번에 다시 
   assert.match(app,/\$\('#refreshPilot'\)\.addEventListener/);
   assert.match(app,/Promise\.all\(\[refreshPilotReadiness\(\),refreshPilotMetrics\(\)\]\)/);
 });
+
+test('파일럿 점검 결과는 개인정보 없이 내려받는다',()=>{
+  assert.match(html,/id="exportPilotReadiness"/);
+  assert.match(app,/class-ieum-pilot-readiness-v1/);
+  assert.match(app,/학생 이름, 응답 원문, 교사 이메일, 학급 ID를 포함하지 않음/);
+  assert.match(app,/classSummary:\{schoolYear:/);
+  assert.match(app,/downloadJson\(report,/);
+  const exportBlock=app.match(/\$\('#exportPilotReadiness'\)[\s\S]*?showToast\('개인정보를 제외한 파일럿 점검 결과를 저장했습니다.'\)\}\);/)?.[0]||'';
+  assert.doesNotMatch(exportBlock,/teacherName|student_name|payload_json|classId|authEmail/);
+});
