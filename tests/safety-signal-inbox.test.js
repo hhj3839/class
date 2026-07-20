@@ -31,3 +31,13 @@ test('다른 학급 학생과 응답 ID는 서버에서 채택하지 않는다',
   assert.match(migration,/r\.class_id=p_class_id and r\.id=/);
   assert.match(migration,/source_snapshot jsonb/);
 });
+
+test('확인함은 상태 요약·기한 경과·처리 완료 필터와 근거 확인을 제공한다',()=>{
+  assert.match(html,/signalReviewUnreviewed/);
+  assert.match(html,/data-signal-review-filter="open"/);
+  assert.match(html,/data-signal-review-filter="done"/);
+  assert.match(app,/기한 경과/);
+  assert.match(app,/data-review-evidence/);
+  assert.match(helper,/openEvidence/);
+  assert.match(helper,/saveObservation.*hidden=true/);
+});
