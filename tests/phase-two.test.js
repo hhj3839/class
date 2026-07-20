@@ -38,6 +38,24 @@ test('AI 자연어 결과를 한국어로만 요청한다',()=>{
   assert.match(edge,/영어 문장, 영어 제목, 영어 우선순위 표기는 사용하지 마세요/);
 });
 
+test('AI 관찰 보조는 받은 평가 기반 3명과 코칭 방향·종합 판단을 만든다',()=>{
+  assert.match(edge,/received_relationships/);
+  assert.match(edge,/maxItems:3/);
+  assert.match(edge,/overall_judgment/);
+  assert.match(edge,/coaching_direction/);
+  assert.match(edge,/주의 깊게 볼 학생을 반드시 정확히 3명/);
+  assert.match(app,/주의 깊게 볼 학생 \$\{priority\.length\}명/);
+  assert.match(app,/담임 관찰 포인트·코칭 방향/);
+});
+
+test('학생 상세는 어려움 은폐 가능성과 낮은 변별력을 안전하게 점검한다',()=>{
+  assert.match(html,/id="studentResponseInsight"/);
+  assert.match(app,/function studentResponseInsights\(/);
+  assert.match(app,/관계 응답의 변별력이 낮을 수 있어요/);
+  assert.match(app,/어려움을 드러내지 않았을 가능성을 확인해 주세요/);
+  assert.match(app,/어려움을 숨긴다고 단정하지 말고/);
+});
+
 test('백업은 서버 권한 검사 후 내보내고 감사 로그와 함께 복구한다',()=>{
   assert.match(app,/teacher_export_class_backup_auth/);
   assert.match(app,/teacher_restore_class_backup_auth/);
