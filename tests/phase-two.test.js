@@ -10,7 +10,7 @@ const migration=fs.readFileSync('supabase/migrations/20260720170000_ai_reports_b
 test('AI 분석은 DB 캐시·월 호출 제한·교사 검토 상태를 사용한다',()=>{
   assert.match(edge,/teacher_get_cached_ai_analysis_auth/);
   assert.match(edge,/teacher_begin_ai_analysis_auth/);
-  assert.match(migration,/call_count>=5/);
+  assert.match(migration,/call_count>=10/);
   assert.match(app,/teacher_review_ai_analysis_auth/);
 });
 
