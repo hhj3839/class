@@ -91,3 +91,13 @@ test('상단 고정 바는 로그인 계정과 로그아웃만 표시한다',()=
   assert.match(topbar,/id="authButton"/);
   assert.doesNotMatch(topbar,/classEyebrow|pageTitle|학년도|관찰 기록/);
 });
+
+test('이메일 인증 복귀 화면은 성공·실패를 안내하고 인증 토큰을 주소에서 제거한다',()=>{
+  assert.match(html,/id="authCallbackNotice" role="status" hidden/);
+  assert.match(app,/function handleAuthCallbackNotice\(\)/);
+  assert.match(app,/이메일 인증이 완료되었습니다/);
+  assert.match(app,/이메일 인증에 실패했습니다/);
+  assert.match(app,/fragment\.has\('access_token'\)/);
+  assert.match(app,/history\.replaceState/);
+  assert.match(app,/handleAuthCallbackNotice\(\);renderAuthState\(\)/);
+});
