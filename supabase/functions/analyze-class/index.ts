@@ -6,7 +6,8 @@ const corsHeaders={
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
-const analysisVersion='2026.07.20-korean-fields-v2';
+const analysisVersion='2026.07.20-timeout-safe-v3';
+const openAiTimeoutMs=45000;
 const internalLabelMap:[RegExp,string][]=[
   [/직접 호소/g,'학생이 작성한 서술'],[/직접 경험/g,'경험 여부가 확인되지 않은 서술'],[/직접 목격/g,'목격 여부가 확인되지 않은 서술'],
   [/received_average_delta/gi,'받은 관계 점수 평균 변화'],[/received_relationships/gi,'받은 관계 평가'],[/monthly_changes/gi,'전월 대비 변화'],[/self_rating_deltas/gi,'자기평가 변화'],
@@ -26,6 +27,8 @@ Deno.serve(async request=>{
   if(request.method!=='POST')return json({error:'POST 요청만 허용됩니다.'},405);
   const authorization=request.headers.get('Authorization')||'';
   if(!authorization.startsWith('Bearer '))return json({error:'교사 로그인이 필요합니다.'},401);
+  let runId='';
+  let failAnalysis:((reason:string,requestId?:string)=>Promise<void>)|null=null;
   try{
     const {classId,month,force=false}=await request.json();
     if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 월을 확인해 주세요.'},400);
@@ -34,13 +37,14 @@ Deno.serve(async request=>{
     const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
     const surveyMonth=`${month}-01`;
     if(!force){const cached=await callRpc('teacher_get_cached_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:localizeAnalysisValues(row.result_json),meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true,analysisVersion}})}}
-    const runId=await callRpc('teacher_begin_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});
+    runId=await callRpc('teacher_begin_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});
+    failAnalysis=async(reason:string,requestId='')=>{await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:requestId,p_error_message:text(reason,500)}).catch(()=>null)};
     const rpc=await fetch(`${supabaseUrl}/rest/v1/rpc/teacher_get_responses_auth`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify({p_class_id:classId})});
     const rows=await rpc.json().catch(()=>null);
-    if(!rpc.ok)return json({error:rpc.status===401?'로그인이 만료되었습니다.':'담당 학급 권한을 확인해 주세요.'},rpc.status===401?401:403);
+    if(!rpc.ok){const message=rpc.status===401?'로그인이 만료되었습니다.':'담당 학급 권한을 확인해 주세요.';await failAnalysis(message);return json({error:message},rpc.status===401?401:403)}
     const latest=new Map<number,any>();
     (rows||[]).filter((row:any)=>String(row.survey_month||'').slice(0,7)===month&&!row.analysis_excluded).sort((a:any,b:any)=>new Date(b.submitted_at).getTime()-new Date(a.submitted_at).getTime()).forEach((row:any)=>{if(!latest.has(Number(row.student_number)))latest.set(Number(row.student_number),row)});
-    if(!latest.size)return json({error:'선택한 월에 분석할 응답이 없습니다.'},400);
+    if(!latest.size){const message='선택한 월에 분석할 응답이 없습니다.';await failAnalysis(message);return json({error:message},400)}
     const previousDate=new Date(`${month}-01T00:00:00Z`);previousDate.setUTCMonth(previousDate.getUTCMonth()-1);const previousMonth=previousDate.toISOString().slice(0,7),previousLatest=new Map<number,any>();
     (rows||[]).filter((row:any)=>String(row.survey_month||'').slice(0,7)===previousMonth&&!row.analysis_excluded).sort((a:any,b:any)=>new Date(b.submitted_at).getTime()-new Date(a.submitted_at).getTime()).forEach((row:any)=>{if(!previousLatest.has(Number(row.student_number)))previousLatest.set(Number(row.student_number),row)});
     const evidence=[...latest.values()].map((row:any)=>{const number=Number(row.student_number),p=row.payload_json||{},ratings=p.selfRatings||{},peer=p.peerObservations||{},state=p.studentState||{},before=previousLatest.get(number)?.payload_json||{},beforeRatings=before.selfRatings||{},ratingDeltas=Object.fromEntries(Object.keys(ratings).map(key=>[key,Number(ratings[key]?.score)-Number(beforeRatings[key]?.score)]).filter(([,value])=>Number.isFinite(value)));return{
@@ -60,13 +64,13 @@ Deno.serve(async request=>{
     const prompt=`당신은 초등학교 담임교사의 관찰을 돕는 보조 분석가입니다. ${month} 설문을 분석하세요. 학생별로 친구들에게 받은 관계 평가, 자기평가, 서술 응답과 전월 변화를 함께 비교하며 단일 시점보다 반복·변화를 우선하세요. 의미 있는 복수 신호나 즉시 도움 요청이 있는 학생만 주의 깊게 볼 학생으로 최대 3명까지 선정하세요. 근거가 약하면 3명을 채우지 말고 빈 배열 또는 필요한 인원만 반환하세요. 학생 간 순위는 만들지 마세요. 모든 evidence 문장은 반드시 [계산 결과], [학생 원문], [친구 관찰] 중 하나로 시작하고 AI의 추측은 evidence에 넣지 마세요. 내부 JSON 필드명이나 영문 변수명을 결과에 절대 복사하지 말고 교사가 이해할 수 있는 한국어 항목명으로 바꾸세요. 특히 peer, hurt, needsHelp, unresolved, monthly_changes, responsibility, received_average_delta 같은 문자열을 출력하지 마세요. 관계 평균이나 비율을 근거로 쓸 때는 반드시 해당 응답자 수 또는 응답 건수를 함께 쓰세요. 현재 입력에는 직접 경험·직접 목격·전해 들음의 구분 정보가 없으므로 '직접 호소', '직접 경험', '직접 목격'이라고 확정하지 말고 '학생이 작성한 서술'이라고 표현하세요. 입력 근거와 복수의 가능한 해석, 담임 관찰 포인트, 구체적인 코칭 방향을 제시하고 전체 결과를 아우르는 종합 판단도 작성하세요. 학생을 진단·낙인·확정하지 말고 입력에 직접 있는 근거만 쓰세요. 이름은 입력의 학생-N 표기를 그대로 유지하세요. 폭력·자해·즉각적 도움 요청은 즉시 확인으로 우선 표시하세요. 결석·미제출은 부정 신호로 해석하지 마세요. 관계 점수만으로 고립이나 집단을 확정하지 마세요. 가능한 해석은 복수 가설로, 교사 확인은 실제 관찰이나 비공개 대화 질문으로 제안하세요. 학생-N 표기를 제외한 모든 자연어 값은 반드시 자연스럽고 이해하기 쉬운 한국어로 작성하세요. 영어 문장, 영어 제목, 영어 우선순위 표기는 사용하지 마세요.`;
     const sourceRefInstruction=' 각 주의 학생의 source_refs에는 입력의 source_refs 중 해당 근거를 직접 뒷받침하는 값만 원문 그대로 최대 4개 복사하세요. 새로운 ID나 경로를 만들지 마세요.';
     const model='gpt-5.4-mini';
-    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,reasoning:{effort:'low'},instructions:prompt+sourceRefInstruction,input:JSON.stringify({response_count:evidence.length,responses:evidence}),max_output_tokens:2800,text:{format:{type:'json_schema',name:'class_support_analysis',strict:true,schema}}})});
+    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',signal:AbortSignal.timeout(openAiTimeoutMs),headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,reasoning:{effort:'low'},instructions:prompt+sourceRefInstruction,input:JSON.stringify({response_count:evidence.length,responses:evidence}),max_output_tokens:2800,text:{format:{type:'json_schema',name:'class_support_analysis',strict:true,schema}}})});
     const result=await ai.json().catch(()=>null);
-    if(!ai.ok){const requestId=ai.headers.get('x-request-id')||'';console.error('OpenAI API request failed',{status:ai.status,code:result?.error?.code||'',type:result?.error?.type||'',message:text(result?.error?.message,500),requestId});await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:requestId}).catch(()=>null);return json({error:'AI 분석 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.',requestId},502)}
+    if(!ai.ok){const requestId=ai.headers.get('x-request-id')||'',detail=text(result?.error?.message,500)||`OpenAI 응답 코드 ${ai.status}`;console.error('OpenAI API request failed',{status:ai.status,code:result?.error?.code||'',type:result?.error?.type||'',message:detail,requestId});await failAnalysis(detail,requestId);return json({error:`AI 분석 요청에 실패했습니다. ${detail}`,requestId},502)}
     const outputText=(result?.output||[]).flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
-    if(!outputText){await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:ai.headers.get('x-request-id')||''}).catch(()=>null);return json({error:'AI 분석 결과를 읽지 못했습니다.'},502)}
+    if(!outputText){const message='AI 분석 결과를 읽지 못했습니다.';await failAnalysis(message,ai.headers.get('x-request-id')||'');return json({error:message},502)}
     const allowedRefs=new Set(evidence.flatMap((row:any)=>row.source_refs||[])),analysis=localizeAnalysisValues(JSON.parse(outputText)),generatedAt=new Date().toISOString();(analysis.priority_students||[]).forEach((item:any)=>{item.source_refs=(item.source_refs||[]).filter((ref:any)=>allowedRefs.has(String(ref))) });
     await callRpc('teacher_complete_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_result:analysis,p_model:model,p_response_count:evidence.length,p_request_id:ai.headers.get('x-request-id')||''});
     return json({analysis,meta:{runId,model,month,responseCount:evidence.length,generatedAt,cached:false,analysisVersion}});
-  }catch(error){return json({error:error instanceof Error?error.message:'서버 분석 중 오류가 발생했습니다.'},500)}
+  }catch(error){const timedOut=error instanceof DOMException&&error.name==='TimeoutError';const message=timedOut?'AI 응답 시간이 45초를 초과했습니다. 잠시 후 다시 시도해 주세요.':error instanceof Error?error.message:'서버 분석 중 오류가 발생했습니다.';if(runId&&failAnalysis)await failAnalysis(message);console.error('AI analysis failed',{runId,message});return json({error:message},timedOut?504:500)}
 });

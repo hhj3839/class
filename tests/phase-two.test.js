@@ -70,9 +70,21 @@ test('AI 결과에서 영문 내부 키와 확인되지 않은 직접 경험 표
   assert.match(edge,/현재 입력에는 직접 경험·직접 목격·전해 들음의 구분 정보가 없으므로/);
   assert.match(edge,/직접 호소\/g,'학생이 작성한 서술'/);
   assert.match(edge,/localizeAnalysisValues\(JSON\.parse\(outputText\)\)/);
-  assert.match(edge,/analysisVersion='2026\.07\.20-korean-fields-v2'/);
+  assert.match(edge,/analysisVersion='2026\.07\.20-timeout-safe-v3'/);
   assert.match(edge,/analysis:localizeAnalysisValues\(row\.result_json\)/);
   assert.match(app,/meta\.analysisVersion\|\|'버전 확인 불가'/);
+});
+
+test('AI 시간 초과와 중단은 failed로 종료하고 호출 한도에서 제외한다',()=>{
+  const recovery=fs.readFileSync('supabase/migrations/20260720235945_ai_analysis_failure_recovery.sql','utf8');
+  assert.match(edge,/AbortSignal\.timeout\(openAiTimeoutMs\)/);
+  assert.match(edge,/AI 응답 시간이 45초를 초과했습니다/);
+  assert.match(edge,/p_error_message:text\(reason,500\)/);
+  assert.match(edge,/if\(runId&&failAnalysis\)await failAnalysis\(message\)/);
+  assert.match(recovery,/add column if not exists error_message/);
+  assert.match(recovery,/status='pending' and created_at<now\(\)-interval '5 minutes'/);
+  assert.match(recovery,/status='complete' or \(status='pending' and created_at>=now\(\)-interval '5 minutes'\)/);
+  assert.match(recovery,/ai_analysis_failed/);
 });
 
 test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
