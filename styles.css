@@ -9,3 +9,11 @@
 .ai-review-actions,.backup-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.backup-actions{margin:20px 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.backup-actions>div{flex:1;min-width:240px}.backup-actions p{margin:2px 0}.report-options{display:grid;gap:14px;padding:22px 25px}.report-options label{display:grid;gap:7px;font-weight:700}.report-options label:has(input[type=checkbox]){display:flex;align-items:center}.report-options input[type=checkbox]{width:18px;height:18px}@media(max-width:700px){.ai-review-actions{justify-content:flex-start}.analysis-actions{display:flex;flex-wrap:wrap;gap:7px}}
 .participation-qr{display:grid;place-items:center;min-height:190px;margin:18px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}.participation-qr img{width:180px;height:180px;image-rendering:pixelated}.link-tools{display:flex;justify-content:center;gap:12px}.pilot-panel{margin:18px 0}.pilot-checklist{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px;margin-top:18px}.pilot-check{display:flex;gap:10px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.pilot-check>span{width:25px;height:25px;display:grid;place-items:center;border-radius:50%;font-weight:900}.pilot-check.ready>span{background:var(--green-soft);color:var(--green)}.pilot-check.pending>span{background:var(--orange-soft);color:var(--orange)}.pilot-check p{margin:2px 0 0;font-size:11px;color:var(--muted)}@media(max-width:900px){.pilot-checklist{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.pilot-checklist{grid-template-columns:1fr}}
 .class-connect-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+
+/* 상단 고정 바는 로그인 계정과 로그아웃 동작에만 집중합니다. */
+.topbar{height:72px;justify-content:flex-end;padding:0 38px}
+.top-actions{gap:12px;color:var(--ink)}
+.top-actions #authStatus{display:inline!important;font-weight:700}
+.top-actions #authButton{padding:8px 13px}
+.topbar .menu-button{margin-right:auto}
+@media(max-width:780px){.topbar{height:68px;padding:0 16px}.top-actions{min-width:0}.top-actions #authStatus{max-width:48vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}}

@@ -70,3 +70,10 @@ test('첫 화면에서 교사 회원가입을 제공한다',()=>{
   assert.match(supabase,/function authErrorMessage/);
   assert.match(html,/id="authError" role="alert"/);
 });
+
+test('상단 고정 바는 로그인 계정과 로그아웃만 표시한다',()=>{
+  const topbar=html.match(/<header class="topbar">([\s\S]*?)<\/header>/)?.[1]||'';
+  assert.match(topbar,/id="authStatus"/);
+  assert.match(topbar,/id="authButton"/);
+  assert.doesNotMatch(topbar,/classEyebrow|pageTitle|학년도|관찰 기록/);
+});
