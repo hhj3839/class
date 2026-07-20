@@ -34,7 +34,8 @@ Supabase SQL Editor에서 다음 파일을 순서대로 실행합니다.
 1. `supabase/migrations/20260720150000_stable_student_ids.sql`
 2. `supabase/migrations/20260720170000_ai_reports_backup.sql`
 3. `supabase/migrations/20260720190000_secure_participation_pilot.sql`
+4. `supabase/migrations/20260720235900_pilot_evidence_metrics.sql`
 
-그 다음 `supabase/functions/analyze-class/index.ts`를 Edge Function `analyze-class`로 다시 배포합니다. `OPENAI_API_KEY`는 Edge Function 비밀값에만 저장하며 저장소나 브라우저 코드에 넣지 않습니다.
+그 다음 `supabase/functions/analyze-class/index.ts`를 Edge Function `analyze-class`로 다시 배포합니다. v1.1 함수는 AI 근거를 응답 ID·문항 경로와 연결하고 서버에서 허용된 참조인지 검증합니다. `OPENAI_API_KEY`는 Edge Function 비밀값에만 저장하며 저장소나 브라우저 코드에 넣지 않습니다.
 
 3차 마이그레이션을 적용하면 기존 `?class=학급ID` 학생 링크는 차단됩니다. 설문 관리에서 새 `?join=임의토큰` 링크나 QR을 다시 배포해야 합니다. 학생 작성 중 내용은 해당 학생 탭의 `sessionStorage`에 최대 12시간만 임시 저장되고, 제출 성공 시 즉시 삭제됩니다.

@@ -49,7 +49,7 @@ test('누적 관계망은 중앙 균형 배치와 별도 범례 표를 제공한
 });
 
 test('담임 관찰 포인트에는 관찰 기록 저장 버튼을 표시하지 않는다',()=>{
-  assert.match(app,/querySelectorAll\('\[data-save-relation-observation\]'\)/);
+  assert.doesNotMatch(app,/data-save-relation-observation/);
   assert.doesNotMatch(app,/teacher_save_observation_auth[\s\S]{0,500}data-save-relation-observation/);
 });
 

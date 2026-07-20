@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css?v=20260720-4" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
   <link rel="stylesheet" href="analysis-dashboard.css?v=20260720-11" />
+  <link rel="stylesheet" href="pilot-feedback.css?v=20260720-1" />
 </head>
 <body>
   <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><div class="auth-gate-actions"><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><button class="secondary-button" id="gateSignupButton" type="button">교사 회원가입</button></div><small>학생은 담임 선생님이 공유한 참여 링크를 이용해 주세요.</small></div></section>
@@ -73,7 +74,7 @@
       <section class="view" id="view-analysis">
         <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2><p>AI 분석, 전체 현황, PDF 저장을 탭으로 구분했습니다.</p></div><div class="analysis-actions"><select id="analysisMonth" aria-label="분석 월"></select></div></div>
         <div class="analysis-view-tabs" role="tablist" aria-label="분석 화면 선택"><button class="active" type="button" data-analysis-tab="ai" role="tab" aria-selected="true">AI 분석</button><button type="button" data-analysis-tab="overview" role="tab" aria-selected="false">전체 현황</button><button type="button" data-analysis-tab="pdf" role="tab" aria-selected="false">PDF 저장</button></div>
-        <div id="analysisAiPanel" role="tabpanel"><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><p class="eyebrow">근거 기반 교사 지원</p><h3>AI 분석</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">분석 준비 중</span><button class="text-button" id="runAiAnalysis" type="button">결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">새로 분석</button><button class="text-button" id="flagAiAnalysis" type="button">오류 표시</button></div></div><div class="notice warning compact"><span>!</span><p>AI 결과는 진단이나 사실 판정이 아닙니다. 설문 원문과 실제 관찰·대화로 반드시 확인하세요.</p></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
+        <div id="analysisAiPanel" role="tabpanel"><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><p class="eyebrow">근거 기반 교사 지원</p><h3>AI 분석</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">분석 준비 중</span><button class="text-button" id="runAiAnalysis" type="button">결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">새로 분석</button><button class="text-button" id="flagAiAnalysis" type="button">오류 표시</button></div></div><div class="notice warning compact"><span>!</span><p>AI 결과는 진단이나 사실 판정이 아닙니다. 설문 원문과 실제 관찰·대화로 반드시 확인하세요.</p></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div><div class="ai-usefulness" id="aiUsefulness" hidden><strong>이 분석이 실제 확인에 도움이 되었나요?</strong><div><button type="button" data-ai-usefulness="helpful">도움 됨</button><button type="button" data-ai-usefulness="partial">일부 도움</button><button type="button" data-ai-usefulness="not_helpful">도움 안 됨</button></div><span id="aiUsefulnessStatus" class="muted"></span></div></section></div>
         <div id="analysisOverviewPanel" role="tabpanel" hidden><div id="analysisDataStatus" class="notice safe" aria-live="polite"></div><div class="filter-tabs"><button class="active" data-filter="all">전체 5</button><button data-filter="urgent">즉시 확인 1</button><button data-filter="watch">지속 관찰 1</button></div><div class="analysis-layout"><div class="signal-cards" id="analysisCards"></div></div></div>
         <div id="analysisPdfPanel" role="tabpanel" hidden><section class="panel pdf-action-panel"><p class="eyebrow">교사용 보고서</p><h3>AI 분석 PDF 다운로드</h3><p>학급 전체 또는 학생 개인 범위와 개인정보 포함 여부를 선택해 PDF 파일로 바로 다운로드합니다.</p><button class="primary-button" id="printReport" type="button">PDF 저장 옵션 열기</button></section></div>
       </section>
@@ -96,6 +97,7 @@
 
       <section class="view" id="view-observations">
         <div class="page-intro"><div><p class="eyebrow">AI 제안을 실제 확인으로 연결</p><h2>관찰 확인</h2><p>확인한 사실, 학생과 나눈 이야기, 확인 결과를 간단히 남기세요.</p></div><button class="primary-button" id="addObservation">+ 직접 기록</button></div>
+        <div class="feedback-metrics" id="observationFeedbackSummary" aria-live="polite"></div>
         <div class="observation-board" id="observationBoard"></div>
       </section>
 
@@ -122,7 +124,7 @@
             <p class="muted">번호와 이름을 직접 수정할 수 있습니다. 삭제한 학생의 기존 분석·관찰 기록은 이 데모에서 자동 삭제되지 않습니다.</p>
           </section>
         </div></div>
-        <div id="settingsPilotPanel" role="tabpanel" hidden><section class="panel pilot-panel"><div class="panel-head"><div><p class="eyebrow">실제 운영 전 점검</p><h3>파일럿 준비 상태</h3></div><button class="secondary-button" id="refreshPilot" type="button">다시 점검</button></div><div id="pilotChecklist" class="pilot-checklist"><p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p></div></section></div>
+        <div id="settingsPilotPanel" role="tabpanel" hidden><section class="panel pilot-panel"><div class="panel-head"><div><p class="eyebrow">실제 운영 전 점검</p><h3>파일럿 준비 상태</h3></div><button class="secondary-button" id="refreshPilot" type="button">다시 점검</button></div><div id="pilotMetrics" class="pilot-metrics"><p class="muted">학급 자료를 불러오면 운영 지표를 계산합니다.</p></div><div id="pilotChecklist" class="pilot-checklist"><p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p></div></section></div>
         <div id="settingsGovernancePanel" role="tabpanel" hidden><section class="panel governance-settings"><div class="panel-head"><div><p class="eyebrow">개인정보 운영</p><h3>보존 정책과 감사 로그</h3></div><button class="secondary-button" id="refreshAuditLog" type="button">새로고침</button></div><div class="governance-policy"><label><span>보존 기간</span><select id="retentionMonths"><option value="6">6개월</option><option value="12" selected>12개월</option><option value="24">24개월</option><option value="36">36개월</option></select></label><label><span>학년도 종료 시</span><select id="endOfYearAction"><option value="review">교사 검토 후 결정</option><option value="anonymize">익명화 예정</option><option value="delete">삭제 예정</option></select></label><button class="primary-button" id="saveRetentionPolicy" type="button">보존 정책 저장</button></div><p class="muted">정책은 계획만 저장하며 자동 영구 삭제를 실행하지 않습니다.</p><div class="backup-actions"><div><strong>암호화 저장 전 운영 백업</strong><p class="muted">파일에는 학생 이름과 설문 원문이 포함됩니다. 안전한 교사용 저장 공간에만 보관하세요.</p></div><button class="secondary-button" id="exportBackup" type="button">백업 내보내기</button><button class="secondary-button" id="importBackup" type="button">백업 복구</button><input id="backupFile" type="file" accept="application/json" hidden></div><div id="auditLogList" class="audit-log-list"></div></section></div>
       </section>
     </main>
@@ -143,6 +145,6 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260720-17"></script>
+  <script src="app.js?v=20260720-18"></script>
 </body>
 </html>

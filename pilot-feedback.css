@@ -1,0 +1,13 @@
+.relation-trend-strip,.feedback-metrics,.pilot-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.relation-trend-strip article,.feedback-metrics article,.pilot-metric-grid article{display:flex;flex-direction:column;gap:5px;padding:16px;border:1px solid #dce8ed;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(40,79,99,.06)}
+.relation-trend-strip span,.feedback-metrics span,.pilot-metric-grid span{font-size:13px;color:#607681;font-weight:800}
+.relation-trend-strip strong,.feedback-metrics strong,.pilot-metric-grid strong{font-size:23px;color:#234f67}
+.relation-trend-strip small,.feedback-metrics small,.pilot-metric-grid small{color:#71838c;line-height:1.45}
+.pilot-metrics{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid #e4ecef}
+.pilot-metric-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.pilot-metric-head h4{margin:3px 0 0;font-size:20px}.pilot-metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+.ai-usefulness{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:20px;padding:16px;border-radius:16px;background:#f4f8fa;border:1px solid #dae7ec}
+.ai-usefulness>div{display:flex;gap:8px;flex-wrap:wrap}.ai-usefulness button{border:1px solid #b8cdd6;background:#fff;color:#355d70;border-radius:999px;padding:8px 13px;font-weight:800;cursor:pointer}.ai-usefulness button.selected{background:#356a8a;color:#fff;border-color:#356a8a}
+.ai-source-button{margin-top:6px;width:100%}.source-evidence{padding:16px 0;border-bottom:1px solid #e3eaed}.source-evidence>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.source-evidence p{margin:12px 0 0;white-space:pre-wrap;line-height:1.65}
+@media(max-width:900px){.relation-trend-strip,.feedback-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.pilot-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.relation-trend-strip,.feedback-metrics,.pilot-metric-grid{grid-template-columns:1fr}.pilot-metric-head{display:block}.pilot-metric-head .confidence{display:inline-block;margin-top:8px}}

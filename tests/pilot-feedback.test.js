@@ -1,0 +1,43 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const read=file=>fs.readFileSync(file,'utf8');
+const app=read('app.js'),html=read('index.html'),student=read('student.js');
+const edge=read('supabase/functions/analyze-class/index.ts');
+const migration=read('supabase/migrations/20260720235900_pilot_evidence_metrics.sql');
+
+test('학생 설문 완료 시간을 파일럿 지표용으로 저장한다',()=>{
+  assert.match(student,/surveyStartedAt=Date\.now\(\)/);
+  assert.match(student,/completionSeconds:/);
+  assert.match(migration,/average_completion_seconds/);
+});
+
+test('AI 추천 유용성 평가는 교사 권한과 감사 로그로 저장한다',()=>{
+  assert.match(html,/data-ai-usefulness="helpful"/);
+  assert.match(app,/teacher_set_ai_usefulness_auth/);
+  assert.match(migration,/ai_usefulness_review/);
+  assert.match(migration,/teacher_id=auth\.uid\(\)/);
+});
+
+test('AI 근거는 응답 ID와 문항 경로를 검증한 뒤 원문으로 연결한다',()=>{
+  assert.match(edge,/response_id:String\(row\.id\)/);
+  assert.match(edge,/allowedRefs=new Set/);
+  assert.match(edge,/source_refs=.*filter/);
+  assert.match(app,/openAiSourceEvidence/);
+  assert.match(app,/valueAtPath/);
+});
+
+test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
+  assert.match(html,/id="observationFeedbackSummary"/);
+  assert.match(html,/id="pilotMetrics"/);
+  assert.match(app,/renderObservationFeedbackSummary/);
+  assert.match(migration,/observation_support_count/);
+  assert.match(migration,/observation_no_issue_count/);
+});
+
+test('누적 관계망은 데이터 충족도와 월별 연결 변화를 함께 표시한다',()=>{
+  assert.match(app,/function cumulativeCoverage/);
+  assert.match(app,/function relationshipMonthSnapshot/);
+  assert.match(app,/전월 대비 연결 변화/);
+  assert.match(app,/1100×640 기준의 반응형 캔버스/);
+});
