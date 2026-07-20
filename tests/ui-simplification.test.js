@@ -4,6 +4,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const html=read('index.html');
+const app=read('app.js');
 
 test('설문 관리는 현황과 응답 정정 두 탭으로 분리된다',()=>{
   const html=read('index.html');
@@ -37,4 +39,32 @@ test('누적 관계망은 고정 캔버스와 학생 강조 도구를 제공한�
   assert.match(app,/<rect x="-46" y="-21" width="92" height="42"/);
   assert.match(css,/\.network-fixed-frame/);
   assert.match(css,/\.relation-summary-grid/);
+});
+
+test('교사 홈은 중복 지원 신호 목록 없이 학생 단위 관찰 인원을 센다',()=>{
+  assert.doesNotMatch(html,/id="signalList"/);
+  assert.match(app,/observationStudents=new Set/);
+  assert.match(app,/signal\.studentNumber/);
+});
+
+test('분석·설정 화면은 요청한 탭 구조를 제공한다',()=>{
+  assert.match(html,/data-analysis-tab="ai"/);
+  assert.match(html,/data-analysis-tab="overview"/);
+  assert.match(html,/data-analysis-tab="pdf"/);
+  assert.match(html,/data-settings-tab="class"/);
+  assert.match(html,/data-settings-tab="pilot"/);
+  assert.match(html,/data-settings-tab="governance"/);
+});
+
+test('학생 상세와 관계 분석은 안전한 초기 화면을 사용한다',()=>{
+  assert.match(app,/<option value="">학생을 선택해 주세요<\/option>/);
+  assert.match(app,/setRelationshipTab\('example'\)/);
+  assert.match(html,/>누적 관계망<\/button>/);
+});
+
+test('첫 화면에서 교사 회원가입을 제공한다',()=>{
+  const supabase=read('supabase.js');
+  assert.match(html,/id="gateSignupButton"/);
+  assert.match(html,/data-auth-mode="signup"/);
+  assert.match(supabase,/async function teacherSignUp/);
 });
