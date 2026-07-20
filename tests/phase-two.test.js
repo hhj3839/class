@@ -60,6 +60,18 @@ test('AI 분석은 전월 변화와 유형별 근거를 분리한다',()=>{
   assert.match(app,/추가 확인 학생 없음/);
 });
 
+test('AI 결과에서 영문 내부 키와 확인되지 않은 직접 경험 표현을 제거한다',()=>{
+  assert.match(edge,/function|const localizeAnalysisValues/);
+  assert.match(edge,/received_average_delta\/gi,'받은 관계 점수 평균 변화'/);
+  assert.match(edge,/needsHelp\/gi,'도움 필요 친구 문항'/);
+  assert.match(edge,/hurt\/gi,'상처 행동 문항'/);
+  assert.match(edge,/내부 JSON 필드명이나 영문 변수명을 결과에 절대 복사하지 말고/);
+  assert.match(edge,/반드시 해당 응답자 수 또는 응답 건수를 함께 쓰세요/);
+  assert.match(edge,/현재 입력에는 직접 경험·직접 목격·전해 들음의 구분 정보가 없으므로/);
+  assert.match(edge,/직접 호소\/g,'학생이 작성한 서술'/);
+  assert.match(edge,/localizeAnalysisValues\(JSON\.parse\(outputText\)\)/);
+});
+
 test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
   assert.match(html,/<h3>AI 분석<\/h3>/);
   assert.doesNotMatch(html,/서버 측 보조 분석|AI 관찰 보조/);
