@@ -79,6 +79,8 @@ test('첫 화면에서 교사 회원가입을 제공한다',()=>{
   assert.match(html,/id="gateSignupButton"/);
   assert.match(html,/data-auth-mode="signup"/);
   assert.match(supabase,/async function teacherSignUp/);
+  assert.match(supabase,/const redirectUrl=new URL\('\.',location\.href\)\.href/);
+  assert.match(supabase,/signup\?redirect_to=\$\{encodeURIComponent\(redirectUrl\)\}/);
   assert.match(supabase,/function authErrorMessage/);
   assert.match(html,/id="authError" role="alert"/);
 });
