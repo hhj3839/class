@@ -17,3 +17,8 @@
 .top-actions #authButton{padding:8px 13px}
 .topbar .menu-button{margin-right:auto}
 @media(max-width:780px){.topbar{height:68px;padding:0 16px}.top-actions{min-width:0}.top-actions #authStatus{max-width:48vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}}
+
+/* 메뉴 설명은 화면 본문 대신 메뉴 버튼의 툴팁으로 제공합니다. */
+.nav-item{position:relative}
+.nav-item::after{content:attr(data-tooltip);position:absolute;left:calc(100% + 12px);top:50%;width:250px;padding:9px 11px;border-radius:9px;background:#102d3f;color:#fff;box-shadow:0 8px 24px rgba(13,37,51,.22);font-size:12px;font-weight:600;line-height:1.45;opacity:0;pointer-events:none;transform:translate(6px,-50%);transition:opacity .16s ease,transform .16s ease;z-index:30}
+.nav-item:hover::after,.nav-item:focus-visible::after{opacity:1;transform:translate(0,-50%)}
