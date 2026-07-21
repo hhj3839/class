@@ -136,11 +136,14 @@ test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
 test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포함하고 세 탭으로 자료를 구분한다',()=>{
   assert.match(app,/function studentResponseInsights\(/);
   assert.match(app,/function studentResponseInsightHTML\(/);
-  assert.match(app,/응답 요약과 눈에 띄는 변화/);
-  assert.match(app,/응답에서 알 수 있는 점/);
-  assert.match(app,/눈에 띄는 응답 변화/);
-  assert.match(app,/자기평가 점수 변화/);
+  assert.match(app,/<h3>응답 요약<\/h3>/);
+  assert.match(app,/눈에 띄는 관계 응답 변화/);
   assert.match(app,/받은 관계 점수 변화/);
+  assert.match(app,/긍정 문항의 이름 언급/);
+  assert.match(app,/고마운 학생이나 나아진 학생을 판정한 수치가 아니라/);
+  const insight=app.slice(app.indexOf('function studentResponseInsights'),app.indexOf('function renderStudentDetail'));
+  assert.doesNotMatch(insight,/자기평가 응답|자기평가 점수 변화|학생이 직접 남긴 내용|직접 작성한 내용의 변화/);
+  assert.doesNotMatch(app,/응답 요약과 눈에 띄는 변화|응답에서 알 수 있는 점/);
   assert.doesNotMatch(app,/학생별 간단한 자동 분석/);
   assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-tab="summary"/);
