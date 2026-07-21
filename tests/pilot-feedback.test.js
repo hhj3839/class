@@ -36,10 +36,11 @@ test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
   assert.match(migration,/observation_no_issue_count/);
 });
 
-test('누적 관계망은 데이터 충족도와 월별 연결 변화를 함께 표시한다',()=>{
+test('누적 관계망은 복잡한 지표 띠 없이 학급 관계 읽기를 제공한다',()=>{
   assert.match(app,/function cumulativeCoverage/);
   assert.match(app,/function relationshipMonthSnapshot/);
-  assert.match(app,/전월 대비 연결 변화/);
+  assert.doesNotMatch(app,/누적 데이터 충족도|최근 월 강한 상호 연결|전월 대비 연결 변화/);
+  assert.match(app,/우리 학급 관계 읽기/);
   assert.match(app,/1100×640 기준의 반응형 캔버스/);
 });
 
