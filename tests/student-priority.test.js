@@ -5,9 +5,8 @@ const fs=require('node:fs');
 const html=fs.readFileSync('index.html','utf8');
 const priority=fs.readFileSync('student-priority.js','utf8');
 
-test('교사 홈은 미처리 신호와 관찰 기록을 학생 단위로 통합한다',()=>{
-  assert.match(html,/담임 확인 우선순위/);
-  assert.match(html,/위험도 순위가 아니라/);
+test('교사 홈에서는 담임 확인 우선순위를 제거하되 계산 기능은 보존한다',()=>{
+  assert.doesNotMatch(html,/담임 확인 우선순위|studentPriorityList|studentPriorityCount/);
   assert.match(priority,/signalReviewFor/);
   assert.match(priority,/getObservations\(\)/);
   assert.match(priority,/resolved\.has/);

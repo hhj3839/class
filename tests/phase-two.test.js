@@ -133,9 +133,11 @@ test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
   assert.doesNotMatch(html,/서버 측 보조 분석|AI 관찰 보조/);
 });
 
-test('학생 상세는 간단한 자동 분석 없이 세 탭으로 자료를 구분한다',()=>{
-  assert.doesNotMatch(html,/id="studentResponseInsight"/);
-  assert.doesNotMatch(app,/function studentResponseInsights\(/);
+test('학생 상세는 한눈에 보기에 간단한 자동 분석을 포함하고 세 탭으로 자료를 구분한다',()=>{
+  assert.match(app,/function studentResponseInsights\(/);
+  assert.match(app,/function studentResponseInsightHTML\(/);
+  assert.match(app,/학생별 간단한 자동 분석/);
+  assert.match(app,/\$\{studentInsight\}<div id="studentSupportTimelineSlot"/);
   assert.match(app,/data-student-detail-tab="summary"/);
   assert.match(app,/data-student-detail-tab="trend"/);
   assert.match(app,/data-student-detail-tab="responses"/);
