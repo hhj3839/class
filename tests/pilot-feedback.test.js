@@ -13,9 +13,9 @@ test('학생 설문 완료 시간을 파일럿 지표용으로 저장한다',()=
   assert.match(migration,/average_completion_seconds/);
 });
 
-test('AI 추천 유용성 평가는 교사 권한과 감사 로그로 저장한다',()=>{
-  assert.match(html,/data-ai-usefulness="helpful"/);
-  assert.match(app,/teacher_set_ai_usefulness_auth/);
+test('AI 유용성 평가 버튼은 화면에서 제거하고 기존 감사 구조는 보존한다',()=>{
+  assert.doesNotMatch(html,/data-ai-usefulness|id="aiUsefulness"/);
+  assert.doesNotMatch(app,/teacher_set_ai_usefulness_auth/);
   assert.match(migration,/ai_usefulness_review/);
   assert.match(migration,/teacher_id=auth\.uid\(\)/);
 });
