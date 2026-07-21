@@ -1,6 +1,21 @@
 const clearSensitiveStateBeforeSignalInbox=clearSensitiveState;
 clearSensitiveState=()=>{signalReviews=[];clearSensitiveStateBeforeSignalInbox()};
 
+async function ensureSignalReview(signal){
+  const existing=signalReviewFor(signal);
+  if(existing)return existing;
+  await teacherRpc('teacher_upsert_signal_review_auth',{
+    p_class_id:classSettings.classId,
+    p_signal:{
+      signalKey:signalKey(signal),studentId:signal.studentId,studentNumber:signal.studentNumber,
+      sourceResponseId:signal.sourceResponseId,signalType:signal.type,status:'unreviewed',note:'',followUpDate:'',
+      sourceSnapshot:{month:selectedAnalysisMonth,title:signal.title,summary:signal.summary,evidence:signal.evidence}
+    }
+  });
+  await refreshSignalReviews();
+  return signalReviewFor(signal);
+}
+
 document.addEventListener('click',async event=>{
   const filterButton=event.target.closest('[data-signal-review-filter]');
   if(filterButton){signalReviewFilter=filterButton.dataset.signalReviewFilter;renderSignalInbox();return}
