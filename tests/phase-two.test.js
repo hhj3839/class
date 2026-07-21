@@ -139,6 +139,10 @@ test('학생 상세는 간단한 자동 분석 없이 세 탭으로 자료를 �
   assert.match(app,/data-student-detail-tab="summary"/);
   assert.match(app,/data-student-detail-tab="trend"/);
   assert.match(app,/data-student-detail-tab="responses"/);
+  assert.match(html,/<h2>학생별 기록<\/h2>/);
+  assert.match(app,/>한눈에 보기<\/button>/);
+  assert.match(app,/>월별 변화<\/button>/);
+  assert.match(app,/>응답 기록<\/button>/);
   assert.match(app,/최근 교우 관계 점수/);
   assert.doesNotMatch(app,/latest\.selfSmile\?'😊'/);
 });
