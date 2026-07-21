@@ -95,6 +95,8 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(app,/data-student-detail-panel="trend"[^>]*hidden/);
   assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
+  assert.match(html,/class="student-selection-bar"/);
+  assert.match(html,/확인할 학생 선택/);
 });
 
 test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다',()=>{
