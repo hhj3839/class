@@ -5,6 +5,7 @@ const read=file=>fs.readFileSync(file,'utf8');
 const app=read('app.js'),html=read('index.html'),student=read('student.js');
 const edge=read('supabase/functions/analyze-class/index.ts');
 const migration=read('supabase/migrations/20260720235900_pilot_evidence_metrics.sql');
+const signalMetrics=read('supabase/migrations/20260722090000_signal_review_metrics.sql');
 const limitMigration=read('supabase/migrations/20260720235930_ai_analysis_limit_10.sql');
 
 test('학생 설문 완료 시간을 파일럿 지표용으로 저장한다',()=>{
@@ -34,6 +35,19 @@ test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
   assert.match(app,/renderObservationFeedbackSummary/);
   assert.match(migration,/observation_support_count/);
   assert.match(migration,/observation_no_issue_count/);
+  assert.match(signalMetrics,/signal_review_checked_count/);
+  assert.match(signalMetrics,/signal_review_resolved_count/);
+  assert.match(signalMetrics,/support_connected','no_issue','closed/);
+  assert.match(app,/안전 신호 확인/);
+  assert.match(app,/안전 신호 처리/);
+});
+
+test('서로 다른 실제 교사 계정의 운영 학급 접근을 재시험할 수 있다',()=>{
+  const smoke=read('supabase/tests/cross_teacher_access_smoke_test.sql');
+  assert.match(smoke,/auth\.users/);
+  assert.match(smoke,/teacher_get_class_context_auth/);
+  assert.match(smoke,/ACCESS_CONTROL_TEST_FAILED/);
+  assert.match(smoke,/cross_teacher_access_control/);
 });
 
 test('누적 관계망은 복잡한 지표 띠 없이 학급 관계 읽기를 제공한다',()=>{
