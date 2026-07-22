@@ -6,7 +6,7 @@ const corsHeaders={
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
-const analysisVersion='2026.07.22-direct-class-patterns-v7';
+const analysisVersion='2026.07.22-authenticated-pilot-v8';
 const openAiTimeoutMs=45000;
 const internalLabelMap:[RegExp,string][]=[
   [/직접 호소/g,'학생이 작성한 서술'],[/직접 경험/g,'경험 여부가 확인되지 않은 서술'],[/직접 목격/g,'목격 여부가 확인되지 않은 서술'],
@@ -30,9 +30,13 @@ Deno.serve(async request=>{
   let runId='';
   let failAnalysis:((reason:string,requestId?:string)=>Promise<void>)|null=null;
   try{
+    const supabaseUrl=Deno.env.get('SUPABASE_URL')!,anonKey=Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authResponse=await fetch(`${supabaseUrl}/auth/v1/user`,{headers:{apikey:anonKey,Authorization:authorization}});
+    const authUser=await authResponse.json().catch(()=>null);
+    if(!authResponse.ok||!authUser?.id)return json({error:'교사 로그인이 필요합니다.'},401);
     const {classId,month,force=false}=await request.json();
     if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 월을 확인해 주세요.'},400);
-    const supabaseUrl=Deno.env.get('SUPABASE_URL')!,anonKey=Deno.env.get('SUPABASE_ANON_KEY')!,openaiKey=Deno.env.get('OPENAI_API_KEY');
+    const openaiKey=Deno.env.get('OPENAI_API_KEY');
     if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
     const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
     const surveyMonth=`${month}-01`;
