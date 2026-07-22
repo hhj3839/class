@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css?v=20260720-5" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260722-4" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260722-5" />
   <link rel="stylesheet" href="pilot-feedback.css?v=20260720-3" />
   <link rel="stylesheet" href="safety-signals.css?v=20260720-2" />
   <link rel="stylesheet" href="safety-signals-workflow.css?v=20260720-1" />
@@ -26,7 +26,7 @@
         <button class="nav-item active" data-view="home" data-tooltip="이번 달 참여와 학급 변화를 한눈에 확인합니다." title="이번 달 참여와 학급 변화를 한눈에 확인합니다." aria-description="이번 달 참여와 학급 변화를 한눈에 확인합니다."><span>⌂</span> 교사 홈</button>
         <button class="nav-item" data-view="survey" data-tooltip="참여 링크를 공유하고 제출 현황을 확인합니다." title="참여 링크를 공유하고 제출 현황을 확인합니다." aria-description="참여 링크를 공유하고 제출 현황을 확인합니다."><span>▤</span> 설문 관리</button>
         <button class="nav-item" data-view="analysis" data-tooltip="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다." title="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다." aria-description="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다."><span>◫</span> 분석 대시보드</button>
-        <button class="nav-item" data-view="student-detail" data-tooltip="학생별 월간 응답과 누적 추세를 확인합니다." title="학생별 월간 응답과 누적 추세를 확인합니다." aria-description="학생별 월간 응답과 누적 추세를 확인합니다."><span>◎</span> 학생 상세</button>
+        <button class="nav-item" data-view="student-detail" data-tooltip="학생별 월간 응답과 누적 추세를 확인합니다." title="학생별 월간 응답과 누적 추세를 확인합니다." aria-description="학생별 월간 응답과 누적 추세를 확인합니다."><span>◎</span> 학생별 기록</button>
         <button class="nav-item" data-view="relations" data-tooltip="전체 월의 관계 응답을 누적해 관계망을 살펴봅니다." title="전체 월의 관계 응답을 누적해 관계망을 살펴봅니다." aria-description="전체 월의 관계 응답을 누적해 관계망을 살펴봅니다."><span>⌘</span> 관계 분석</button>
         <button class="nav-item" data-view="settings" data-tooltip="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." title="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." aria-description="학급 정보와 운영 준비, 개인정보 정책을 관리합니다."><span>⚙</span> 학급 설정</button>
       </nav>
@@ -112,7 +112,7 @@
 
       <section class="view" id="view-settings">
         <div class="page-intro"><div><p class="eyebrow">내 학급 관리</p><h2>학급 설정</h2></div></div>
-        <div id="settingsClassPanel" role="tabpanel"><div class="settings-toolbar"><button class="secondary-button" id="syncRoster">DB 명단 동기화</button><button class="primary-button" id="saveSettings">변경사항 저장</button></div>
+        <div id="settingsClassPanel" role="tabpanel"><div class="settings-toolbar"><button class="primary-button" id="saveSettings">학급 정보와 명단 저장</button></div>
         <div class="settings-layout">
           <form class="panel settings-form" id="classSettingsForm">
             <div class="panel-head"><div><p class="eyebrow">기본 정보</p><h3>교사와 학급</h3></div></div>
@@ -121,10 +121,9 @@
               <label><span>학년도</span><input id="schoolYear" type="number" min="2020" max="2100" required></label>
               <label><span>학년</span><input id="grade" type="number" min="1" max="6" required></label>
               <label><span>반</span><input id="classNumber" type="number" min="1" max="30" required></label>
-              <label><span>학급 ID</span><input id="classId" maxlength="30" placeholder="학급 연결 ID"></label>
-              <label><span>최초 학급 연결 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="최초 연결 후 저장되지 않습니다"></label>
             </div>
-            <div class="notice safe compact"><span>✓</span><div><strong>교사 로그인으로 보호됩니다.</strong><p>새 학급을 만들거나, 기존 학급 ID와 연결 코드로 담당 학급을 연결할 수 있습니다.</p></div></div><div class="class-connect-actions"><button class="primary-button" id="createClass" type="button">새 학급 만들기</button><button class="secondary-button" id="claimClass" type="button">기존 학급 연결</button></div>
+            <div class="notice safe compact"><span>✓</span><div><strong>교사 로그인으로 보호됩니다.</strong><p>새 학급은 만든 교사 계정에 자동으로 연결됩니다.</p></div></div><div class="class-connect-actions"><button class="primary-button" id="createClass" type="button">새 학급 만들기</button></div>
+            <details class="legacy-class-connection"><summary>기존 데이터 이전</summary><p class="muted">로그인 기능 도입 전에 만든 학급만 최초 한 번 연결합니다. 새 학급에는 필요하지 않습니다.</p><div class="form-grid"><label><span>기존 학급 ID</span><input id="classId" maxlength="30" placeholder="기존 학급 연결 ID"></label><label><span>최초 학급 연결 코드</span><input id="teacherSecret" type="password" maxlength="80" autocomplete="off" placeholder="연결 후 저장되지 않습니다"></label></div><button class="secondary-button" id="claimClass" type="button">기존 학급 가져오기</button></details>
           </form>
           <section class="panel roster-panel">
             <div class="panel-head"><div><p class="eyebrow">학생 관리</p><h3>학생 명단 <span class="roster-count" id="rosterCount">28명</span></h3></div><div class="roster-actions"><button class="secondary-button" id="pasteRoster" type="button">명단 붙여넣기</button><button class="primary-button" id="addStudent" type="button">+ 학생 추가</button></div></div>
@@ -153,7 +152,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260722-6"></script>
+  <script src="app.js?v=20260722-7"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260721-2"></script>
   <script src="student-priority.js?v=20260720-1"></script>
