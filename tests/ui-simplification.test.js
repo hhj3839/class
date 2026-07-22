@@ -7,11 +7,14 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const html=read('index.html');
 const app=read('app.js');
 
-test('설문 관리는 현황과 응답 정정 두 탭으로 분리된다',()=>{
+test('설문 관리는 학생 참여 링크와 제출 현황만 탭으로 구분한다',()=>{
   const html=read('index.html');
-  assert.match(html,/data-survey-admin-tab="overview"/);
-  assert.match(html,/data-survey-admin-tab="correction"/);
-  assert.match(html,/id="responseCorrectionPanel"[^>]*hidden/);
+  assert.match(html,/data-survey-admin-tab="link"[^>]*>학생 참여 링크/);
+  assert.match(html,/data-survey-admin-tab="status"[^>]*>제출 현황/);
+  assert.match(html,/id="surveyStatusPanel"[^>]*hidden/);
+  assert.doesNotMatch(html,/data-survey-admin-tab="correction"/);
+  assert.match(html,/id="responseCorrectionPanel"[^>]*hidden[^>]*aria-hidden="true"/);
+  assert.match(app,/panels=\{link:\$\('#surveyLinkPanel'\),status:\$\('#surveyStatusPanel'\)\}/);
 });
 
 test('분석 대시보드는 전체 현황 없이 AI·학급 관찰 패턴·즉시 PDF를 제공한다',()=>{
