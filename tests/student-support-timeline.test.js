@@ -4,6 +4,7 @@ const fs=require('node:fs');
 
 const html=fs.readFileSync('index.html','utf8');
 const timeline=fs.readFileSync('student-support-timeline.js','utf8');
+const app=fs.readFileSync('app.js','utf8');
 
 test('학생별 살펴보기는 설문·확인 필요 응답·교사 확인 결과를 하나의 이력으로 연결한다',()=>{
   assert.match(html,/student-support-timeline\.js/);
@@ -32,4 +33,7 @@ test('학생 개인 PDF는 최근 확인·지원 이력 요약을 포함한다',
   assert.match(timeline,/function buildStudentSupportReportSection/);
   assert.match(timeline,/확인·지원 이력 요약/);
   assert.match(timeline,/recent=items\.slice\(0,8\)/);
+  assert.match(app,/scope==='class'&&currentAiAnalysis/);
+  assert.match(app,/scope==='student'&&currentAiAnalysis\?\.meta\?\.month!==selectedAnalysisMonth\?buildStudentSupportReportSection/);
+  assert.match(app,/\$\('#reportScope'\)\.value==='student'\?\$\('#printStudentReport'\):\$\('#printReport'\)/);
 });

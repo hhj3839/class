@@ -172,8 +172,8 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(app,/function studentResponseInsightHTML\(/);
   assert.match(app,/<h3>지난 제출과 달라진 점<\/h3>/);
   assert.match(app,/지난 제출과 비교/);
-  assert.match(app,/친구들이 준 관계 점수 평균 변화/);
-  assert.match(app,/친절·성장 문항 이름 언급/);
+  assert.match(app,/친구 관계 점수 평균 변화/);
+  assert.match(app,/긍정적인 친구 언급/);
   assert.match(app,/고마운 학생이나 나아진 학생을 판정한 수치가 아니라/);
   const insight=app.slice(app.indexOf('function studentResponseInsights'),app.indexOf('function renderStudentDetail'));
   assert.doesNotMatch(insight,/자기평가 응답|자기평가 점수 변화|학생이 직접 남긴 내용|직접 작성한 내용의 변화/);
@@ -187,12 +187,30 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(app,/>한눈에 보기<\/button>/);
   assert.match(app,/>변화와 지원<\/button>/);
   assert.match(app,/>월별 응답<\/button>/);
-  assert.match(app,/월을 눌러 응답 보기/);
+  assert.match(app,/월을 눌러 자세히 보기/);
   const responseRecords=app.slice(app.indexOf('const timeline='),app.indexOf('const monthHeads='));
   assert.match(responseRecords,/<details class="student-month-card">/);
   assert.doesNotMatch(responseRecords,/<details class="student-month-card"[^>]*open/);
   assert.match(app,/친구들이 준 관계 점수 평균/);
   assert.doesNotMatch(app,/latest\.selfSmile\?'😊'/);
+});
+
+test('학생을 바꿔도 현재 탭을 유지하고 응답이 없어도 지원 이력에 접근한다',()=>{
+  assert.match(app,/let activeStudentDetailTab='summary'/);
+  assert.match(app,/function setStudentDetailTab\(tab\)\{activeStudentDetailTab=tab/);
+  assert.match(app,/setStudentDetailTab\(activeStudentDetailTab\)/);
+  const emptyStudent=app.slice(app.indexOf('if(!monthly.length)'),app.indexOf('const studentInsight='));
+  assert.match(emptyStudent,/data-student-detail-tab="summary"/);
+  assert.match(emptyStudent,/data-student-detail-tab="trend"/);
+  assert.match(emptyStudent,/data-student-detail-tab="responses"/);
+  assert.match(emptyStudent,/studentSupportTimelineSlot/);
+  assert.match(emptyStudent,/아직 제출된 설문이 없습니다/);
+});
+
+test('긍정적인 친구 언급은 긴 학생 이름에 포함된 짧은 이름을 제외한다',()=>{
+  assert.match(app,/function mentionsStudentName\(text,student\)/);
+  assert.match(app,/String\(other\.name\)\.includes\(name\)&&value\.includes\(other\.name\)/);
+  assert.match(app,/if\(mentionsStudentName\(text,student\)\)/);
 });
 
 test('백업은 서버 권한 검사 후 내보내고 감사 로그와 함께 복구한다',()=>{
