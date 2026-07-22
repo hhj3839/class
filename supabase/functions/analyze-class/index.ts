@@ -7,6 +7,7 @@ const corsHeaders={
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
 const analysisVersion='2026.07.22-teacher-coaching-v9';
+const relationshipAnalysisVersion='2026.07.22-relationship-coaching-v1';
 const openAiTimeoutMs=45000;
 const internalLabelMap:[RegExp,string][]=[
   [/직접 호소/g,'학생이 작성한 서술'],[/직접 경험/g,'경험 여부가 확인되지 않은 서술'],[/직접 목격/g,'목격 여부가 확인되지 않은 서술'],
@@ -34,18 +35,47 @@ Deno.serve(async request=>{
     const authResponse=await fetch(`${supabaseUrl}/auth/v1/user`,{headers:{apikey:anonKey,Authorization:authorization}});
     const authUser=await authResponse.json().catch(()=>null);
     if(!authResponse.ok||!authUser?.id)return json({error:'교사 로그인이 필요합니다.'},401);
-    const {classId,month,force=false}=await request.json();
-    if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 월을 확인해 주세요.'},400);
+    const {classId,month,force=false,analysisType='class'}=await request.json();
+    if(!['class','relationship'].includes(analysisType))return json({error:'지원하지 않는 분석 유형입니다.'},400);
+    if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 기준 월을 확인해 주세요.'},400);
     const openaiKey=Deno.env.get('OPENAI_API_KEY');
     if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
     const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
     const surveyMonth=`${month}-01`;
-    if(!force){const cached=await callRpc('teacher_get_cached_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:localizeAnalysisValues(row.result_json),meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true,analysisVersion}})}}
-    runId=await callRpc('teacher_begin_ai_analysis_auth',{p_class_id:classId,p_survey_month:surveyMonth});
+    const cachedRpc=analysisType==='relationship'?'teacher_get_cached_relationship_analysis_auth':'teacher_get_cached_ai_analysis_auth';
+    const beginRpc=analysisType==='relationship'?'teacher_begin_relationship_analysis_auth':'teacher_begin_ai_analysis_auth';
+    const selectedVersion=analysisType==='relationship'?relationshipAnalysisVersion:analysisVersion;
+    if(!force){const cached=await callRpc(cachedRpc,{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0];return json({analysis:localizeAnalysisValues(row.result_json),meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true,analysisVersion:selectedVersion,analysisType}})}}
+    runId=await callRpc(beginRpc,{p_class_id:classId,p_survey_month:surveyMonth});
     failAnalysis=async(reason:string,requestId='')=>{await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:requestId,p_error_message:text(reason,500)}).catch(()=>null)};
     const rpc=await fetch(`${supabaseUrl}/rest/v1/rpc/teacher_get_responses_auth`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify({p_class_id:classId})});
     const rows=await rpc.json().catch(()=>null);
     if(!rpc.ok){const message=rpc.status===401?'로그인이 만료되었습니다.':'담당 학급 권한을 확인해 주세요.';await failAnalysis(message);return json({error:message},rpc.status===401?401:403)}
+    if(analysisType==='relationship'){
+      const monthlyLatest=new Map<string,any>();
+      (rows||[]).filter((row:any)=>!row.analysis_excluded).sort((a:any,b:any)=>new Date(b.submitted_at).getTime()-new Date(a.submitted_at).getTime()).forEach((row:any)=>{const key=`${String(row.survey_month||'').slice(0,7)}:${Number(row.student_number)}`;if(!monthlyLatest.has(key))monthlyLatest.set(key,row)});
+      const relationshipRows=[...monthlyLatest.values()].filter((row:any)=>(row.payload_json?.relationships||[]).length);
+      if(!relationshipRows.length){const message='누적 관계 분석에 사용할 응답이 없습니다.';await failAnalysis(message);return json({error:message},400)}
+      const scores=new Map<string,number[]>(),months=[...new Set(relationshipRows.map((row:any)=>String(row.survey_month).slice(0,7)))].sort();
+      relationshipRows.forEach((row:any)=>(row.payload_json?.relationships||[]).forEach((item:any)=>{const key=`학생-${Number(row.student_number)}:학생-${Number(item.targetNumber)}`;if(!scores.has(key))scores.set(key,[]);scores.get(key)!.push(Number(item.score))}));
+      const average=(values:number[])=>Number((values.reduce((sum,value)=>sum+value,0)/values.length).toFixed(2));
+      const directed=[...scores.entries()].map(([pair,values])=>{const [from,to]=pair.split(':');return{from,to,average:average(values),months:values.length}});
+      const mutual:any[]=[];directed.forEach(item=>{if(item.from>=item.to||item.average<4)return;const reverse=directed.find(other=>other.from===item.to&&other.to===item.from);if(reverse?.average>=4)mutual.push({students:[item.from,item.to],minimum_average:Math.min(item.average,reverse.average),sample_months:Math.min(item.months,reverse.months)})});
+      const received=new Map<string,number[]>();directed.forEach(item=>{if(!received.has(item.to))received.set(item.to,[]);received.get(item.to)!.push(item.average)});
+      const studentSummaries=[...received.entries()].map(([student,values])=>({student,response_count:values.length,received_average:average(values),high_count:values.filter(value=>value>=4).length,low_count:values.filter(value=>value<=2).length,range:Number((Math.max(...values)-Math.min(...values)).toFixed(2)),mutual_high_count:mutual.filter(item=>item.students.includes(student)).length}));
+      const relationshipSchema={type:'object',additionalProperties:false,properties:{analysis_type:{type:'string',enum:['relationship']},summary:{type:'string'},insights:{type:'array',minItems:2,maxItems:3,items:{type:'object',additionalProperties:false,properties:{observation:{type:'string'},teacher_check:{type:'string'},coaching_direction:{type:'string'},evidence:{type:'array',minItems:1,maxItems:3,items:{type:'string'}}},required:['observation','teacher_check','coaching_direction','evidence']}},limitations:{type:'array',maxItems:3,items:{type:'string'}}},required:['analysis_type','summary','insights','limitations']};
+      const relationshipPrompt=`당신은 초등학교 담임교사가 누적 친구 관계 응답을 학급 운영에 활용하도록 돕는 보조 분석가입니다. 입력은 학생 실명이 아닌 학생-N 익명 번호와 여러 달의 1~5점 관계 응답 계산 결과입니다. 결과는 학급 분석과 섞지 말고 관계 구조만 해석하세요. summary는 우리 반 관계의 전체 모습을 2문장 이내로 작성하세요. insights는 서로 높은 점수를 주고받은 연결의 분포, 편안한 관계가 여러 방향으로 확인되는 정도, 학생별 받은 응답 차이, 서로 다른 관계를 잇는 운영 가능성을 근거가 강한 순서로 2~3개 작성하세요. observation에는 계산 결과로 확인되는 관계 모습을, teacher_check에는 쉬는 시간·모둠·놀이·협력 활동에서 담임이 확인할 장면을, coaching_direction에는 자리·모둠·역할·비공개 대화 등 실제 학급 운영 방법을 각각 한 문장으로 작성하세요. evidence는 반드시 [계산 결과]로 시작하고 응답 인원·관계 수·반영 월 수 중 해당 수치를 포함하세요. 학생을 인기·고립·문제 학생으로 단정하거나 관계 원인을 추측하지 마세요. 고정된 친구 집단이라고 확정하지 말고 담임 관찰과 학생 대화가 필요함을 유지하세요. 특정 학생을 언급할 때는 학생-N 표기를 그대로 사용하세요. 모든 자연어는 이해하기 쉬운 한국어로 작성하고 각 문장은 120자 이내로 제한하세요.`;
+      const model='gpt-5.4-mini';
+      const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',signal:AbortSignal.timeout(openAiTimeoutMs),headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,reasoning:{effort:'low'},instructions:relationshipPrompt,input:JSON.stringify({months,relationship_response_count:relationshipRows.length,student_count:studentSummaries.length,mutual_high_relationships:mutual,students:studentSummaries}),max_output_tokens:2200,text:{format:{type:'json_schema',name:'relationship_support_analysis',strict:true,schema:relationshipSchema}}})});
+      const result=await ai.json().catch(()=>null);
+      if(!ai.ok){const requestId=ai.headers.get('x-request-id')||'',detail=text(result?.error?.message,500)||`OpenAI 응답 코드 ${ai.status}`;await failAnalysis(detail,requestId);return json({error:`관계 AI 분석 요청에 실패했습니다. ${detail}`,requestId},502)}
+      if(result?.status==='incomplete'){const message='관계 AI 분석 결과가 출력 한도 때문에 완성되지 않았습니다. 다시 시도해 주세요.';await failAnalysis(message,ai.headers.get('x-request-id')||'');return json({error:message},502)}
+      const outputText=(result?.output||[]).flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
+      if(!outputText){const message='관계 AI 분석 결과를 읽지 못했습니다.';await failAnalysis(message,ai.headers.get('x-request-id')||'');return json({error:message},502)}
+      const analysis=localizeAnalysisValues(JSON.parse(outputText)),generatedAt=new Date().toISOString();
+      await callRpc('teacher_complete_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_result:analysis,p_model:model,p_response_count:relationshipRows.length,p_request_id:ai.headers.get('x-request-id')||''});
+      return json({analysis,meta:{runId,model,month,responseCount:relationshipRows.length,generatedAt,cached:false,analysisVersion:relationshipAnalysisVersion,analysisType}});
+    }
     const latest=new Map<number,any>();
     (rows||[]).filter((row:any)=>String(row.survey_month||'').slice(0,7)===month&&!row.analysis_excluded).sort((a:any,b:any)=>new Date(b.submitted_at).getTime()-new Date(a.submitted_at).getTime()).forEach((row:any)=>{if(!latest.has(Number(row.student_number)))latest.set(Number(row.student_number),row)});
     if(!latest.size){const message='선택한 월에 분석할 응답이 없습니다.';await failAnalysis(message);return json({error:message},400)}
