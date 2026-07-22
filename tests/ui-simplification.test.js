@@ -109,11 +109,13 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(app,/data-student-detail-panel="trend"[^>]*hidden/);
   assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
-  assert.match(html,/class="student-selection-bar"/);
-  assert.match(html,/학생 선택/);
+  assert.match(html,/class="panel student-workspace-header"/);
+  assert.match(html,/학생 바꾸기/);
   assert.match(html,/id="previousStudent"/);
   assert.match(html,/id="nextStudent"/);
-  assert.match(app,/student-identity-bar/);
+  assert.match(html,/id="studentDetailMeta"/);
+  assert.match(html,/id="printStudentReport"/);
+  assert.doesNotMatch(app,/student-identity-bar|student-context-sticky/);
 });
 
 test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다',()=>{
