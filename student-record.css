@@ -55,6 +55,8 @@
 
 .student-picker:hover select { border-color: var(--blue); }
 .student-picker:focus-within select { border-color: var(--blue); box-shadow:0 0 0 3px rgba(54,119,151,.16); outline:0; }
+.analysis-month-picker.student-picker { display:block; min-width:150px; padding:0; border:0; background:transparent; color:inherit; }
+.analysis-month-picker.student-picker select { min-width:0; }
 
 .student-step-button,
 .student-pdf-button {
