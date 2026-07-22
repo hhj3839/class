@@ -155,10 +155,10 @@ test('교사용 화면의 AI 명칭은 AI 분석으로 통일한다',()=>{
 test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포함하고 세 탭으로 자료를 구분한다',()=>{
   assert.match(app,/function studentResponseInsights\(/);
   assert.match(app,/function studentResponseInsightHTML\(/);
-  assert.match(app,/<h3>눈에 띄는 관계 응답 변화<\/h3>/);
-  assert.match(app,/눈에 띄는 관계 응답 변화/);
-  assert.match(app,/받은 관계 점수 변화/);
-  assert.match(app,/긍정 문항의 이름 언급/);
+  assert.match(app,/<h3>지난 제출과 달라진 점<\/h3>/);
+  assert.match(app,/지난 제출과 비교/);
+  assert.match(app,/친구들이 준 관계 점수 평균 변화/);
+  assert.match(app,/친절·성장 문항 이름 언급/);
   assert.match(app,/고마운 학생이나 나아진 학생을 판정한 수치가 아니라/);
   const insight=app.slice(app.indexOf('function studentResponseInsights'),app.indexOf('function renderStudentDetail'));
   assert.doesNotMatch(insight,/자기평가 응답|자기평가 점수 변화|학생이 직접 남긴 내용|직접 작성한 내용의 변화/);
@@ -168,15 +168,15 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(app,/data-student-detail-tab="summary"/);
   assert.match(app,/data-student-detail-tab="trend"/);
   assert.match(app,/data-student-detail-tab="responses"/);
-  assert.match(html,/<h2>학생별 기록<\/h2>/);
+  assert.match(html,/<h2>학생별 살펴보기<\/h2>/);
   assert.match(app,/>한눈에 보기<\/button>/);
-  assert.match(app,/>월별 변화<\/button>/);
-  assert.match(app,/>응답 기록<\/button>/);
+  assert.match(app,/>변화와 지원<\/button>/);
+  assert.match(app,/>월별 응답<\/button>/);
   assert.match(app,/월을 눌러 응답 보기/);
   const responseRecords=app.slice(app.indexOf('const timeline='),app.indexOf('const monthHeads='));
   assert.match(responseRecords,/<details class="student-month-card">/);
   assert.doesNotMatch(responseRecords,/<details class="student-month-card"[^>]*open/);
-  assert.match(app,/받은 관계 점수/);
+  assert.match(app,/친구들이 준 관계 점수 평균/);
   assert.doesNotMatch(app,/latest\.selfSmile\?'😊'/);
 });
 
