@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="학생의 월별 생활과 관계 변화를 근거 중심으로 살피는 교사용 웹앱" />
   <title>우리반 이음</title>
-  <link rel="stylesheet" href="styles.css?v=20260720-5" />
+  <link rel="stylesheet" href="styles.css?v=20260722-6" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
   <link rel="stylesheet" href="analysis-dashboard.css?v=20260722-6" />
   <link rel="stylesheet" href="pilot-feedback.css?v=20260720-3" />
@@ -48,8 +48,8 @@
         <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
         <div class="stats-grid">
           <article class="stat-card"><div class="stat-head"><span>이번 달 설문 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
-          <article class="stat-card"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><p class="red-text">바로 도움을 요청한 응답</p></article>
-          <article class="stat-card"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>응답과 실제 상황을 함께 확인해 주세요.</p></article>
+          <article class="stat-card"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><div class="home-student-links" id="homeUrgentStudents" aria-label="바로 확인할 학생 목록"></div><p class="red-text">바로 도움을 요청한 응답</p></article>
+          <article class="stat-card"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><div class="home-student-links" id="homeWeekStudents" aria-label="살펴볼 학생 목록"></div><p>응답과 실제 상황을 함께 확인해 주세요.</p></article>
           <article class="stat-card"><div class="stat-head"><span>친절·성장 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친구에 관한 서술이 있는 응답</p></article>
         </div>
         <div class="dashboard-grid home-trend-grid">
@@ -165,7 +165,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260722-15"></script>
+  <script src="app.js?v=20260722-16"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-5"></script>
   <script src="student-priority.js?v=20260720-1"></script>
