@@ -24,6 +24,15 @@ test('데모 생성 SQL은 핵심 화면 상태와 저장 AI 결과를 포함한
   assert.match(seed,/month_offset in reverse 2\.\.0/);
 });
 
+test('데모 관계 응답은 묶음·연결·비대칭·월별 변화를 의도적으로 포함한다',()=>{
+  assert.match(seed,/A\(1·3·9\), B\(2·5·7\), C\(4·6·8\)/);
+  assert.match(seed,/\(3,5\),\(5,3\),\(7,8\),\(8,7\)/);
+  assert.match(seed,/\(1,2\),\(5,4\)/);
+  assert.match(seed,/5-month_offset/);
+  assert.match(seed,/2\+month_offset/);
+  assert.match(seed,/target_number=4/);
+});
+
 test('데모 삭제 SQL은 대상 교사와 demo 접두사를 함께 검사한다',()=>{
   assert.match(reset,/teacher_id=target_teacher/);
   assert.match(reset,/class_id like 'demo-%'/);

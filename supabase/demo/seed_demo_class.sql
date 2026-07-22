@@ -65,15 +65,28 @@ begin
       relationships := '[]'::jsonb;
       for target_number in 1..10 loop
         if target_number <> student_number then
-          score := greatest(1, least(5,
-            3 + case
-              when target_number = 1 then (2 - month_offset)
-              when target_number = 2 then (month_offset - 1)
-              when target_number = 4 and student_number in (2,3,5) then -2
-              when target_number = 9 then 1
-              else ((student_number + target_number + month_offset) % 3) - 1
-            end
-          ));
+          -- 세 개의 느슨한 관계 묶음, 묶음 사이 연결, 비대칭, 월별 강화·약화를 함께 만든다.
+          score := case
+            -- 1↔3은 최근으로 올수록 3→4→5점으로 강화된다.
+            when (student_number,target_number) in ((1,3),(3,1)) then 5-month_offset
+            -- 2↔7은 최근으로 올수록 4→3→2점으로 약화된다.
+            when (student_number,target_number) in ((2,7),(7,2)) then 2+month_offset
+            -- A(1·3·9), B(2·5·7), C(4·6·8) 안의 나머지 편안한 상호 관계
+            when student_number in (1,3,9) and target_number in (1,3,9) then 5
+            when student_number in (2,5,7) and target_number in (2,5,7) then 5
+            when student_number in (4,6,8) and target_number in (4,6,8) then 5
+            -- 묶음 사이에서 연결 역할을 하는 상호 4점 관계
+            when (student_number,target_number) in ((3,5),(5,3),(7,8),(8,7)) then 4
+            -- 같은 관계를 다르게 경험하는 두 방향의 비대칭 사례
+            when (student_number,target_number) in ((1,2),(5,4)) then 5
+            when (student_number,target_number) in ((2,1),(4,5)) then 2
+            -- 4번은 친구에 따라 받은 점수 차이가 크게 보이도록 구성한다.
+            when target_number=4 and student_number in (1,3,9) then 1
+            when target_number=4 and student_number in (2,7) then 2
+            -- 10번은 8번과만 상호 4점이며 여러 방향 연결이 아직 확인되지 않는다.
+            when (student_number,target_number) in ((8,10),(10,8)) then 4
+            else 2 + ((student_number + target_number + month_offset) % 2)
+          end;
           relationships := relationships || jsonb_build_array(jsonb_build_object('targetNumber', target_number, 'score', score));
         end if;
       end loop;
