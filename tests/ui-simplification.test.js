@@ -125,11 +125,11 @@ test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다'
   assert.doesNotMatch(app,/친구별 평가 편차/);
 });
 
-test('AI 학생 카드는 해석·관찰·코칭만 바로 보여주고 다른 해석은 숨긴다',()=>{
+test('AI 학생 카드는 해석·살펴볼 점·다음 지원만 바로 보여주고 다른 해석은 숨긴다',()=>{
   const aiRender=app.slice(app.indexOf('function renderAiAnalysis'),app.indexOf('async function runAiAnalysis'));
   assert.match(aiRender,/담임 해석/);
-  assert.match(aiRender,/담임 관찰 포인트/);
-  assert.match(aiRender,/<strong>코칭<\/strong>/);
+  assert.match(aiRender,/담임이 살펴볼 점/);
+  assert.match(aiRender,/<strong>다음 대화와 지원<\/strong>/);
   assert.doesNotMatch(aiRender,/가능한 다른 해석 보기|ai-interpretations/);
 });
 
