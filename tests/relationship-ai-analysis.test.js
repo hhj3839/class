@@ -29,6 +29,12 @@ test('관계 AI는 누적 익명 관계 계산만 받아 학급 운영 문장을
 });
 
 test('관계 화면은 교사가 요청할 때 저장 결과 또는 새 AI 해석을 표시한다',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.match(html,/data-relation-tab="example"[^>]*>표시 방법<\/button>/);
+  assert.match(html,/data-relation-tab="actual"[^>]*>우리 반 관계 지도<\/button>/);
+  assert.match(html,/data-relation-tab="ai"[^>]*>AI 관계 해석<\/button>/);
+  assert.match(html,/id="relationAiPanel" role="tabpanel" hidden/);
+  assert.match(app,/actual\.hidden=tab!=='actual';ai\.hidden=tab!=='ai'/);
   assert.match(app,/AI로 관계 해석하기/);
   assert.match(app,/analysisType:'relationship'/);
   assert.match(app,/function renderRelationshipAiAnalysis/);

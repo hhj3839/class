@@ -257,8 +257,8 @@ function renderRelationshipsV2(){
 }
 
 function setRelationshipTab(tab){
-  const actual=$('#relationActualPanel'),example=$('#relationPreview'),tabs=$('#relationTabs');if(!actual||!example||!tabs)return;
-  const showExample=tab==='example';actual.hidden=showExample;example.hidden=!showExample;
+  const actual=$('#relationActualPanel'),example=$('#relationPreview'),ai=$('#relationAiPanel'),tabs=$('#relationTabs');if(!actual||!example||!ai||!tabs)return;
+  example.hidden=tab!=='example';actual.hidden=tab!=='actual';ai.hidden=tab!=='ai';
   tabs.querySelectorAll('[data-relation-tab]').forEach(button=>{const selected=button.dataset.relationTab===tab;button.classList.toggle('active',selected);button.setAttribute('aria-selected',String(selected))});
 }
 
