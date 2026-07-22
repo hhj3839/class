@@ -48,7 +48,7 @@ test('누적 관계망은 중앙 균형 배치와 별도 범례 표를 제공한
   assert.match(app,/groupCount=analysis\.groups\.length/);
   assert.match(app,/centerAngle=groupCount===2/);
   assert.match(app,/unplacedRadiusX=groupCount\?width\*\.43:width\*\.34/);
-  assert.match(app,/<rect x="-54" y="-22" width="108" height="44"/);
+  assert.match(app,/<rect x="-60" y="-22" width="120" height="44"/);
   assert.match(css,/\.network-fixed-frame/);
   assert.match(css,/\.actual-relations \.network svg[\s\S]*width: 100%/);
   assert.match(css,/aspect-ratio: 1100 \/ 640/);
