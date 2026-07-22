@@ -20,6 +20,7 @@
 - [ ] 안정적인 Wi-Fi와 연결 중단 시험이 가능한 기기 1대
 - [ ] 유효한 학생 참여 QR 또는 링크
 - [ ] [학생 설문 참여 안내](STUDENT_SURVEY_GUIDE.md)와 [담임 운영 가이드](TEACHER_QUICK_GUIDE.md)
+- [ ] 실제 시험 전 [기능 점검용 데모 학급](DEMO_CLASS_GUIDE.md)으로 주요 교사 화면을 사전 확인
 - [ ] 담당 담임 계정과 접근 권한이 없는 다른 교사 시험 계정
 - [ ] 시험 전 Supabase JSON 백업
 - [ ] [오류 기록 양식](FIELD_ISSUE_TEMPLATE.md)
