@@ -38,6 +38,8 @@ test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
   assert.match(signalMetrics,/signal_review_checked_count/);
   assert.match(signalMetrics,/signal_review_resolved_count/);
   assert.match(signalMetrics,/support_connected','no_issue','closed/);
+  assert.match(signalMetrics,/from public\.safety_signal_reviews s/);
+  assert.doesNotMatch(signalMetrics,/from public\.signal_reviews s/);
   assert.match(app,/안전 신호 확인/);
   assert.match(app,/안전 신호 처리/);
 });

@@ -47,7 +47,7 @@ begin
     select count(*)::integer total,
       count(*) filter(where s.status<>'unreviewed')::integer checked,
       count(*) filter(where s.status in('support_connected','no_issue','closed'))::integer resolved
-    from public.signal_reviews s where s.class_id=p_class_id
+    from public.safety_signal_reviews s where s.class_id=p_class_id
   )
   select target_month,a.count,count(l.id)::integer,
     case when a.count>0 then round(count(l.id)::numeric/a.count*100,1) else 0 end,
