@@ -19,6 +19,9 @@ test('확인·지원 이력은 진행 중 건수와 다음 확인 예정일을 �
   assert.match(timeline,/openObservations/);
   assert.match(timeline,/다음 확인 예정일/);
   assert.match(timeline,/data-edit-observation/);
+  assert.match(timeline,/확인·지원 이력 보기/);
+  assert.match(timeline,/if\(!supportItems\.length\)/);
+  assert.match(timeline,/<details class="student-support-details">/);
 });
 
 test('확인·지원 이력은 월·살펴볼 기록으로 필터링한다',()=>{
