@@ -6,6 +6,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const html=read('index.html');
 const app=read('app.js');
+const studentRecordCss=read('student-record.css');
 
 test('설문 관리는 학생 설문 링크와 제출 현황만 탭으로 구분한다',()=>{
   const html=read('index.html');
@@ -115,6 +116,9 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(html,/id="nextStudent"/);
   assert.match(html,/id="studentDetailMeta"/);
   assert.match(html,/id="printStudentReport"/);
+  assert.match(studentRecordCss,/\.student-picker::after/);
+  assert.match(studentRecordCss,/appearance:\s*none/);
+  assert.match(studentRecordCss,/\.student-picker:focus-within/);
   assert.doesNotMatch(app,/student-identity-bar|student-context-sticky/);
 });
 
