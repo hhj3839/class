@@ -19,3 +19,17 @@ test('학생 지원 타임라인은 미완료 건수와 다음 확인일을 표�
   assert.match(timeline,/다음 확인일/);
   assert.match(timeline,/data-edit-observation/);
 });
+
+test('학생 지원 타임라인은 월·기록 유형으로 필터링한다',()=>{
+  assert.match(timeline,/studentSupportFilters=\{month:'all',kind:'all'\}/);
+  assert.match(timeline,/data-support-filter="month"/);
+  assert.match(timeline,/data-support-filter="kind"/);
+  assert.match(timeline,/filteredStudentSupportItems/);
+});
+
+test('학생 개인 PDF는 최근 지원 타임라인 요약을 포함한다',()=>{
+  assert.match(html,/id="printStudentReport"/);
+  assert.match(timeline,/function buildStudentSupportReportSection/);
+  assert.match(timeline,/학생 지원 타임라인 요약/);
+  assert.match(timeline,/recent=items\.slice\(0,8\)/);
+});
