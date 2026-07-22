@@ -79,7 +79,8 @@ test('분석은 월 선택을 탭 옆에 두고 설정은 학급 관리만 노�
   assert.match(html,/id="printReport"/);
   assert.doesNotMatch(html,/data-analysis-tab="overview"|data-analysis-tab="pdf"/);
   assert.match(html,/class="analysis-toolbar"/);
-  assert.match(html,/class="analysis-month-picker"/);
+  assert.match(html,/class="student-picker analysis-month-picker"/);
+  assert.doesNotMatch(html,/<span>살펴볼 달<\/span>/);
   assert.doesNotMatch(html,/data-settings-tab=/);
   assert.match(html,/id="settingsPilotPanel"[^>]*hidden/);
   assert.match(html,/id="settingsGovernancePanel"[^>]*hidden/);
