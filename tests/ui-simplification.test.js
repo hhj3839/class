@@ -91,7 +91,7 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(html,/class="panel signal-review-panel"[^>]*hidden/);
   assert.doesNotMatch(html,/data-view="observations"/);
   assert.match(app,/최근 제출일/);
-  assert.match(app,/최근 교우 관계 점수/);
+  assert.match(app,/받은 관계 점수/);
   assert.match(app,/id="studentSupportTimelineSlot"/);
   assert.match(support,/querySelector\('#studentSupportTimelineSlot'\)/);
   assert.match(app,/data-student-detail-panel="summary"/);
@@ -105,8 +105,9 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
 test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다',()=>{
   const relationView=app.slice(app.indexOf('function renderRelationshipsV2'),app.indexOf('function setRelationshipTab'));
   assert.doesNotMatch(relationView,/상호 높은 관계가 밀집된 묶음|여러 집단과 연결된 학생|relation-trend-strip/);
-  assert.match(relationView,/친구에 따라 받은 관계 점수가 다른 학생/);
+  assert.doesNotMatch(relationView,/친구에 따라 받은 관계 점수가 다른 학생|강한 상호 연결이 적게 나타난 학생/);
   assert.match(app,/우리 학급 관계 읽기/);
+  assert.match(app,/담임 코칭/);
   assert.doesNotMatch(app,/친구별 평가 편차/);
 });
 
