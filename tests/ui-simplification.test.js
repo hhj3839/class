@@ -90,8 +90,8 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   const support=read('student-support-timeline.js');
   assert.match(html,/class="panel signal-review-panel"[^>]*hidden/);
   assert.doesNotMatch(html,/data-view="observations"/);
-  assert.match(app,/최근 제출일/);
-  assert.match(app,/받은 관계 점수/);
+  assert.match(app,/최근 설문 제출/);
+  assert.match(app,/친구들이 준 관계 점수 평균/);
   assert.match(app,/id="studentSupportTimelineSlot"/);
   assert.match(support,/querySelector\('#studentSupportTimelineSlot'\)/);
   assert.match(app,/data-student-detail-panel="summary"/);
@@ -99,7 +99,10 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
   assert.match(html,/class="student-selection-bar"/);
-  assert.match(html,/확인할 학생 선택/);
+  assert.match(html,/학생 선택/);
+  assert.match(html,/id="previousStudent"/);
+  assert.match(html,/id="nextStudent"/);
+  assert.match(app,/student-identity-bar/);
 });
 
 test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다',()=>{
