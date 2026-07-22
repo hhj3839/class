@@ -33,6 +33,11 @@ test('관찰 진행 상태와 확인 결과를 분리하고 출처 필드를 보
   assert.doesNotMatch(html,/id="observationFact" required/);
   assert.match(app,/status==='done'&&!observedFact/);
   assert.match(app,/status==='done'&&outcome==='pending'/);
+  assert.match(app,/status==='done'&&!resolutionReason/);
+  assert.match(app,/sourceSnapshot\.supportResolution=\{followUpResult,resolutionReason,needsFollowUp\}/);
+  assert.match(html,/id="observationFollowUpResult"/);
+  assert.match(html,/id="observationResolutionReason"/);
+  assert.match(html,/id="observationNeedsFollowUp"/);
   assert.match(app,/aiRunId:item\.aiRunId/);
   assert.match(app,/sourceType:item\.sourceType/);
   assert.match(app,/sourceSnapshot:item\.sourceSnapshot/);
