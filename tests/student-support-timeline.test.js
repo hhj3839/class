@@ -21,11 +21,15 @@ test('확인·지원 이력은 진행 중 건수와 다음 확인 예정일을 �
   assert.match(timeline,/data-edit-observation/);
 });
 
-test('확인·지원 이력은 월·기록 종류로 필터링한다',()=>{
+test('확인·지원 이력은 월·살펴볼 기록으로 필터링한다',()=>{
   assert.match(timeline,/studentSupportFilters=\{month:'all',kind:'all'\}/);
   assert.match(timeline,/data-support-filter="month"/);
   assert.match(timeline,/data-support-filter="kind"/);
   assert.match(timeline,/filteredStudentSupportItems/);
+  assert.match(timeline,/살펴볼 기록/);
+  assert.match(timeline,/전체 기록/);
+  assert.match(timeline,/날짜 미정/);
+  assert.match(timeline,/예정 없음/);
 });
 
 test('학생 개인 PDF는 최근 확인·지원 이력 요약을 포함한다',()=>{
@@ -33,7 +37,9 @@ test('학생 개인 PDF는 최근 확인·지원 이력 요약을 포함한다',
   assert.match(timeline,/function buildStudentSupportReportSection/);
   assert.match(timeline,/확인·지원 이력 요약/);
   assert.match(timeline,/recent=items\.slice\(0,8\)/);
+  assert.match(timeline,/function buildStudentOverviewReportSection/);
+  assert.match(timeline,/function buildStudentMonthlyResponseReportSection/);
   assert.match(app,/scope==='class'&&currentAiAnalysis/);
-  assert.match(app,/scope==='student'&&currentAiAnalysis\?\.meta\?\.month!==selectedAnalysisMonth\?buildStudentSupportReportSection/);
+  assert.match(app,/scope==='student'\?buildStudentOverviewReportSection/);
   assert.match(app,/\$\('#reportScope'\)\.value==='student'\?\$\('#printStudentReport'\):\$\('#printReport'\)/);
 });
