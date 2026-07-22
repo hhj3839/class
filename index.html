@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
 </head>
 <body>
-  <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><div class="auth-callback-notice" id="authCallbackNotice" role="status" hidden></div><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><div class="auth-gate-actions"><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><button class="secondary-button" id="gateSignupButton" type="button">교사 회원가입</button></div><small>학생은 담임 선생님이 공유한 참여 링크를 이용해 주세요.</small></div></section>
+  <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><div class="auth-callback-notice" id="authCallbackNotice" role="status" hidden></div><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><div class="auth-gate-actions"><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><button class="secondary-button" id="gateSignupButton" type="button">교사 회원가입</button></div><small>학생은 담임 선생님이 공유한 설문 링크를 이용해 주세요.</small></div></section>
   <div class="app-shell" id="teacherApp" hidden>
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#home" aria-label="우리반 이음 홈">
@@ -24,9 +24,9 @@
         <span><strong>우리반 이음</strong><small>관찰과 대화를 잇다</small></span>
       </a>
       <nav aria-label="주요 메뉴">
-        <button class="nav-item active" data-view="home" data-tooltip="이번 달 참여와 학급 변화를 한눈에 확인합니다." title="이번 달 참여와 학급 변화를 한눈에 확인합니다." aria-description="이번 달 참여와 학급 변화를 한눈에 확인합니다."><span>⌂</span> 교사 홈</button>
-        <button class="nav-item" data-view="survey" data-tooltip="참여 링크를 공유하고 제출 현황을 확인합니다." title="참여 링크를 공유하고 제출 현황을 확인합니다." aria-description="참여 링크를 공유하고 제출 현황을 확인합니다."><span>▤</span> 설문 관리</button>
-        <button class="nav-item" data-view="analysis" data-tooltip="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다." title="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다." aria-description="AI 분석을 확인하고 이름이 포함된 PDF를 저장합니다."><span>◫</span> 분석 대시보드</button>
+        <button class="nav-item active" data-view="home" data-tooltip="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다." title="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다." aria-description="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다."><span>⌂</span> 우리 반 현황</button>
+        <button class="nav-item" data-view="survey" data-tooltip="설문 링크를 공유하고 제출 현황을 확인합니다." title="설문 링크를 공유하고 제출 현황을 확인합니다." aria-description="설문 링크를 공유하고 제출 현황을 확인합니다."><span>▤</span> 설문 관리</button>
+        <button class="nav-item" data-view="analysis" data-tooltip="AI 분석과 우리 반에서 보이는 모습을 확인합니다." title="AI 분석과 우리 반에서 보이는 모습을 확인합니다." aria-description="AI 분석과 우리 반에서 보이는 모습을 확인합니다."><span>◫</span> 학급 분석</button>
         <button class="nav-item" data-view="student-detail" data-tooltip="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다." title="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다." aria-description="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다."><span>◎</span> 학생별 살펴보기</button>
         <button class="nav-item" data-view="relations" data-tooltip="전체 월의 친구 관계 응답으로 우리 반 관계 지도를 살펴봅니다." title="전체 월의 친구 관계 응답으로 우리 반 관계 지도를 살펴봅니다." aria-description="전체 월의 친구 관계 응답으로 우리 반 관계 지도를 살펴봅니다."><span>⌘</span> 관계 분석</button>
         <button class="nav-item" data-view="settings" data-tooltip="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." title="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." aria-description="학급 정보와 운영 준비, 개인정보 정책을 관리합니다."><span>⚙</span> 학급 설정</button>
@@ -47,14 +47,14 @@
       <section class="view active" id="view-home">
         <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
         <div class="stats-grid">
-          <article class="stat-card"><div class="stat-head"><span>이번 달 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
-          <article class="stat-card"><div class="stat-head"><span>즉시 확인</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>건</small></strong><p class="red-text">도움 요청 응답을 확인해요</p></article>
-          <article class="stat-card"><div class="stat-head"><span>관찰 확인</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>실제 상황에서 확인할 신호</p></article>
-          <article class="stat-card"><div class="stat-head"><span>긍정 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친절·성장 서술 응답</p></article>
+          <article class="stat-card"><div class="stat-head"><span>이번 달 설문 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
+          <article class="stat-card"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><p class="red-text">바로 도움을 요청한 응답</p></article>
+          <article class="stat-card"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><p>응답과 실제 상황을 함께 확인해요</p></article>
+          <article class="stat-card"><div class="stat-head"><span>친절·성장 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친구에 관한 서술이 있는 응답</p></article>
         </div>
         <div class="dashboard-grid home-trend-grid">
           <div class="panel" id="classTrendPanel">
-            <div class="panel-head"><div><p class="eyebrow">실제 제출 자료</p><h2>학급 변화</h2></div><span class="confidence" id="classTrendConfidence">자료 확인 중</span></div>
+            <div class="panel-head"><div><p class="eyebrow">제출한 설문 기준</p><h2>우리 반 월별 변화</h2></div><span class="confidence" id="classTrendConfidence">설문 응답 확인 중</span></div>
             <div class="trend-chart" id="classTrendChart" aria-label="월별 학급 자기평가 평균 추세"></div>
             <div class="insight" id="classTrendInsight"><span>ⓘ</span><p>월별 응답을 불러오면 실제 변화가 표시됩니다.</p></div>
           </div>
@@ -70,12 +70,12 @@
 
       <section class="view" id="view-survey">
         <div class="page-intro"><div><p class="eyebrow">7월 월간 설문</p><h2>설문 관리</h2></div><div class="roster-actions"><a class="primary-button button-link" id="openStudentSurvey" href="student.html">학생 설문 미리보기</a></div></div>
-        <div class="survey-admin-tabs" role="tablist" aria-label="설문 관리 화면 선택"><button class="active" type="button" data-survey-admin-tab="link" role="tab" aria-controls="surveyLinkPanel" aria-selected="true">학생 참여 링크</button><button type="button" data-survey-admin-tab="status" role="tab" aria-controls="surveyStatusPanel" aria-selected="false">제출 현황</button></div>
+        <div class="survey-admin-tabs" role="tablist" aria-label="설문 관리 화면 선택"><button class="active" type="button" data-survey-admin-tab="link" role="tab" aria-controls="surveyLinkPanel" aria-selected="true">학생 설문 링크</button><button type="button" data-survey-admin-tab="status" role="tab" aria-controls="surveyStatusPanel" aria-selected="false">제출 현황</button></div>
         <div id="surveyLinkPanel" role="tabpanel">
-          <div class="panel link-panel"><div class="participation-qr-wrap"><div class="participation-qr" id="participationQr" aria-label="학생 참여 QR 코드"></div><button class="secondary-button qr-save-button" id="downloadQr" type="button">QR 이미지 저장</button></div><div class="participation-link-content"><div><p class="eyebrow">학생용 안전 접속</p><h3>학생 참여 링크</h3><p class="muted">QR을 화면에 띄우거나 링크를 복사해 공유하세요. 재발급하면 기존 링크는 즉시 폐기됩니다.</p></div><div class="copy-row"><code>참여 링크 준비 중</code><button id="copyLink">링크 복사</button></div><div class="link-tools"><button class="danger-outline-button" id="rotateParticipationToken" type="button">참여 링크 재발급</button></div></div></div>
+          <div class="panel link-panel"><div class="participation-qr-wrap"><div class="participation-qr" id="participationQr" aria-label="학생 설문 QR 코드"></div><button class="secondary-button qr-save-button" id="downloadQr" type="button">QR 코드 저장</button></div><div class="participation-link-content"><div><p class="eyebrow">학생 설문 접속</p><h3>학생 설문 링크</h3><p class="muted">QR을 화면에 띄우거나 링크를 복사해 공유하세요. 새 링크를 만들면 이전 링크로는 더 이상 접속할 수 없습니다.</p></div><div class="copy-row"><code>설문 링크 준비 중</code><button id="copyLink">링크 복사</button></div><div class="link-tools"><button class="danger-outline-button" id="rotateParticipationToken" type="button">새 설문 링크 만들기</button></div></div></div>
         </div>
         <div id="surveyStatusPanel" role="tabpanel" hidden>
-          <div class="panel submission-panel"><div class="submission-head"><div><p class="eyebrow">월별 참여 확인</p><h3>제출 현황</h3></div><div class="submission-controls"><button class="secondary-button" id="refreshResponses" type="button">응답 새로고침</button><label for="surveyMonth"><span>조회 월</span><select id="surveyMonth" aria-label="제출 현황 월"></select></label><div class="participation-summary"><span>응답 인원</span><strong id="surveyParticipation">0 / 28명</strong></div></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 월에 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="월별 설문 현황"></div><div id="responseList" hidden></div></div>
+          <div class="panel submission-panel"><div class="submission-head"><div><p class="eyebrow">월별 제출 확인</p><h3>제출 현황</h3></div><div class="submission-controls"><button class="secondary-button" id="refreshResponses" type="button">제출 현황 새로고침</button><label for="surveyMonth"><span>확인할 달</span><select id="surveyMonth" aria-label="제출 현황을 확인할 달"></select></label><div class="participation-summary"><span>제출 학생</span><strong id="surveyParticipation">0 / 28명</strong></div></div></div><div class="progress large"><span id="surveyParticipationBar" style="width:0%"></span></div><div class="student-grid" id="studentGrid"></div><p class="muted">회색 학생은 해당 달에 아직 제출하지 않았습니다.</p><div id="monthlySurveyAccordion" class="response-list" aria-label="지난 설문 제출 현황"></div><div id="responseList" hidden></div></div>
         </div>
         <div id="responseCorrectionPanel" hidden aria-hidden="true">
         <section class="panel data-governance-panel"><div class="panel-head"><div><p class="eyebrow">교사 전용 데이터 관리</p><h3>응답 정정·분석 제외</h3></div><span class="confidence">영구 삭제 아님</span></div><p class="muted">선택한 월의 응답을 분석에서 제외하거나 소프트 삭제할 수 있습니다. 모든 작업에는 사유와 감사 로그가 남습니다.</p><div id="responseManagement"></div></section>
@@ -83,10 +83,10 @@
       </section>
 
       <section class="view" id="view-analysis">
-        <div class="page-intro"><div><p class="eyebrow">근거 중심 분석</p><h2>분석 대시보드</h2></div></div>
-        <div class="analysis-toolbar"><div class="analysis-view-tabs" role="tablist" aria-label="분석 화면 선택"><button class="active" type="button" data-analysis-tab="ai" role="tab" aria-selected="true">AI 분석</button><button type="button" data-analysis-tab="patterns" role="tab" aria-selected="false">학급 관찰 패턴</button><button type="button" id="printReport">PDF 저장</button></div><label class="analysis-month-picker"><span>분석 월</span><select id="analysisMonth" aria-label="분석 월"></select></label></div>
-        <div id="analysisAiPanel" role="tabpanel"><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 분석</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 시각 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">새로 분석</button><button class="text-button" id="flagAiAnalysis" type="button">오류 표시</button></div></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
-        <div id="analysisPatternsPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 학급에서 보이는 패턴</h3></div></div><div id="classObservationPatterns"><p class="muted">AI 분석 결과를 불러오면 학급에서 보이는 패턴이 표시됩니다.</p></div></section></div>
+        <div class="page-intro"><div><p class="eyebrow">설문 응답을 바탕으로 살펴보기</p><h2>학급 분석</h2></div></div>
+        <div class="analysis-toolbar"><div class="analysis-view-tabs" role="tablist" aria-label="학급 분석 화면 선택"><button class="active" type="button" data-analysis-tab="ai" role="tab" aria-selected="true">AI 분석</button><button type="button" data-analysis-tab="patterns" role="tab" aria-selected="false">우리 반에서 보이는 모습</button><button type="button" id="printReport">분석 결과 PDF 저장</button></div><label class="analysis-month-picker"><span>살펴볼 달</span><select id="analysisMonth" aria-label="분석할 달"></select></label></div>
+        <div id="analysisAiPanel" role="tabpanel"><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 분석</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">AI 새 분석</button><button class="text-button" id="flagAiAnalysis" type="button">분석 내용 문제 표시</button></div></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
+        <div id="analysisPatternsPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 반에서 보이는 모습</h3></div></div><div id="classObservationPatterns"><p class="muted">AI 분석 결과를 불러오면 우리 반에서 보이는 모습이 표시됩니다.</p></div></section></div>
       </section>
 
       <section class="view" id="view-student-detail">
@@ -153,7 +153,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260722-11"></script>
+  <script src="app.js?v=20260722-12"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-2"></script>
   <script src="student-priority.js?v=20260720-1"></script>
