@@ -6,6 +6,7 @@
   <meta name="description" content="우리반 이음 월간 학교생활 돌아보기" />
   <title>학교생활 돌아보기 · 우리반 이음</title>
   <link rel="stylesheet" href="student.css" />
+  <link rel="stylesheet" href="positive-peer.css?v=20260722-1" />
   <link rel="stylesheet" href="student-touch.css?v=20260720-1" />
   <link rel="stylesheet" href="smile.css?v=20260719-2" />
 </head>
@@ -25,8 +26,8 @@
       <div class="survey-welcome"><p class="kicker" id="studentGreeting">안녕하세요</p><h1>한 달 동안 나의 학교생활 돌아보기</h1><p>점수와 함께 그렇게 생각한 이유를 적어 주세요.</p></div>
       <section class="student-card"><h2>1. 나의 학교생활</h2><div id="selfRatings"></div></section>
       <section class="student-card"><h2>■ 한 달 동안 우리 반 학교생활모습 돌아보기</h2>
-        <label class="field"><span>1. 이번 달에 친구들을 차별하지 않고 친절한 말과 행동으로 잘 대해 주며 존중하고 있는 친구들은 누구입니까? (직접 보거나 겪은 일, 들은 일을 자세하게 써 보세요.)</span><textarea id="kindDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
-        <label class="field"><span>2. 지난 학년이나 지난 달과 비교해 말과 행동이 좋아졌다고 생각하는 친구는 누구입니까? 자세하게 써 주면 그 친구가 더 잘 할 수 있으니 어떻게 좋아졌는지 자세히 써 주세요.</span><textarea id="growthDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
+        <div class="field"><span>1. 이번 달에 친구들을 차별하지 않고 친절한 말과 행동으로 잘 대해 주며 존중하고 있는 친구들은 누구입니까?</span><div class="peer-name-options" id="kindStudents" aria-label="친절하고 존중하는 친구 선택"></div><label><span class="detail-prompt">직접 보거나 겪은 일을 자세히 적어 주세요.</span><textarea id="kindDetail" placeholder="어떤 말이나 행동이 좋았는지 적어 주세요."></textarea></label></div>
+        <div class="field"><span>2. 지난 학년이나 지난달과 비교해 말과 행동이 좋아졌다고 생각하는 친구는 누구입니까?</span><div class="peer-name-options" id="growthStudents" aria-label="긍정적으로 변화한 친구 선택"></div><label><span class="detail-prompt">어떻게 좋아졌는지 자세히 적어 주세요.</span><textarea id="growthDetail" placeholder="달라진 말이나 행동을 적어 주세요."></textarea></label></div>
         <label class="field sensitive"><span>3. 아직도 다른 친구를 놀리는 말 또는 비꼬는 말, 따돌리는 말 등을 해서 다른 친구에게 상처를 주거나 폭력적인 말, 폭력적인 행동으로 다른 친구들을 힘들게 하는 친구는 누구입니까? (보거나 겪은 일, 들은 일을 자세하게 써 보세요. 그리고 그 친구에게 하고 싶은 말도 써 보세요.)</span><textarea id="hurtDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
         <div class="context-grid"><label class="field"><span>이 일을 어떻게 알게 되었나요?</span><select id="sourceType"><option>해당 없음</option><option>직접 경험</option><option>직접 목격</option><option>전해 들음</option></select></label><label class="field"><span>얼마나 있었나요?</span><select id="frequency"><option>해당 없음</option><option>한 번</option><option>2~3번</option><option>4번 이상</option></select></label><label class="check-field"><input type="checkbox" id="ongoing"> 지금도 계속되고 있어요</label></div>
         <label class="field"><span>4. 우리 반에 도움이 필요하다고 생각하는 친구는 누구인지 까닭과 함께 써 보세요. 그리고 그 친구에게 하고 싶은 말도 적어 보세요.</span><textarea id="helpDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
@@ -43,6 +44,6 @@
     <section class="student-card complete-card" id="completeCard" hidden><div class="complete-icon">✓</div><h1>응답을 제출했어요</h1><p>선생님이 내용을 확인하고 필요한 도움을 함께 생각할 거예요.</p><a href="index.html">우리반 이음 홈으로</a></section>
   </main>
   <script src="supabase.js?v=20260720-4"></script>
-  <script src="student.js?v=20260722-1"></script>
+  <script src="student.js?v=20260722-2"></script>
 </body>
 </html>
