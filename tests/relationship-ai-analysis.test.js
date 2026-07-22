@@ -23,6 +23,8 @@ test('관계 AI는 누적 익명 관계 계산만 받아 학급 운영 문장을
   assert.match(edge,/mutual_high_relationships/);
   assert.match(edge,/관계 구조만 해석하세요/);
   assert.match(edge,/인기·고립·문제 학생으로 단정하거나 관계 원인을 추측하지 마세요/);
+  assert.match(edge,/익명 번호 뒤에 '학생'을 붙여 언급/);
+  assert.match(edge,/relationship-coaching-v2/);
   assert.match(edge,/relationship_support_analysis/);
 });
 
