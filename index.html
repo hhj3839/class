@@ -151,11 +151,10 @@
         <div id="settingsYearEndPanel" role="tabpanel" aria-labelledby="settingsTabYearEnd" hidden>
         <section class="panel year-end-cleanup" aria-labelledby="yearEndCleanupTitle">
           <div class="panel-head"><div><p class="eyebrow">종료된 학년도만</p><h3 id="yearEndCleanupTitle">학년 말 자료 정리</h3></div><span class="confidence" id="yearEndCleanupStatus">보고서 생성 전</span></div>
-          <p class="muted">학년 말 보고서를 학교가 승인한 공간에 보관한 뒤 전년도 학생 자료를 정리합니다. 현재 학년도는 삭제할 수 없습니다.</p>
+          <p class="muted">학년 말 보고서를 저장한 뒤 전년도 학생 자료를 정리합니다. 현재 학년도는 삭제할 수 없습니다.</p>
           <div class="year-end-steps">
             <article><span>1</span><div><strong>학년 말 보고서 만들기</strong><p>학급 요약, 학생별 응답과 확인·지원 이력을 하나의 PDF로 저장합니다.</p><button class="secondary-button" id="downloadYearEndReport" type="button">학년 말 보고서 PDF 만들기</button></div></article>
-            <article><span>2</span><div><strong>보고서 보관 확인</strong><p>다운로드한 PDF가 정상적으로 열리는지 확인하고 학교가 승인한 공간에 보관합니다.</p><label class="year-end-check"><input id="yearEndReportStored" type="checkbox"><span>PDF가 정상적으로 열리며 학교 승인 공간에 보관했습니다.</span></label><p class="year-end-ready-status" id="yearEndReadyStatus" role="status"></p></div></article>
-            <article class="year-end-danger"><span>3</span><div><strong>전년도 학급 자료 영구 삭제</strong><p>학생 명단, 설문, 관계 응답, 확인·지원 기록과 AI 분석을 삭제합니다. 처리 후 복구할 수 없습니다.</p><div class="year-end-confirmations"><label><span>학급 이름</span><input id="yearEndClassLabel" autocomplete="off" placeholder="예: 3학년 2반" disabled></label><label><span>확인 문구</span><input id="yearEndConfirmation" autocomplete="off" placeholder="전년도 학급 자료 삭제" disabled></label></div><label class="year-end-check"><input id="yearEndDeletionAccepted" type="checkbox" disabled><span>삭제 범위와 복구 불가능 안내를 확인했습니다.</span></label><button class="danger-button" id="deleteYearEndData" type="button" disabled>전년도 학급 자료 영구 삭제</button><div id="yearEndResult" aria-live="polite"></div></div></article>
+            <article class="year-end-danger"><span>2</span><div><strong>전년도 학급 자료 영구 삭제</strong><p>학생 명단, 설문, 관계 응답, 확인·지원 기록과 AI 분석을 삭제합니다. 처리 후 복구할 수 없습니다.</p><p class="year-end-ready-status" id="yearEndReadyStatus" role="status"></p><div class="year-end-confirmations"><label><span>학급 이름</span><input id="yearEndClassLabel" autocomplete="off" placeholder="예: 3학년 2반" disabled></label><label><span>확인 문구</span><input id="yearEndConfirmation" autocomplete="off" placeholder="전년도 학급 자료 삭제" disabled></label></div><label class="year-end-check"><input id="yearEndDeletionAccepted" type="checkbox" disabled><span>삭제 범위와 복구 불가능 안내를 확인했습니다.</span></label><button class="danger-button" id="deleteYearEndData" type="button" disabled>전년도 학급 자료 영구 삭제</button><div id="yearEndResult" aria-live="polite"></div></div></article>
           </div>
         </section>
         </div>
@@ -180,7 +179,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260723-26"></script>
+  <script src="app.js?v=20260723-27"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-5"></script>
   <script src="student-priority.js?v=20260720-1"></script>
