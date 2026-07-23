@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="학생의 월별 생활과 관계 변화를 근거 중심으로 살피는 교사용 웹앱" />
   <title>우리반 이음</title>
-  <link rel="stylesheet" href="styles.css?v=20260723-1" />
+  <link rel="stylesheet" href="styles.css?v=20260723-2" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
   <link rel="stylesheet" href="analysis-dashboard.css?v=20260723-9" />
   <link rel="stylesheet" href="pilot-feedback.css?v=20260720-3" />
@@ -145,7 +145,17 @@
             <div class="roster-table-wrap"><table class="roster-table"><thead><tr><th>번호</th><th>학생 이름</th><th>관리</th></tr></thead><tbody id="rosterBody"></tbody></table></div>
             <p class="muted">번호와 이름을 직접 수정할 수 있습니다. 삭제한 학생의 기존 분석·관찰 기록은 이 데모에서 자동 삭제되지 않습니다.</p>
           </section>
-        </div></div>
+        </div>
+        <section class="panel year-end-cleanup" aria-labelledby="yearEndCleanupTitle">
+          <div class="panel-head"><div><p class="eyebrow">종료된 학년도만</p><h3 id="yearEndCleanupTitle">학년 말 자료 정리</h3></div><span class="confidence" id="yearEndCleanupStatus">보고서 생성 전</span></div>
+          <p class="muted">학년 말 보고서를 학교가 승인한 공간에 보관한 뒤 전년도 학생 자료를 정리합니다. 현재 학년도는 삭제할 수 없습니다.</p>
+          <div class="year-end-steps">
+            <article><span>1</span><div><strong>학년 말 보고서 만들기</strong><p>학급 요약, 학생별 응답과 확인·지원 이력을 하나의 PDF로 저장합니다.</p><button class="secondary-button" id="downloadYearEndReport" type="button">학년 말 보고서 PDF 만들기</button></div></article>
+            <article><span>2</span><div><strong>삭제 대상 미리보기</strong><p>보고서를 확인하고 학교 승인 공간에 보관한 뒤 삭제될 자료의 건수를 확인합니다.</p><label class="year-end-check"><input id="yearEndReportStored" type="checkbox"><span>PDF가 정상적으로 열리며 학교 승인 공간에 보관했습니다.</span></label><button class="secondary-button" id="previewYearEndCleanup" type="button" disabled>삭제 대상 미리보기</button><div id="yearEndPreview" class="year-end-preview" aria-live="polite"></div></div></article>
+            <article class="year-end-danger"><span>3</span><div><strong>전년도 학급 자료 영구 삭제</strong><p>학생 명단, 설문, 관계 응답, 확인·지원 기록과 AI 분석을 삭제합니다. 처리 후 복구할 수 없습니다.</p><div class="year-end-confirmations"><label><span>학급 이름</span><input id="yearEndClassLabel" autocomplete="off" placeholder="예: 3학년 2반" disabled></label><label><span>확인 문구</span><input id="yearEndConfirmation" autocomplete="off" placeholder="전년도 학급 자료 삭제" disabled></label></div><label class="year-end-check"><input id="yearEndDeletionAccepted" type="checkbox" disabled><span>미리보기의 대상과 복구 불가능 안내를 확인했습니다.</span></label><button class="danger-button" id="deleteYearEndData" type="button" disabled>전년도 학급 자료 영구 삭제</button></div></article>
+          </div>
+        </section>
+        </div>
         <div id="settingsPilotPanel" role="tabpanel" hidden><section class="panel pilot-panel"><div class="panel-head"><div><p class="eyebrow">실제 운영 전 점검</p><h3>파일럿 준비 상태</h3></div><div class="pilot-actions"><button class="secondary-button" id="exportPilotReadiness" type="button">점검 결과 저장</button><button class="secondary-button" id="refreshPilot" type="button">다시 점검</button></div></div><div id="pilotReadinessSummary" class="pilot-readiness-summary" role="status"><strong>점검 전</strong><span>학급 자료를 불러오면 준비 상태를 확인합니다.</span></div><div id="pilotMetrics" class="pilot-metrics"><p class="muted">학급 자료를 불러오면 운영 지표를 계산합니다.</p></div><div id="pilotChecklist" class="pilot-checklist"><p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p></div></section></div>
         <div id="settingsGovernancePanel" role="tabpanel" hidden><section class="panel governance-settings"><div class="panel-head"><div><p class="eyebrow">개인정보 운영</p><h3>보존 정책과 감사 로그</h3></div><button class="secondary-button" id="refreshAuditLog" type="button">새로고침</button></div><div class="governance-policy"><label><span>보존 기간</span><select id="retentionMonths"><option value="6">6개월</option><option value="12" selected>12개월</option><option value="24">24개월</option><option value="36">36개월</option></select></label><label><span>학년도 종료 시</span><select id="endOfYearAction"><option value="review">교사 검토 후 결정</option><option value="anonymize">익명화 예정</option><option value="delete">삭제 예정</option></select></label><button class="primary-button" id="saveRetentionPolicy" type="button">보존 정책 저장</button></div><p class="muted">정책은 계획만 저장하며 자동 영구 삭제를 실행하지 않습니다.</p><div class="backup-actions"><div><strong>암호화 저장 전 운영 백업</strong><p class="muted">파일에는 학생 이름과 설문 원문이 포함됩니다. 안전한 교사용 저장 공간에만 보관하세요.</p></div><button class="secondary-button" id="exportBackup" type="button">백업 내보내기</button><button class="secondary-button" id="importBackup" type="button">백업 복구</button><input id="backupFile" type="file" accept="application/json" hidden></div><div id="auditLogList" class="audit-log-list"></div></section></div>
       </section>
@@ -167,7 +177,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260723-24"></script>
+  <script src="app.js?v=20260723-25"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-5"></script>
   <script src="student-priority.js?v=20260720-1"></script>
