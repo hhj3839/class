@@ -186,7 +186,7 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(html,/data-student-detail-tab="responses"/);
   assert.match(html,/<h2>학생별 살펴보기<\/h2>/);
   assert.match(html,/>한눈에 보기<\/button>/);
-  assert.match(html,/>변화와 지원<\/button>/);
+  assert.match(html,/>변화 살펴보기<\/button>/);
   assert.match(html,/>월별 응답<\/button>/);
   assert.match(app,/월을 눌러 자세히 보기/);
   const responseRecords=app.slice(app.indexOf('const timeline='),app.indexOf('const monthHeads='));

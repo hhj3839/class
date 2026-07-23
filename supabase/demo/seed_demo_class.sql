@@ -163,7 +163,7 @@ begin
   (md5(target_teacher::text||':demo-signal:5')::uuid,demo_class,'demo-week-5',md5(target_teacher::text||':demo-student:5')::uuid,5,md5(target_teacher::text||':demo-response:0:5')::uuid,'week','conversation_planned','비공개 대화 시간을 잡았습니다.',current_date+2,'{"demo":true}'::jsonb,target_teacher,now()),
   (md5(target_teacher::text||':demo-signal:9')::uuid,demo_class,'demo-closed-9',md5(target_teacher::text||':demo-student:9')::uuid,9,md5(target_teacher::text||':demo-response:0:9')::uuid,'watch','closed','확인 후 특이사항 없음으로 종결했습니다.',current_date-3,'{"demo":true}'::jsonb,target_teacher,now()-interval '3 days');
 
-  -- 설문이 없는 6번 학생도 변화와 지원 화면을 확인할 수 있는 진행 기록
+  -- 설문이 없는 6번 학생도 변화 살펴보기 화면을 확인할 수 있는 진행 기록
   insert into public.observations(
     id,class_id,student_id,student_number,survey_month,title,planned_action,observed_fact,
     teacher_interpretation,interview_note,follow_up,follow_up_date,status,outcome,
