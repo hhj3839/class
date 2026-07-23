@@ -17,6 +17,12 @@ test('관계 지도는 월 선택 첫 항목에서 여러 달을 함께 볼 수 
   assert.doesNotMatch(html,/data-relationship-map-toggle|보기 범위 늘리기/);
 });
 
+test('관계 분석 월 선택은 여러 달 보기 다음에 최신 월부터 표시한다',()=>{
+  assert.match(app,/displayMonths=\[\.\.\.months\]\.reverse\(\)/);
+  assert.match(app,/selector\.innerHTML=rangeOption\+displayMonths\.map/);
+  assert.match(app,/selectedRelationshipMonth=months\.at\(-1\)/);
+});
+
 test('여러 달 항목은 누적 보기로 전환하고 특정 달은 월별 보기로 돌아간다',()=>{
   assert.match(html,/relation-view-tabs[\s\S]*relationshipAnalysisMonth/);
   assert.match(app,/event\.target\.id==='relationshipAnalysisMonth'/);
