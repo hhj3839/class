@@ -7,7 +7,7 @@
   <title>우리반 이음</title>
   <link rel="stylesheet" href="styles.css?v=20260723-1" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
-  <link rel="stylesheet" href="analysis-dashboard.css?v=20260723-8" />
+  <link rel="stylesheet" href="analysis-dashboard.css?v=20260723-9" />
   <link rel="stylesheet" href="pilot-feedback.css?v=20260720-3" />
   <link rel="stylesheet" href="safety-signals.css?v=20260720-2" />
   <link rel="stylesheet" href="safety-signals-workflow.css?v=20260720-1" />
@@ -110,7 +110,7 @@
 
       <section class="view" id="view-relations">
         <div class="page-intro"><div><p class="eyebrow">친구 관계 응답 살펴보기</p><h2>관계 분석</h2></div><span class="confidence" id="relationConfidence">관계 응답 확인 중</span></div>
-        <div class="analysis-toolbar relation-analysis-toolbar"><div class="relation-view-tabs" id="relationTabs" role="tablist" aria-label="관계 분석 화면 선택"><button class="active" type="button" data-relation-tab="example" role="tab" aria-selected="true" aria-controls="relationPreview">표시 방법</button><button type="button" data-relation-tab="actual" role="tab" aria-selected="false" aria-controls="relationActualPanel">월별 관계 지도</button><button type="button" data-relation-tab="ai" role="tab" aria-selected="false" aria-controls="relationAiPanel">AI 관계 코칭</button></div><div class="analysis-toolbar-actions"><button type="button" class="secondary-button relationship-range-toggle" data-relationship-map-toggle aria-pressed="false">보기 범위 늘리기</button><label class="student-picker analysis-month-picker"><select id="relationshipAnalysisMonth" aria-label="관계 분석을 살펴볼 달"></select></label></div></div>
+        <div class="analysis-toolbar relation-analysis-toolbar"><div class="relation-view-tabs" id="relationTabs" role="tablist" aria-label="관계 분석 화면 선택"><button class="active" type="button" data-relation-tab="example" role="tab" aria-selected="true" aria-controls="relationPreview">표시 방법</button><button type="button" data-relation-tab="actual" role="tab" aria-selected="false" aria-controls="relationActualPanel">월별 관계 지도</button><button type="button" data-relation-tab="ai" role="tab" aria-selected="false" aria-controls="relationAiPanel">AI 관계 코칭</button></div><div class="analysis-toolbar-actions"><label class="student-picker analysis-month-picker"><select id="relationshipAnalysisMonth" aria-label="관계 분석 보기 범위와 달 선택"></select></label></div></div>
         <div id="relationActualPanel" role="tabpanel"><div id="relationContent"></div></div>
         <div id="relationAiPanel" role="tabpanel" hidden><div id="relationshipActions"></div></div>
         <div class="relation-grid" id="relationPreview" hidden>
@@ -167,7 +167,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260723-21"></script>
+  <script src="app.js?v=20260723-22"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-5"></script>
   <script src="student-priority.js?v=20260720-1"></script>

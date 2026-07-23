@@ -7,22 +7,29 @@ const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('analysis-dashboard.css','utf8');
 const prd=fs.readFileSync('PRD_v1.2.md','utf8');
 
-test('관계 지도는 최근 월을 기본으로 선택하고 보기 범위를 늘릴 수 있다',()=>{
+test('관계 지도는 월 선택 첫 항목에서 여러 달을 함께 볼 수 있다',()=>{
   assert.match(html,/data-relation-tab="actual"[^>]*>월별 관계 지도<\/button>/);
   assert.match(app,/var selectedRelationshipMonth='',relationshipMapMode='monthly'/);
   assert.match(app,/function relationshipMapState\(\)/);
   assert.match(html,/id="relationshipAnalysisMonth"/);
   assert.match(html,/relation-analysis-toolbar/);
-  assert.match(html,/data-relationship-map-toggle[^>]*>보기 범위 늘리기<\/button>[\s\S]*id="relationshipAnalysisMonth"/);
-  assert.match(app,/button\.textContent=cumulative\?'선택한 달만 보기':'보기 범위 늘리기'/);
+  assert.match(app,/<option value="all"[^>]*>여러 달 함께 보기<\/option>/);
+  assert.doesNotMatch(html,/data-relationship-map-toggle|보기 범위 늘리기/);
 });
 
-test('관계 지도 범위 버튼은 월 선택 바로 옆에 있고 달을 고르면 월별로 돌아간다',()=>{
-  assert.match(html,/relation-view-tabs[\s\S]*data-relationship-map-toggle[\s\S]*relationshipAnalysisMonth/);
+test('여러 달 항목은 누적 보기로 전환하고 특정 달은 월별 보기로 돌아간다',()=>{
+  assert.match(html,/relation-view-tabs[\s\S]*relationshipAnalysisMonth/);
   assert.match(app,/event\.target\.id==='relationshipAnalysisMonth'/);
-  assert.match(app,/selectedRelationshipMonth=event\.target\.value;relationshipMapMode='monthly';renderRelationshipsV2\(\)/);
-  assert.match(app,/relationshipMapMode=relationshipMapMode==='monthly'\?'cumulative':'monthly'/);
-  assert.doesNotMatch(app,/relationship-map-toolbar|월별 관계로 돌아가기|누적 관계 보기/);
+  assert.match(app,/event\.target\.value==='all'\)relationshipMapMode='cumulative'/);
+  assert.match(app,/selectedRelationshipMonth=event\.target\.value;relationshipMapMode='monthly'/);
+  assert.doesNotMatch(app,/data-relationship-map-toggle|relationship-range-toggle|relationship-map-toolbar/);
+});
+
+test('AI 관계 코칭에서는 여러 달 항목을 숨기고 선택한 월을 유지한다',()=>{
+  assert.match(app,/aiSelected=\$\('#relationTabs \[data-relation-tab="ai"\]'\)\?\.classList\.contains\('active'\)/);
+  assert.match(app,/const rangeOption=aiSelected\?'':`<option value="all"/);
+  assert.match(app,/selector\.value=aiSelected\?selectedRelationshipMonth/);
+  assert.match(app,/setRelationshipTab\(tab\)[\s\S]*updateRelationshipMonthSelector\(\)/);
 });
 
 test('AI 관계 코칭은 상단 월 선택을 지도와 함께 사용한다',()=>{
