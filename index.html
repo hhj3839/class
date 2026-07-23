@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="학생의 월별 생활과 관계 변화를 근거 중심으로 살피는 교사용 웹앱" />
   <title>우리반 이음</title>
-  <link rel="stylesheet" href="styles.css?v=20260722-6" />
+  <link rel="stylesheet" href="styles.css?v=20260723-1" />
   <link rel="stylesheet" href="survey-layout.css?v=20260720-3" />
   <link rel="stylesheet" href="analysis-dashboard.css?v=20260723-6" />
   <link rel="stylesheet" href="pilot-feedback.css?v=20260720-3" />
@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
 </head>
 <body>
+  <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
   <section class="auth-gate" id="authGate"><div class="auth-gate-card"><span class="brand-mark">이음</span><p class="eyebrow">교사 전용</p><h1>우리반 이음</h1><div class="auth-callback-notice" id="authCallbackNotice" role="status" hidden></div><p>학생 정보 보호를 위해 로그인한 담당 교사만 이용할 수 있습니다.</p><div class="auth-gate-actions"><button class="primary-button" id="gateLoginButton" type="button">교사 로그인</button><button class="secondary-button" id="gateSignupButton" type="button">교사 회원가입</button></div><small>학생은 담임 선생님이 공유한 설문 링크를 이용해 주세요.</small></div></section>
   <div class="app-shell" id="teacherApp" hidden>
     <aside class="sidebar" id="sidebar">
@@ -38,7 +39,7 @@
       <div class="profile"><span class="avatar" id="profileAvatar">교</span><div><strong id="profileTeacher">담임교사</strong><small id="profileClass">학급 정보</small></div></div>
     </aside>
 
-    <main>
+    <main id="teacherMain" tabindex="-1">
       <header class="topbar">
         <button class="icon-button menu-button" id="menuButton" aria-label="메뉴 열기">☰</button>
         <div class="top-actions"><span id="authStatus">로그인 필요</span><button class="secondary-button" id="authButton" type="button">교사 로그인</button></div>
