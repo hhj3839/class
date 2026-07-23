@@ -10,7 +10,7 @@ test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한
   assert.match(html,/data-analysis-tab="patterns"[^>]*>우리 반 응답 흐름<\/button>/);
   assert.match(html,/id="classResponseFlowMetrics"/);
   assert.match(app,/function classResponseFlowData/);
-  assert.match(app,/replaceKoreanLabel\(result,name,'개별 학생'\)/);
+  assert.match(app,/aiTeacherDisplayText\(cleanAiEvidenceText\(value\)\)/);
   assert.match(app,/설문 참여/);
   assert.match(app,/학교생활 자기평가/);
   assert.match(app,/친구 관계 응답/);
@@ -20,7 +20,7 @@ test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한
 
 test('AI 학생 지원은 교사가 바로 쓰는 네 가지 역할로 구성한다',()=>{
   assert.match(html,/data-analysis-tab="ai"[^>]*>AI 학생 지원<\/button>/);
-  assert.match(app,/응답에서 살펴볼 점/);
+  assert.match(app,/담임 참고 · 확인할 장면 · 학생 코칭 · 다음 지원 방향/);
   assert.match(app,/담임이 확인할 장면/);
   assert.match(app,/학생 코칭/);
   assert.match(app,/다음 지원 방향/);

@@ -138,7 +138,7 @@ test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다'
 
 test('AI 학생 카드는 살펴볼 점·확인 장면·학생 코칭·지원 방향을 바로 보여준다',()=>{
   const aiRender=app.slice(app.indexOf('function renderAiAnalysis'),app.indexOf('async function runAiAnalysis'));
-  assert.match(aiRender,/응답에서 살펴볼 점/);
+  assert.match(aiRender,/담임 참고 · 확인할 장면 · 학생 코칭 · 다음 지원 방향/);
   assert.match(aiRender,/담임이 확인할 장면/);
   assert.match(aiRender,/<strong>학생 코칭<\/strong>/);
   assert.match(aiRender,/<strong>다음 지원 방향<\/strong>/);
