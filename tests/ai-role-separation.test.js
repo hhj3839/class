@@ -10,6 +10,7 @@ test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한
   assert.match(html,/data-analysis-tab="patterns"[^>]*>우리 반 응답 흐름<\/button>/);
   assert.match(html,/id="classResponseFlowMetrics"/);
   assert.match(app,/function classResponseFlowData/);
+  assert.match(app,/result\.split\(name\)\.join\('개별 학생'\)/);
   assert.match(app,/설문 참여/);
   assert.match(app,/학교생활 자기평가/);
   assert.match(app,/친구 관계 응답/);
