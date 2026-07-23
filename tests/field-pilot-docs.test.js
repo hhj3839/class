@@ -9,9 +9,12 @@ const teacherGuide=fs.readFileSync('TEACHER_QUICK_GUIDE.md','utf8');
 const prd=fs.readFileSync('PRD_v1.2.md','utf8');
 
 test('현장 점검표는 태블릿·교사 화면·PDF·권한·복구 시험을 포함한다',()=>{
-  for(const id of ['S-01','S-09','T-01','T-08','P-01','P-06','A-01','A-04'])assert.match(checklist,new RegExp(id));
+  for(const id of ['D-01','D-06','S-01','S-09','T-01','T-10','P-01','P-06','A-01','A-04'])assert.match(checklist,new RegExp(id));
   assert.match(checklist,/P0 오류 0건/);
   assert.match(checklist,/v1\.2\.1-rc\.1/);
+  assert.match(checklist,/통과 \/ 실패 \/ 미실행/);
+  assert.match(checklist,/실패 즉시.*FIELD_ISSUE_TEMPLATE/);
+  assert.match(checklist,/선택한 달과 마지막 분석 시점이 일치/);
 });
 
 test('오류 기록 양식은 개인정보 제외와 심각도·재현·재시험 정보를 요구한다',()=>{
@@ -44,4 +47,6 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
   assert.match(prd,/교사 화면 실명 치환/);
   assert.match(prd,/35명·12개월 관계 계산 성능 검사/);
   assert.match(prd,/학교 장애 대응·백업·복구 절차/);
+  assert.match(prd,/자동 테스트: 136개 통과/);
+  assert.match(prd,/화면 하단의 안전 안내/);
 });
