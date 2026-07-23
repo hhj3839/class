@@ -1,0 +1,33 @@
+.skip-link {
+  position: fixed;
+  left: 14px;
+  top: 10px;
+  z-index: 100;
+  transform: translateY(-160%);
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: #fff;
+  color: #204b67;
+  box-shadow: 0 5px 20px rgba(13, 37, 51, .25);
+  font-weight: 900;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid #79b8d4;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

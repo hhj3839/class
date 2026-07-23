@@ -347,8 +347,10 @@ v1.2 릴리스 후보는 다음 조건을 모두 만족해야 한다.
 
 - 여러 학급을 담당하는 교사의 학급 전환
 - 학년 말 익명화·삭제 실행 전 미리보기와 이중 확인
-- 접근성 점검 자동화와 저사양 태블릿 성능 측정
-- 학교용 배포·장애 대응·복구 절차 문서화
+- [x] 본문 바로가기·키보드 포커스·움직임 최소화 접근성 자동 기준
+- [x] 35명·12개월 전체 관계 응답의 핵심 계산 자동 성능 기준
+- 저사양 학교 태블릿의 화면 표시·입력·PDF 실제 성능 측정 *(2026년 8월 중순 이후)*
+- [x] 학교용 배포 전 점검·장애 대응·백업·복구 절차 문서화
 
 ## 13. 출시 계획
 
@@ -360,8 +362,8 @@ v1.2 릴리스 후보는 다음 조건을 모두 만족해야 한다.
 ## 14. 현재 구현 기준선
 
 - 기준선: 관계 분석 3개 탭, 월별 관계 지도·누적 관계 보기, 이름 충돌 방지와 월별·누적 흐름을 구분하는 AI 관계 코칭까지 반영
-- 자동 테스트: 129개 통과(로컬 Node 테스트 및 GitHub Actions)
-- 현장 시험 문서: `FIELD_PILOT_v1.2.1.md`, `FIELD_ISSUE_TEMPLATE.md`
+- 자동 테스트: 133개 통과(로컬 Node 테스트 및 GitHub Actions)
+- 현장 시험 문서: `FIELD_PILOT_v1.2.1.md`, `FIELD_PILOT_RESULTS_v1.2.1.md`, `FIELD_ISSUE_TEMPLATE.md`, `SCHOOL_OPERATIONS_RUNBOOK.md`
 - 시험 계정 점검 자료: `DEMO_CLASS_GUIDE.md`, `supabase/demo/seed_demo_class.sql`, `supabase/demo/reset_demo_class.sql`
 - 적용 완료 DB 기능: 안정 학생 UUID, 안전한 참여 토큰, 백업·복구, 파일럿 지표, 학급·관계 AI 저장 유형과 각각의 월 10회 제한, 중복 제출 방지, 안전 신호 확인함, 안전 신호와 관찰 기록의 명시적 연결·중복 관찰 방지, 안전 신호 확인·처리율 집계
 - 배포 상태: GitHub Pages, 관계 AI 분석 유형 마이그레이션과 Supabase `analyze-class` Edge Function 적용

@@ -23,3 +23,9 @@
 .nav-item{position:relative}
 .nav-item::after{content:attr(data-tooltip);position:absolute;left:calc(100% + 12px);top:50%;width:250px;padding:9px 11px;border-radius:9px;background:#102d3f;color:#fff;box-shadow:0 8px 24px rgba(13,37,51,.22);font-size:12px;font-weight:600;line-height:1.45;opacity:0;pointer-events:none;transform:translate(6px,-50%);transition:opacity .16s ease,transform .16s ease;z-index:30}
 .nav-item:hover::after,.nav-item:focus-visible::after{opacity:1;transform:translate(0,-50%)}
+
+/* 키보드 탐색과 움직임 최소화 설정을 파일럿 접근성 기준으로 유지합니다. */
+.skip-link{position:fixed;left:16px;top:10px;z-index:200;transform:translateY(-160%);padding:10px 14px;border-radius:9px;background:#fff;color:var(--blue-dark);box-shadow:0 5px 20px rgba(13,37,51,.25);font-weight:800}
+.skip-link:focus{transform:none}
+:where(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #79b8d4;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
