@@ -132,7 +132,7 @@ test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다'
   assert.match(app,/AI 관계 코칭/);
   assert.match(app,/관계에서 보이는 모습/);
   assert.match(app,/학급 코칭/);
-  assert.match(app,/학급 운영 방법/);
+  assert.doesNotMatch(app,/<strong>학급 운영 방법<\/strong>/);
   assert.doesNotMatch(app,/친구별 평가 편차/);
 });
 

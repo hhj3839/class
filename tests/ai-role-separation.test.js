@@ -27,12 +27,13 @@ test('AI 학생 지원은 교사가 바로 쓰는 네 가지 역할로 구성한
   assert.match(edge,/실제 건넬 수 있는 말 한 문장을 60자 이내/);
 });
 
-test('AI 관계 코칭은 학급 코칭과 운영 방법을 분리한다',()=>{
+test('AI 관계 코칭은 관계 모습·확인 장면·학급 코칭으로 간결하게 구성한다',()=>{
   assert.match(html,/data-relation-tab="ai"[^>]*>AI 관계 코칭<\/button>/);
   assert.match(edge,/class_coaching/);
-  assert.match(edge,/operation_method/);
+  assert.match(edge,/학급 운영 방법은 별도 항목으로 만들지 말고/);
   assert.match(app,/학급 코칭/);
-  assert.match(app,/학급 운영 방법/);
+  assert.doesNotMatch(app,/<strong>학급 운영 방법<\/strong>/);
+  assert.match(edge,/60자 이내의 한 문장으로만 작성하세요/);
 });
 
 test('AI 학생 지원 항목은 한 열로 표시한다',()=>{
