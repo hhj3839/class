@@ -20,6 +20,12 @@ test('AI 익명 번호를 실제 이름으로 바꿀 때 받침에 맞는 조사
   assert.equal(context.aiTeacherDisplayText('학생-2으로 이동합니다.'),'하나로 이동합니다.');
 });
 
+test('현재 명단에 없는 익명 번호는 내부 번호 대신 이전 명단 학생으로 표시한다',()=>{
+  assert.equal(context.aiTeacherDisplayText('학생-5는 과거 응답에 포함됐습니다.'),'이전 명단 학생은 과거 응답에 포함됐습니다.');
+  assert.equal(context.aiTeacherDisplayText('5번 학생과 대화 기록이 있습니다.'),'이전 명단 학생과 대화 기록이 있습니다.');
+  assert.doesNotMatch(context.aiTeacherDisplayText('학생-5의 응답입니다.'),/학생-5/);
+});
+
 test('AI 학급 요약에서 실명을 숨길 때 개별 학생 조사도 보정한다',()=>{
   assert.equal(context.anonymousClassSummaryText('최다온는 변화가 있습니다.'),'개별 학생은 변화가 있습니다.');
   assert.equal(context.anonymousClassSummaryText('하나가 도움을 요청했습니다.'),'개별 학생이 도움을 요청했습니다.');
