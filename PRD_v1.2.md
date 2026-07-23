@@ -382,6 +382,7 @@ v1.2 릴리스 후보는 다음 조건을 모두 만족해야 한다.
 - 현장 시험 문서: `FIELD_PILOT_v1.2.1.md`, `FIELD_PILOT_RESULTS_v1.2.1.md`, `FIELD_ISSUE_TEMPLATE.md`, `SCHOOL_OPERATIONS_RUNBOOK.md`
 - 시험 계정 점검 자료: `DEMO_CLASS_GUIDE.md`, `supabase/demo/seed_demo_class.sql`, `supabase/demo/reset_demo_class.sql`
 - 적용 완료 DB 기능: 안정 학생 UUID, 안전한 참여 토큰, 백업·복구, 파일럿 지표, 학급·관계 AI 저장 유형과 무제한 새 분석·감사 기록, 중복 제출 방지, 안전 신호 확인함, 안전 신호와 관찰 기록의 명시적 연결·중복 관찰 방지, 안전 신호 확인·처리율 집계
+- 학년 말 정리 기준선: PR #77과 `20260723190000_year_end_cleanup.sql` 적용. 비식별 전년도 데모 학급에서 17쪽 보고서 생성, 보관 확인 잠금, 자료 미리보기, 이중 확인, 영구 삭제, 최소 감사 기록과 데모 복원까지 통과
 - 배포 상태: GitHub Pages, 관계 AI 분석 유형 마이그레이션과 Supabase `analyze-class` Edge Function 적용
 - 최신 사전 점검: 2026-07-23 배포본에서 AI 학생 지원 v15 새 분석, 시기 없는 교실 관찰 문장, 월별·여러 달 관계 지도 전환과 학급·학생 A4 PDF 3쪽 렌더링을 비식별 시험 계정으로 확인
 - 현장 검증 상태: 단일 학교 태블릿 기본 흐름 성공. 실제 태블릿 다중 제출·회전·잠금·재연결과 학교 기기 PDF 검증은 방학 이후 2026년 8월 중순에 재개
