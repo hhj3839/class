@@ -1,0 +1,27 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+
+const app=fs.readFileSync('app.js','utf8');
+const start=app.indexOf('function hasKoreanBatchim');
+const end=app.indexOf('function cleanAiEvidenceText');
+const context={classSettings:{students:[{number:1,name:'최다온'},{number:2,name:'하나'}]},cleanAiEvidenceText:value=>String(value||'')};
+vm.createContext(context);
+vm.runInContext(app.slice(start,end),context);
+const anonymousStart=app.indexOf('function anonymousClassSummaryText');
+const anonymousEnd=app.indexOf('function renderClassObservationPatterns');
+vm.runInContext(app.slice(anonymousStart,anonymousEnd),context);
+
+test('AI 익명 번호를 실제 이름으로 바꿀 때 받침에 맞는 조사를 사용한다',()=>{
+  assert.equal(context.aiTeacherDisplayText('학생-1는 확인이 필요합니다.'),'최다온은 확인이 필요합니다.');
+  assert.equal(context.aiTeacherDisplayText('학생-2은 확인이 필요합니다.'),'하나는 확인이 필요합니다.');
+  assert.equal(context.aiTeacherDisplayText('학생-1와 대화합니다.'),'최다온과 대화합니다.');
+  assert.equal(context.aiTeacherDisplayText('학생-2으로 이동합니다.'),'하나로 이동합니다.');
+});
+
+test('AI 학급 요약에서 실명을 숨길 때 개별 학생 조사도 보정한다',()=>{
+  assert.equal(context.anonymousClassSummaryText('최다온는 변화가 있습니다.'),'개별 학생은 변화가 있습니다.');
+  assert.equal(context.anonymousClassSummaryText('하나가 도움을 요청했습니다.'),'개별 학생이 도움을 요청했습니다.');
+  assert.equal(context.anonymousClassSummaryText('학생-1와 학생-2는 함께했습니다.'),'개별 학생과 개별 학생은 함께했습니다.');
+});
