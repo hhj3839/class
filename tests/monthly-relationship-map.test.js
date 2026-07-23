@@ -11,23 +11,24 @@ test('관계 지도는 최근 월을 기본으로 선택하고 누적 관계 보
   assert.match(html,/data-relation-tab="actual"[^>]*>월별 관계 지도<\/button>/);
   assert.match(app,/var selectedRelationshipMonth='',relationshipMapMode='monthly'/);
   assert.match(app,/function relationshipMapState\(\)/);
-  assert.match(app,/id="relationshipMonthSelect"/);
-  assert.match(app,/analysis-month-picker relationship-month-picker/);
+  assert.match(html,/id="relationshipAnalysisMonth"/);
+  assert.match(html,/relation-analysis-toolbar/);
   assert.match(app,/data-relationship-map-toggle>\$\{relationshipMapMode==='cumulative'\?'월별 관계로 돌아가기':'누적 관계 보기'\}/);
 });
 
 test('관계 지도 범위 버튼은 월 선택 바로 옆에 있고 달을 고르면 월별로 돌아간다',()=>{
-  assert.match(app,/relationship-map-toolbar"><label[\s\S]*relationshipMonthSelect[\s\S]*data-relationship-map-toggle/);
+  assert.match(html,/relation-view-tabs[\s\S]*relationshipAnalysisMonth/);
+  assert.match(app,/event\.target\.id==='relationshipAnalysisMonth'/);
   assert.match(app,/selectedRelationshipMonth=event\.target\.value;relationshipMapMode='monthly';renderRelationshipsV2\(\)/);
   assert.match(app,/relationshipMapMode=relationshipMapMode==='monthly'\?'cumulative':'monthly'/);
   assert.doesNotMatch(app,/data-relationship-map-mode|>선택한 달<|>누적 참고</);
 });
 
-test('AI 관계 코칭도 월을 선택하고 지도와 같은 달을 유지한다',()=>{
-  assert.match(app,/id="relationshipAiMonthSelect"/);
+test('AI 관계 코칭은 상단 월 선택을 지도와 함께 사용한다',()=>{
+  assert.match(html,/id="relationshipAnalysisMonth"/);
   assert.match(app,/function relationshipAnalysisMonth\(\).*selectedRelationshipMonth/);
-  assert.match(app,/event\.target\.id!=='relationshipAiMonthSelect'/);
-  assert.match(app,/relationshipMonthSelect[\s\S]*renderRelationshipActions\(\)/);
+  assert.doesNotMatch(app,/relationshipAiMonthSelect|relationshipMonthSelect/);
+  assert.match(app,/relationshipAnalysisMonth[\s\S]*renderRelationshipActions\(\)/);
 });
 
 test('관계 지도 상태는 앱의 첫 렌더에서도 초기화 순서 오류가 나지 않는다',()=>{
