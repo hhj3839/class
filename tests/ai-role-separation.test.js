@@ -31,6 +31,14 @@ test('AI 학생 지원은 교사가 바로 쓰는 세 가지 역할로 구성한
   assert.match(edge,/실제 건넬 수 있는 개방형 질문 한 문장만 50자 이내/);
 });
 
+test('AI 학생 지원의 교실 관찰 문장은 시기를 빼고 장면과 행동만 표시한다',()=>{
+  assert.match(app,/function removeObservationTiming/);
+  assert.match(app,/\[point\.context,point\.behavior\]\.map\(removeObservationTiming\)/);
+  assert.doesNotMatch(app,/\[point\.context,point\.behavior,point\.period\]/);
+  assert.match(edge,/관찰 시기를 정하는 표현은 쓰지 마세요/);
+  assert.doesNotMatch(edge,/period:\{type:'string'\}/);
+});
+
 test('AI 관계 코칭은 관계 모습·확인 장면·학급 코칭으로 간결하게 구성한다',()=>{
   assert.match(html,/data-relation-tab="ai"[^>]*>AI 관계 코칭<\/button>/);
   assert.match(edge,/class_coaching/);
