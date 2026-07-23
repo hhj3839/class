@@ -1,0 +1,33 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+
+const app=fs.readFileSync('app.js','utf8');
+const html=fs.readFileSync('index.html','utf8');
+const css=fs.readFileSync('analysis-dashboard.css','utf8');
+const prd=fs.readFileSync('PRD_v1.2.md','utf8');
+
+test('관계 지도는 최근 월을 기본으로 선택하고 누적 참고를 분리한다',()=>{
+  assert.match(html,/data-relation-tab="actual"[^>]*>월별 관계 지도<\/button>/);
+  assert.match(app,/let selectedRelationshipMonth='',relationshipMapMode='monthly'/);
+  assert.match(app,/function relationshipMapState\(\)/);
+  assert.match(app,/id="relationshipMonthSelect"/);
+  assert.match(app,/data-relationship-map-mode="monthly">선택한 달/);
+  assert.match(app,/data-relationship-map-mode="cumulative">누적 참고/);
+});
+
+test('월별 지도는 선택 월의 최신 응답과 80% 안전장치를 사용한다',()=>{
+  assert.match(app,/allResponses\.filter\(item=>monthOf\(item\)===selectedRelationshipMonth\)/);
+  assert.match(app,/buildCumulativeRelationshipAnalysis\(source\)/);
+  assert.match(app,/선택 범위의 설문 참여율과 친구 관계 응답률이 각각 80% 이상/);
+  assert.match(app,/결석·미제출은 0점으로 계산하지 않습니다/);
+});
+
+test('이전 달 비교는 단절로 단정하지 않는 세 가지 상태를 표시한다',()=>{
+  assert.match(app,/새로 확인된 상호 연결/);
+  assert.match(app,/이어서 확인된 상호 연결/);
+  assert.match(app,/이번 달 응답에서 확인되지 않음/);
+  assert.match(app,/관계가 끊어졌다는 뜻은 아닙니다/);
+  assert.match(css,/\.relation-change-summary/);
+  assert.match(prd,/연결이 확인되지 않은 것을 관계 단절로 표현하지 않는다/);
+});
