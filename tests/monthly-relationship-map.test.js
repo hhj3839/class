@@ -9,11 +9,16 @@ const prd=fs.readFileSync('PRD_v1.2.md','utf8');
 
 test('관계 지도는 최근 월을 기본으로 선택하고 누적 참고를 분리한다',()=>{
   assert.match(html,/data-relation-tab="actual"[^>]*>월별 관계 지도<\/button>/);
-  assert.match(app,/let selectedRelationshipMonth='',relationshipMapMode='monthly'/);
+  assert.match(app,/var selectedRelationshipMonth='',relationshipMapMode='monthly'/);
   assert.match(app,/function relationshipMapState\(\)/);
   assert.match(app,/id="relationshipMonthSelect"/);
   assert.match(app,/data-relationship-map-mode="monthly">선택한 달/);
   assert.match(app,/data-relationship-map-mode="cumulative">누적 참고/);
+});
+
+test('관계 지도 상태는 앱의 첫 렌더에서도 초기화 순서 오류가 나지 않는다',()=>{
+  assert.ok(app.indexOf("var selectedRelationshipMonth='',relationshipMapMode='monthly'")>app.indexOf('renderRelationshipsV2();renderRelationshipActions()'));
+  assert.doesNotMatch(app,/let selectedRelationshipMonth='',relationshipMapMode='monthly'/);
 });
 
 test('월별 지도는 선택 월의 최신 응답과 80% 안전장치를 사용한다',()=>{
