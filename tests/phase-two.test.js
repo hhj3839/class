@@ -122,7 +122,7 @@ test('AI 결과에서 영문 내부 키와 확인되지 않은 직접 경험 표
   assert.match(edge,/직접 호소\/g,'학생이 작성한 서술'/);
   assert.match(edge,/localizeAnalysisValues\(JSON\.parse\(outputText\)\)/);
   assert.match(edge,/analysisVersion='2026\.07\.23-student-support-v10'/);
-  assert.match(edge,/analysis:localizeAnalysisValues\(row\.result_json\)/);
+  assert.match(edge,/cachedAnalysis=localizeAnalysisValues\(row\.result_json\)/);
   assert.match(app,/meta\.analysisVersion\|\|'버전 확인 불가'/);
 });
 

@@ -66,3 +66,11 @@ test('관계 AI 카드는 핵심 제목과 근거 범위를 먼저 표시한다'
   assert.match(app,/<h4>\$\{display\(title\)\}<\/h4><span>\$\{display\(timeframe\)\}<\/span>/);
   assert.match(css,/\.relationship-insight-heading/);
 });
+
+test('이전 형식의 저장 관계 분석은 새 분석을 권장한다',()=>{
+  assert.match(edge,/upgradeRecommended=analysisType==='relationship'/);
+  assert.match(edge,/analysisVersion:upgradeRecommended\?'이전 저장 형식':selectedVersion/);
+  assert.match(app,/이전 형식으로 저장된 결과입니다/);
+  assert.match(app,/AI 새 분석을 실행해 주세요/);
+  assert.match(app,/meta\.upgradeRecommended\?'이전 저장 결과'/);
+});
