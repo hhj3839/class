@@ -7,11 +7,23 @@ const html=fs.readFileSync('index.html','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260723190000_year_end_cleanup.sql','utf8');
 const prd=fs.readFileSync('PRD_v1.2.md','utf8');
 
-test('학급 설정은 보고서·미리보기·이중 확인의 세 단계 자료 정리를 제공한다',()=>{
-  for(const id of ['downloadYearEndReport','yearEndReportStored','previewYearEndCleanup','yearEndClassLabel','yearEndConfirmation','yearEndDeletionAccepted','deleteYearEndData'])assert.match(html,new RegExp(`id="${id}"`));
+test('학급 설정은 기본 설정과 학년 말 자료 정리 탭을 분리한다',()=>{
+  assert.match(html,/data-settings-tab="basic"[\s\S]*>기본 설정<\/button>/);
+  assert.match(html,/data-settings-tab="year-end"[\s\S]*>학년 말 자료 정리<\/button>/);
+  assert.match(html,/id="settingsBasicPanel"/);
+  assert.match(html,/id="settingsYearEndPanel"[^>]*hidden/);
+  assert.match(app,/setSettingsTab\(tab\)[\s\S]*settingsBasicPanel[\s\S]*settingsYearEndPanel/);
+});
+
+test('학년 말 자료 정리는 보고서 보관 뒤 바로 이중 확인으로 이어진다',()=>{
+  for(const id of ['downloadYearEndReport','yearEndReportStored','yearEndClassLabel','yearEndConfirmation','yearEndDeletionAccepted','deleteYearEndData'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(html,/학년 말 보고서 PDF 만들기/);
   assert.match(html,/전년도 학급 자료 영구 삭제/);
   assert.match(html,/현재 학년도는 삭제할 수 없습니다/);
+  assert.doesNotMatch(html,/삭제 대상 미리보기|id="previewYearEndCleanup"|id="yearEndPreview"/);
+  assert.match(app,/\$\('#yearEndReportStored'\)\.addEventListener\('change',async/);
+  assert.match(app,/teacher_preview_year_end_cleanup_auth/);
+  assert.match(app,/prepareYearEndDeletion\(snapshot\)/);
 });
 
 test('학년 말 보고서는 AI 실행과 관계없이 전체 학생 기록을 PDF로 만든다',()=>{
@@ -37,5 +49,5 @@ test('영구 삭제는 학생 연결 자료를 트랜잭션에서 정리하고 �
   assert.match(migration,/participation_token=gen_random_uuid\(\)/);
   assert.match(migration,/year_end_data_deleted/);
   assert.match(migration,/deletion_counts=counts/);
-  assert.match(prd,/학년 말 보고서[\s\S]*삭제 대상 미리보기[\s\S]*이중 입력/);
+  assert.match(prd,/학년 말 보고서[\s\S]*보관 확인[\s\S]*이중 입력/);
 });
