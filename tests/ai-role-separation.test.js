@@ -8,6 +8,9 @@ const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 
 test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한다',()=>{
   assert.match(html,/data-analysis-tab="patterns"[^>]*>우리 반 응답 흐름<\/button>/);
+  assert.match(html,/id="runPatternsAi"[^>]*>저장된 결과 불러오기/);
+  assert.match(html,/id="rerunPatternsAi"[^>]*>AI 새 분석/);
+  assert.match(html,/id="patternsAiMeta"/);
   assert.match(html,/id="classResponseFlowMetrics"/);
   assert.match(app,/function classResponseFlowData/);
   assert.match(app,/aiTeacherDisplayText\(cleanAiEvidenceText\(value\)\)/);
@@ -20,10 +23,11 @@ test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한
 
 test('AI 학생 지원은 교사가 바로 쓰는 세 가지 역할로 구성한다',()=>{
   assert.match(html,/data-analysis-tab="ai"[^>]*>AI 학생 지원<\/button>/);
-  assert.match(app,/담임 참고 · 교실에서 볼 점 · 학생 코칭/);
-  assert.match(app,/교실에서 볼 점/);
+  assert.match(app,/담임 참고 · 교실에서 살펴볼 점 · 학생 코칭/);
+  assert.match(app,/교실에서 살펴볼 점/);
   assert.match(app,/학생 코칭/);
   assert.doesNotMatch(app,/<strong>다음 지원 방향<\/strong>/);
+  assert.doesNotMatch(html,/분석 내용 문제 표시|flagAiAnalysis/);
   assert.match(edge,/실제 건넬 수 있는 개방형 질문 한 문장만 50자 이내/);
 });
 
