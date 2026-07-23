@@ -353,7 +353,7 @@ v1.2 릴리스 후보는 다음 조건을 모두 만족해야 한다.
 ## 14. 현재 구현 기준선
 
 - 기준선: 관계 분석 3개 탭, 월별 관계 지도·누적 참고, 이름 충돌 방지와 별도 AI 관계 해석까지 반영
-- 자동 테스트: 118개 통과(로컬 Node 테스트 및 GitHub Actions)
+- 자동 테스트: 119개 통과(로컬 Node 테스트 및 GitHub Actions)
 - 현장 시험 문서: `FIELD_PILOT_v1.2.1.md`, `FIELD_ISSUE_TEMPLATE.md`
 - 시험 계정 점검 자료: `DEMO_CLASS_GUIDE.md`, `supabase/demo/seed_demo_class.sql`, `supabase/demo/reset_demo_class.sql`
 - 적용 완료 DB 기능: 안정 학생 UUID, 안전한 참여 토큰, 백업·복구, 파일럿 지표, 학급·관계 AI 저장 유형과 각각의 월 10회 제한, 중복 제출 방지, 안전 신호 확인함, 안전 신호와 관찰 기록의 명시적 연결·중복 관찰 방지, 안전 신호 확인·처리율 집계
