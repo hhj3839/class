@@ -6,7 +6,7 @@ const app=read('app.js'),html=read('index.html'),student=read('student.js');
 const edge=read('supabase/functions/analyze-class/index.ts');
 const migration=read('supabase/migrations/20260720235900_pilot_evidence_metrics.sql');
 const signalMetrics=read('supabase/migrations/20260722090000_signal_review_metrics.sql');
-const limitMigration=read('supabase/migrations/20260720235930_ai_analysis_limit_10.sql');
+const unlimitedMigration=read('supabase/migrations/20260723180000_remove_ai_analysis_limits.sql');
 
 test('학생 설문 완료 시간을 파일럿 지표용으로 저장한다',()=>{
   assert.match(student,/surveyStartedAt=Date\.now\(\)/);
@@ -63,8 +63,10 @@ test('누적 관계망은 복잡한 지표 띠 없이 학급 관계 읽기를 �
   assert.match(app,/1100×640 기준의 반응형 캔버스/);
 });
 
-test('새 AI 분석 한도는 기존 기록을 지우지 않고 월 10회로 확대한다',()=>{
-  assert.match(limitMigration,/call_count>=10/);
-  assert.match(limitMigration,/한도\(10회\)/);
-  assert.doesNotMatch(limitMigration,/delete\s+from\s+public\.ai_analysis_runs/i);
+test('학급과 관계 AI 새 분석은 횟수 제한 없이 실행 기록을 유지한다',()=>{
+  assert.match(unlimitedMigration,/teacher_begin_ai_analysis_auth/);
+  assert.match(unlimitedMigration,/teacher_begin_relationship_analysis_auth/);
+  assert.doesNotMatch(unlimitedMigration,/call_count|한도\(10회\)/);
+  assert.match(unlimitedMigration,/monthly_limit','none/);
+  assert.doesNotMatch(unlimitedMigration,/delete\s+from\s+public\.ai_analysis_runs/i);
 });
