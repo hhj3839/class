@@ -130,16 +130,16 @@ test('관계 분석은 핵심 학생군과 학급 이해 문장만 표시한다'
   assert.doesNotMatch(relationView,/상호 높은 관계가 밀집된 묶음|여러 집단과 연결된 학생|relation-trend-strip/);
   assert.doesNotMatch(relationView,/친구에 따라 받은 관계 점수가 다른 학생|강한 상호 연결이 적게 나타난 학생/);
   assert.match(app,/AI 관계 코칭/);
-  assert.match(app,/교실에서 볼 점/);
+  assert.match(app,/교실에서 살펴볼 점/);
   assert.match(app,/학급 코칭/);
   assert.doesNotMatch(app,/<strong>학급 운영 방법<\/strong>/);
   assert.doesNotMatch(app,/친구별 평가 편차/);
 });
 
-test('AI 학생 카드는 담임 참고·교실에서 볼 점·학생 코칭만 보여준다',()=>{
+test('AI 학생 카드는 담임 참고·교실에서 살펴볼 점·학생 코칭만 보여준다',()=>{
   const aiRender=app.slice(app.indexOf('function renderAiAnalysis'),app.indexOf('async function runAiAnalysis'));
-  assert.match(aiRender,/담임 참고 · 교실에서 볼 점 · 학생 코칭/);
-  assert.match(aiRender,/교실에서 볼 점/);
+  assert.match(aiRender,/담임 참고 · 교실에서 살펴볼 점 · 학생 코칭/);
+  assert.match(aiRender,/교실에서 살펴볼 점/);
   assert.match(aiRender,/<strong>학생 코칭<\/strong>/);
   assert.doesNotMatch(aiRender,/<strong>다음 지원 방향<\/strong>/);
   assert.doesNotMatch(aiRender,/가능한 다른 해석 보기|ai-interpretations/);

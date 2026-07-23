@@ -6,7 +6,7 @@ const app=fs.readFileSync('app.js','utf8');
 const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260722170000_relationship_ai_analysis.sql','utf8');
 
-test('학급 분석과 관계 분석은 저장 유형과 월별 호출 한도를 분리한다',()=>{
+test('학급 분석과 관계 분석은 저장 유형과 실행 기록을 분리한다',()=>{
   assert.match(migration,/analysis_type text not null default 'class'/);
   assert.match(migration,/analysis_type in\('class','relationship'\)/);
   assert.match(migration,/teacher_get_cached_relationship_analysis_auth/);
@@ -24,7 +24,7 @@ test('관계 AI는 월별 변화와 누적 익명 관계 계산을 함께 받아
   assert.match(edge,/관계 구조만 해석하세요/);
   assert.match(edge,/인기·고립·문제 학생으로 단정하거나 관계 원인을 추측하지 마세요/);
   assert.match(edge,/익명 번호 뒤에 '학생'을 붙여 언급/);
-  assert.match(edge,/relationship-coaching-v7/);
+  assert.match(edge,/relationship-coaching-v8/);
   assert.match(edge,/teacher_get_class_context_auth/);
   assert.match(edge,/currentStudentNumbers\.has\(Number\(row\.student_number\)\)/);
   assert.match(edge,/currentStudentNumbers\.has\(Number\(item\.targetNumber\)\)/);
@@ -53,7 +53,8 @@ test('관계 화면은 교사가 요청할 때 저장 결과 또는 새 AI 관�
   assert.match(app,/마지막 분석 \$\{formatAnalysisTimestamp\(meta\.generatedAt\)\}/);
   assert.match(app,/analysisType:'relationship'/);
   assert.match(app,/function renderRelationshipAiAnalysis/);
-  assert.match(app,/교실에서 볼 점/);
+  assert.match(app,/교실에서 살펴볼 점/);
+  assert.match(app,/<summary>분석 근거<\/summary>/);
   assert.match(app,/학급 코칭/);
   assert.doesNotMatch(app,/<strong>학급 운영 방법<\/strong>/);
   assert.match(app,/relationship-insight-heading/);

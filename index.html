@@ -86,8 +86,8 @@
       <section class="view" id="view-analysis">
         <div class="page-intro"><div><p class="eyebrow">설문 응답을 바탕으로 살펴보기</p><h2>학급 분석</h2></div></div>
         <div class="analysis-toolbar"><div class="analysis-view-tabs" role="tablist" aria-label="학급 분석 화면 선택"><button class="active" type="button" data-analysis-tab="patterns" role="tab" aria-selected="true">우리 반 응답 흐름</button><button type="button" data-analysis-tab="ai" role="tab" aria-selected="false">AI 학생 지원</button></div><div class="analysis-toolbar-actions"><label class="student-picker analysis-month-picker"><select id="analysisMonth" aria-label="분석 결과를 살펴볼 달"></select></label><button class="secondary-button" type="button" id="printReport">분석 결과 PDF 저장</button></div></div>
-        <div id="analysisAiPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 학생 지원</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">AI 새 분석</button><button class="text-button" id="flagAiAnalysis" type="button">분석 내용 문제 표시</button></div></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
-        <div id="analysisPatternsPanel" role="tabpanel"><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 반 응답 흐름</h3></div></div><div id="classResponseFlowMetrics" class="class-response-metrics"></div><div id="classObservationPatterns"><p class="muted">AI 분석 결과를 불러오면 익명 학급 요약이 함께 표시됩니다.</p></div></section></div>
+        <div id="analysisAiPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 학생 지원</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">AI 새 분석</button></div></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
+        <div id="analysisPatternsPanel" role="tabpanel"><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 반 응답 흐름</h3></div><div class="ai-review-actions"><span class="confidence" id="patternsAiMeta">마지막 분석 확인 중</span><button class="text-button" id="runPatternsAi" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunPatternsAi" type="button">AI 새 분석</button></div></div><div id="classResponseFlowMetrics" class="class-response-metrics"></div><div id="classObservationPatterns"><p class="muted">AI 분석 결과를 불러오면 학급 응답 흐름이 표시됩니다.</p></div></section></div>
       </section>
 
       <section class="view" id="view-student-detail">
@@ -167,7 +167,7 @@
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
-  <script src="app.js?v=20260723-16"></script>
+  <script src="app.js?v=20260723-17"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260722-5"></script>
   <script src="student-priority.js?v=20260720-1"></script>
