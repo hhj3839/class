@@ -52,7 +52,9 @@ test('우리 반 응답 흐름은 계산 지표와 식별자를 제거한 AI 학
   assert.match(app,/계산 결과\|학생 원문\|친구 관찰/);
   assert.match(app,/function renderClassResponseFlowMetrics/);
   assert.match(app,/function anonymousClassSummaryText/);
-  assert.match(app,/이번 달 학급 운영 참고/);
+  assert.match(app,/이번 달 우리 반에서 보이는 흐름/);
+  assert.match(app,/담임이 살펴볼 장면/);
+  assert.doesNotMatch(app,/이번 달 학급 운영 참고|눈에 띄는 변화/);
   assert.match(edge,/classCoachingInstruction/);
   assert.match(edge,/학생-N 같은 개별 식별자와 관계망·자리·모둠·친구 집단 해석을 넣지 말고/);
 });
@@ -82,7 +84,7 @@ test('AI 분석은 받은 평가 기반 최대 3명과 다음 대화·지원 방
   assert.match(app,/필요할 때 응답 원문 확인/);
   assert.match(app,/연결된 응답 원문 보기/);
   assert.match(app,/function buildAiReportSection/);
-  assert.match(app,/함께 확인할 응답/);
+  assert.match(app,/응답 근거/);
   assert.doesNotMatch(app,/function applyTeacherFriendlyAiLabels/);
   assert.match(app,/함께 볼 긍정 요소/);
   assert.match(app,/다음 지원 방향/);
