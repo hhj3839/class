@@ -34,3 +34,8 @@ test('AI 관계 코칭은 학급 코칭과 운영 방법을 분리한다',()=>{
   assert.match(app,/학급 코칭/);
   assert.match(app,/학급 운영 방법/);
 });
+
+test('AI 학생 지원 항목은 한 열로 표시한다',()=>{
+  const css=fs.readFileSync('analysis-dashboard.css','utf8');
+  assert.match(css,/\.ai-student-support-grid\{display:grid;grid-template-columns:1fr;/);
+});
