@@ -56,7 +56,7 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
   assert.match(prd,/교사 화면 실명 치환/);
   assert.match(prd,/35명·12개월 관계 계산 성능 검사/);
   assert.match(prd,/학교 장애 대응·백업·복구 절차/);
-  assert.match(prd,/자동 테스트: 150개 통과/);
+  assert.match(prd,/자동 테스트: 152개 통과/);
   assert.match(prd,/PR #77·#79·#80·#81/);
   assert.match(prd,/20260723223000_update_year_end_cleanup_messages\.sql/);
   assert.match(prd,/화면 하단의 안전 안내/);
