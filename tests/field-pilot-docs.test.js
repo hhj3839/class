@@ -56,8 +56,15 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
   assert.match(prd,/교사 화면 실명 치환/);
   assert.match(prd,/35명·12개월 관계 계산 성능 검사/);
   assert.match(prd,/학교 장애 대응·백업·복구 절차/);
-  assert.match(prd,/자동 테스트: 149개 통과/);
+  assert.match(prd,/자동 테스트: 150개 통과/);
   assert.match(prd,/PR #77·#79·#80·#81/);
   assert.match(prd,/20260723223000_update_year_end_cleanup_messages\.sql/);
   assert.match(prd,/화면 하단의 안전 안내/);
+});
+
+test('PRD는 최신 prepilot.2 릴리스와 7월 24일 사전 검증을 기준선으로 기록한다',()=>{
+  assert.match(prd,/제품 단계: v1\.2\.1-prepilot\.2 기준선 확정/);
+  assert.match(prd,/현재 사전 릴리스: `v1\.2\.1-prepilot\.2` \/ `7a8ec2f`/);
+  assert.match(prd,/2026-07-24 `v1\.2\.1-prepilot\.2` 배포본/);
+  assert.match(prd,/세로·가로 전환과 새로고침 뒤 임시 입력 복구/);
 });
