@@ -27,6 +27,13 @@ test('담임 확인은 월별 설문 주기와 예외적인 빠른 추가 확인
   assert.match(timeline,/담임 확인 이력 보기/);
   assert.match(timeline,/if\(!supportItems\.length\)/);
   assert.match(timeline,/<details class="student-support-details">/);
+  assert.match(timeline,/data-edit-student-review/);
+  assert.match(timeline,/data-student-review-action="reviewed"/);
+  assert.match(timeline,/data-student-review-action="carry_forward"/);
+  assert.match(timeline,/data-student-review-action="rapid_followup"/);
+  assert.match(timeline,/aria-pressed/);
+  assert.match(timeline,/data-cancel-student-review/);
+  assert.doesNotMatch(timeline,/<select data-student-review-status>/);
 });
 
 test('확인·지원 이력은 월·살펴볼 기록으로 필터링한다',()=>{
