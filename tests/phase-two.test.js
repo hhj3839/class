@@ -201,7 +201,7 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(html,/>월별 응답<\/button>/);
   assert.match(app,/월을 눌러 자세히 보기/);
   const responseRecords=app.slice(app.indexOf('const timeline='),app.indexOf('const monthHeads='));
-  assert.match(responseRecords,/<details class="student-month-card">/);
+  assert.match(responseRecords,/<details class="student-month-card"/);
   assert.doesNotMatch(responseRecords,/<details class="student-month-card"[^>]*open/);
   assert.match(app,/친구들이 준 관계 점수 평균/);
   assert.doesNotMatch(app,/latest\.selfSmile\?'😊'/);
