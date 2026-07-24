@@ -28,7 +28,7 @@
         <button class="nav-item active" data-view="home" data-tooltip="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다." title="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다." aria-description="이번 달 설문 참여와 우리 반 변화를 한눈에 확인합니다."><span>⌂</span> 우리 반 현황</button>
         <button class="nav-item" data-view="survey" data-tooltip="설문 링크를 공유하고 제출 현황을 확인합니다." title="설문 링크를 공유하고 제출 현황을 확인합니다." aria-description="설문 링크를 공유하고 제출 현황을 확인합니다."><span>▤</span> 설문 관리</button>
         <button class="nav-item" data-view="analysis" data-tooltip="우리 반 응답 흐름과 AI 학생 지원을 확인합니다." title="우리 반 응답 흐름과 AI 학생 지원을 확인합니다." aria-description="우리 반 응답 흐름과 AI 학생 지원을 확인합니다."><span>◫</span> 학급 분석</button>
-        <button class="nav-item" data-view="student-detail" data-tooltip="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다." title="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다." aria-description="학생 한 명씩 설문 변화와 확인·지원 이력을 살펴봅니다."><span>◎</span> 학생별 살펴보기</button>
+        <button class="nav-item" data-view="student-detail" data-tooltip="학생 한 명씩 설문 변화와 확인이 필요한 응답을 살펴봅니다." title="학생 한 명씩 설문 변화와 확인이 필요한 응답을 살펴봅니다." aria-description="학생 한 명씩 설문 변화와 확인이 필요한 응답을 살펴봅니다."><span>◎</span> 학생별 살펴보기</button>
         <button class="nav-item" data-view="relations" data-tooltip="월별 친구 관계 응답을 살펴보고 누적 흐름과 비교합니다." title="월별 친구 관계 응답을 살펴보고 누적 흐름과 비교합니다." aria-description="월별 친구 관계 응답을 살펴보고 누적 흐름과 비교합니다."><span>⌘</span> 관계 분석</button>
         <button class="nav-item" data-view="settings" data-tooltip="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." title="학급 정보와 운영 준비, 개인정보 정책을 관리합니다." aria-description="학급 정보와 운영 준비, 개인정보 정책을 관리합니다."><span>⚙</span> 학급 설정</button>
       </nav>
@@ -153,7 +153,7 @@
           <div class="panel-head"><div><p class="eyebrow">종료된 학년도만</p><h3 id="yearEndCleanupTitle">학년 말 자료 정리</h3></div><span class="confidence" id="yearEndCleanupStatus">보고서 생성 전</span></div>
           <p class="muted">학년 말 보고서를 저장한 뒤 전년도 학생 자료를 정리합니다. 현재 학년도는 삭제할 수 없습니다.</p>
           <div class="year-end-steps">
-            <article><span>1</span><div><strong>학년 말 보고서 만들기</strong><p>학급 요약, 학생별 응답과 확인·지원 이력을 하나의 PDF로 저장합니다.</p><button class="secondary-button" id="downloadYearEndReport" type="button">학년 말 보고서 PDF 만들기</button></div></article>
+            <article><span>1</span><div><strong>학년 말 보고서 만들기</strong><p>학급 요약, 학생별 응답과 확인 기록을 하나의 PDF로 저장합니다.</p><button class="secondary-button" id="downloadYearEndReport" type="button">학년 말 보고서 PDF 만들기</button></div></article>
             <article class="year-end-danger"><span>2</span><div><strong>전년도 학급 자료 영구 삭제</strong><p>학생 명단, 설문, 관계 응답, 확인·지원 기록과 AI 분석을 삭제합니다. 처리 후 복구할 수 없습니다.</p><p class="year-end-ready-status" id="yearEndReadyStatus" role="status"></p><div class="year-end-confirmations"><label><span>학급 이름</span><input id="yearEndClassLabel" autocomplete="off" placeholder="예: 3학년 2반" disabled></label><label><span>확인 문구</span><input id="yearEndConfirmation" autocomplete="off" placeholder="전년도 학급 자료 삭제" disabled></label></div><label class="year-end-check"><input id="yearEndDeletionAccepted" type="checkbox" disabled><span>삭제 범위와 복구 불가능 안내를 확인했습니다.</span></label><button class="danger-button" id="deleteYearEndData" type="button" disabled>전년도 학급 자료 영구 삭제</button><div id="yearEndResult" aria-live="polite"></div></div></article>
           </div>
         </section>
