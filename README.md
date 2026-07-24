@@ -10,6 +10,13 @@
 
 학생의 월별 자기평가와 교우관계 응답을 바탕으로 담임교사가 지원 신호, 관계 변화, 관찰 포인트를 근거와 함께 확인하는 반응형 웹 MVP입니다.
 
+## 배포
+
+- 운영 주소: [Vercel](https://class-ieum.vercel.app)
+- 보조 주소: [GitHub Pages](https://hhj3839.github.io/class/)
+- `main` 브랜치가 변경되면 Vercel과 GitHub Pages에 자동 배포됩니다.
+- Vercel 로컬 프로젝트 정보가 담긴 `.vercel/` 폴더는 저장소에 포함하지 않습니다.
+
 ## 실행
 
 별도의 설치 과정이 없습니다. `index.html`을 브라우저에서 열거나 로컬 서버로 실행하세요.
