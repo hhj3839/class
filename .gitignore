@@ -10,3 +10,4 @@ tmp/
 *학생자료*.json
 .env.local
 supabase/.temp/
+.vercel
