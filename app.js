@@ -102,9 +102,9 @@ function renderResponseManagement(){const container=$('#responseManagement');if(
 async function refreshGovernance(){if(!getTeacherSession())return;const[policies,logs]=await Promise.all([teacherRpc('teacher_get_retention_policy_auth',{p_class_id:classSettings.classId}),teacherRpc('teacher_get_audit_logs_auth',{p_class_id:classSettings.classId,p_limit:50})]);const policy=policies[0];if(policy){$('#retentionMonths').value=String(policy.retention_months);$('#endOfYearAction').value=policy.end_of_year_action}$('#auditLogList').innerHTML=logs.length?logs.map(log=>`<article><strong>${escapeHTML(log.action)}</strong><span>${new Date(log.created_at).toLocaleString('ko-KR')}</span><p>${escapeHTML(log.reason||'사유 없음')} · ${escapeHTML(log.target_type)}</p></article>`).join(''):'<p class="muted">아직 감사 로그가 없습니다.</p>'}
 function getObservations(){return observationCache}
 function saveObservations(items){observationCache=items;renderObservations();document.dispatchEvent(new CustomEvent('class-ieum:data-updated'))}
-function observationFromDb(row){const stableStudent=row.student_id&&classSettings.students.find(item=>item.studentId===row.student_id),number=stableStudent?.number??(row.student_number===null?null:Number(row.student_number)),student=stableStudent||classSettings.students.find(item=>Number(item.number)===number);return{id:row.id,status:row.status,outcome:row.outcome||'pending',studentId:row.student_id||student?.studentId||null,studentNumber:number,student:student?.name||(number?`${number}번`:'학급 전체'),title:row.title,detail:row.planned_action||row.observed_fact||'',date:row.follow_up_date||row.survey_month?.slice(0,7)||'날짜 미정',observedFact:row.observed_fact||'',teacherInterpretation:row.teacher_interpretation||'',interviewNote:row.interview_note||'',followUp:row.follow_up||'',followUpDate:row.follow_up_date||'',aiRunId:row.ai_run_id||'',sourceType:row.source_type||'manual',sourceSnapshot:row.source_snapshot||{}}}
-function observationPayload(item){const matched=classSettings.students.find(student=>student.name===item.student)?.number,studentNumber=Number(item.studentNumber||matched)||null;return{id:item.id,studentNumber,surveyMonth:`${selectedAnalysisMonth||new Date().toISOString().slice(0,7)}-01`,title:item.title,plannedAction:item.detail||'',observedFact:item.observedFact||'',teacherInterpretation:item.teacherInterpretation||'',interviewNote:item.interviewNote||'',followUp:item.followUp||'',followUpDate:item.followUpDate||'',status:item.status||'todo',outcome:item.outcome||'pending',aiRunId:item.aiRunId||null,sourceType:item.sourceType||'manual',sourceSnapshot:item.sourceSnapshot||{}}}
-async function persistObservation(item){const previousId=item.id,id=await teacherRpc('teacher_save_observation_auth',{p_class_id:classSettings.classId,p_observation:observationPayload(item)});item.id=id;const items=getObservations(),saved=items.find(row=>String(row.id)===String(previousId));if(saved)saved.id=id;saveObservations(items);return id}
+function observationFromDb(row){const stableStudent=row.student_id&&classSettings.students.find(item=>item.studentId===row.student_id),number=stableStudent?.number??(row.student_number===null?null:Number(row.student_number)),student=stableStudent||classSettings.students.find(item=>Number(item.number)===number);return{id:row.id,status:row.status,outcome:row.outcome||'pending',studentId:row.student_id||student?.studentId||null,studentNumber:number,student:student?.name||(number?`${number}번`:'학급 전체'),title:row.title,detail:row.planned_action||row.observed_fact||'',date:row.follow_up_date||row.survey_month?.slice(0,7)||'날짜 미정',observedFact:row.observed_fact||'',teacherInterpretation:row.teacher_interpretation||'',interviewNote:row.interview_note||'',followUp:row.follow_up||'',followUpDate:row.follow_up_date||'',aiRunId:row.ai_run_id||'',sourceType:row.source_type||'manual',sourceSnapshot:row.source_snapshot||{},signalReviewId:row.signal_review_id||null}}
+function observationPayload(item){const matched=classSettings.students.find(student=>student.name===item.student)?.number,studentNumber=Number(item.studentNumber||matched)||null;return{id:item.id,studentNumber,surveyMonth:`${selectedAnalysisMonth||new Date().toISOString().slice(0,7)}-01`,title:item.title,plannedAction:item.detail||'',observedFact:item.observedFact||'',teacherInterpretation:item.teacherInterpretation||'',interviewNote:item.interviewNote||'',followUp:item.followUp||'',followUpDate:item.followUpDate||'',status:item.status||'todo',outcome:item.outcome||'pending',aiRunId:item.aiRunId||null,sourceType:item.sourceType||'manual',sourceSnapshot:item.sourceSnapshot||{},signalReviewId:item.signalReviewId||item.sourceSnapshot?.signalReviewId||null}}
+async function persistObservation(item){const previousId=item.id,id=await teacherRpc('teacher_save_observation_auth',{p_class_id:classSettings.classId,p_observation:observationPayload(item)});item.id=id;const items=getObservations(),saved=items.find(row=>String(row.id)===String(previousId));if(saved)saved.id=id;if(item.signalReviewId||item.sourceSnapshot?.signalReviewId)await refreshSignalReviews();saveObservations(items);return id}
 async function refreshObservations(){const rows=await teacherRpc('teacher_get_observations_auth',{p_class_id:classSettings.classId});saveObservations(rows.map(observationFromDb))}
 function renderObservations(){const items=getObservations(),outcomeLabels={pending:'결과 미정',continue:'계속 관찰',support:'지원 필요',no_issue:'특이사항 없음'},cols=[['todo','관찰 예정'],['doing','관찰 중'],['done','확인 완료']];$('#observationBoard').innerHTML=cols.map(([key,label])=>{const list=items.filter(i=>i.status===key);return `<section class="observation-column"><div class="column-head"><h3>${label}</h3><span>${list.length}</span></div>${list.map(i=>`<article class="observation-card"><div class="observation-card-tags"><span class="tag ${key==='done'?'open':key==='doing'?'week':'watch'}">${escapeHTML(i.student)}</span><span class="observation-outcome ${i.outcome||'pending'}">${outcomeLabels[i.outcome]||'결과 미정'}</span></div><h4>${escapeHTML(i.title)}</h4><p>${escapeHTML(i.observedFact||i.detail||'관찰 예정으로 저장되었습니다.')}</p><div class="observation-meta">${i.sourceType==='ai_analysis'?'<span>AI 분석에서 시작</span>':''}${i.interviewNote?'<span>학생 대화 있음</span>':''}${i.followUp?'<span>후속 조치 있음</span>':''}</div><footer><span>${escapeHTML(i.date)}</span><div><button class="text-button" data-edit-observation="${i.id}">${key==='todo'?'관찰 기록하기':'확인 기록 열기'}</button>${key==='done'?'<span>✓ 완료됨</span>':''}</div></footer></article>`).join('')||'<p class="muted">기록이 없습니다.</p>'}</section>`}).join('')}
 function attachObservationDeleteActions(){const cards=$$('#observationBoard .observation-card');cards.forEach(card=>{const id=card.querySelector('[data-edit-observation]')?.dataset.editObservation,item=getObservations().find(row=>String(row.id)===String(id));if(!item||card.querySelector('[data-delete-observation]'))return;const button=document.createElement('button');button.type='button';button.className='text-button observation-delete-button';button.dataset.deleteObservation=item.id;button.dataset.observationTitle=item.title;button.textContent='삭제';card.querySelector('footer>div')?.append(button)})}
@@ -233,45 +233,7 @@ function renderRelationshipActions(){
 
 // 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
 // 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
-function buildCumulativeRelationshipAnalysis(responses){
-  const cumulative=IeumAnalysisCore.cumulativeScores(responses),months=cumulative.months,submittedStudents=cumulative.participants,relationStudents=cumulative.relationResponders,scoreSamples=cumulative.samples,scores=cumulative.scores;
-  const total=classSettings.students.length;
-  const submitted=submittedStudents.size;
-  const relationCount=relationStudents.size;
-  const ready=IeumAnalysisCore.isRelationshipReady(total,submitted,relationCount);
-  const students=classSettings.students.filter(student=>submittedStudents.has(Number(student.number))||[...scores.keys()].some(key=>Number(key.split(':')[1])===Number(student.number)));
-  const mutual=[];
-  students.forEach((student,index)=>students.slice(index+1).forEach(other=>{
-    const a=Number(student.number),b=Number(other.number),ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);
-    if(ab>=4&&ba>=4)mutual.push({a,b,strength:Math.min(ab,ba)});
-  }));
-  const adjacency=new Map(students.map(student=>[Number(student.number),new Set()]));
-  mutual.filter(edge=>edge.strength>=4.5).forEach(edge=>{adjacency.get(edge.a)?.add(edge.b);adjacency.get(edge.b)?.add(edge.a)});
-  const visited=new Set(),groups=[];
-  students.forEach(student=>{
-    const start=Number(student.number);if(visited.has(start))return;
-    const stack=[start],component=[];visited.add(start);
-    while(stack.length){const value=stack.pop();component.push(value);(adjacency.get(value)||[]).forEach(next=>{if(!visited.has(next)){visited.add(next);stack.push(next)}})}
-    if(component.length>=2)groups.push(component);
-  });
-  const groupByStudent=new Map();
-  groups.forEach((group,index)=>group.forEach(number=>groupByStudent.set(number,index)));
-  const connectionsFor=number=>mutual.filter(edge=>edge.a===number||edge.b===number);
-  const connectors=students.map(student=>{
-    const number=Number(student.number),touched=new Set();
-    connectionsFor(number).forEach(edge=>{const other=edge.a===number?edge.b:edge.a;const group=groupByStudent.get(other);if(group!==undefined)touched.add(group)});
-    return{number,name:student.name,groups:[...touched],connections:connectionsFor(number).length};
-  }).filter(item=>item.groups.length>=2);
-  const peripheral=students.map(student=>{const number=Number(student.number);return{number,name:student.name,connections:connectionsFor(number).length,group:groupByStudent.get(number)}}).filter(item=>item.connections<=1&&item.group===undefined);
-  const groupMetrics=[];
-  for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++){
-    const between=[],internal=[];
-    groups[i].forEach(a=>groups[j].forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)between.push(ab);if(ba!==undefined)between.push(ba)}));
-    [groups[i],groups[j]].forEach(group=>group.forEach((a,index)=>group.slice(index+1).forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)internal.push(ab);if(ba!==undefined)internal.push(ba)})));
-    if(between.length&&internal.length){const betweenAvg=between.reduce((sum,value)=>sum+value,0)/between.length,internalAvg=internal.reduce((sum,value)=>sum+value,0)/internal.length;if(internalAvg-betweenAvg>=1.2)groupMetrics.push({a:i,b:j,internalAvg,betweenAvg})}
-  }
-  return{ready,total,submitted,relationCount,months,students,scores,scoreSamples,mutual,groups,groupByStudent,connectors,peripheral,groupMetrics};
-}
+function buildCumulativeRelationshipAnalysis(responses){return IeumRelationshipCore.build(responses,classSettings.students,IeumAnalysisCore)}
 
 function renderCumulativeRelationships(){
   const content=$('#relationContent'),confidence=$('#relationConfidence');if(!content||!confidence)return;

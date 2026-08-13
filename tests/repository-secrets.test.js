@@ -1,0 +1,3 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const ignored=new Set(['.git','node_modules']),files=[];function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){if(ignored.has(entry.name))continue;const full=path.join(dir,entry.name);if(entry.isDirectory())walk(full);else if(/\.(js|ts|html|md|sql|json|css)$/.test(entry.name))files.push(full)}}walk('.');
+test('공개 저장소에는 GitHub·OpenAI 비밀키 원문이 없다',()=>{const hits=[];for(const file of files){const text=fs.readFileSync(file,'utf8');if(/ghp_[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}/.test(text))hits.push(file)}assert.deepEqual(hits,[])});

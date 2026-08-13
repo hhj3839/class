@@ -19,3 +19,4 @@ test('사용되지 않는 과거 월별 관계분석 구현은 번들에 남기�
   assert.doesNotMatch(app,/function buildRelationshipAnalysis\(/);
   assert.doesNotMatch(app,/function renderRelationships\(/);
 });
+test('누적 관계 계산은 별도 순수 모듈을 사용한다',()=>{assert.match(app,/IeumRelationshipCore\.build/);assert.doesNotMatch(app,/const adjacency=new Map\(students/)});
