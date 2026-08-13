@@ -312,42 +312,4 @@ document.addEventListener('click',event=>{if(event.target.id==='runRelationshipA
 
 // 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
 // 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
-function buildCumulativeRelationshipAnalysis(responses){
-  const cumulative=IeumAnalysisCore.cumulativeScores(responses),months=cumulative.months,submittedStudents=cumulative.participants,relationStudents=cumulative.relationResponders,scoreSamples=cumulative.samples,scores=cumulative.scores;
-  const total=classSettings.students.length;
-  const submitted=submittedStudents.size;
-  const relationCount=relationStudents.size;
-  const ready=IeumAnalysisCore.isRelationshipReady(total,submitted,relationCount);
-  const students=classSettings.students.filter(student=>submittedStudents.has(Number(student.number))||[...scores.keys()].some(key=>Number(key.split(':')[1])===Number(student.number)));
-  const mutual=[];
-  students.forEach((student,index)=>students.slice(index+1).forEach(other=>{
-    const a=Number(student.number),b=Number(other.number),ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);
-    if(ab>=4&&ba>=4)mutual.push({a,b,strength:Math.min(ab,ba)});
-  }));
-  const adjacency=new Map(students.map(student=>[Number(student.number),new Set()]));
-  mutual.filter(edge=>edge.strength>=4.5).forEach(edge=>{adjacency.get(edge.a)?.add(edge.b);adjacency.get(edge.b)?.add(edge.a)});
-  const visited=new Set(),groups=[];
-  students.forEach(student=>{
-    const start=Number(student.number);if(visited.has(start))return;
-    const stack=[start],component=[];visited.add(start);
-    while(stack.length){const value=stack.pop();component.push(value);(adjacency.get(value)||[]).forEach(next=>{if(!visited.has(next)){visited.add(next);stack.push(next)}})}
-    if(component.length>=2)groups.push(component);
-  });
-  const groupByStudent=new Map();
-  groups.forEach((group,index)=>group.forEach(number=>groupByStudent.set(number,index)));
-  const connectionsFor=number=>mutual.filter(edge=>edge.a===number||edge.b===number);
-  const connectors=students.map(student=>{
-    const number=Number(student.number),touched=new Set();
-    connectionsFor(number).forEach(edge=>{const other=edge.a===number?edge.b:edge.a;const group=groupByStudent.get(other);if(group!==undefined)touched.add(group)});
-    return{number,name:student.name,groups:[...touched],connections:connectionsFor(number).length};
-  }).filter(item=>item.groups.length>=2);
-  const peripheral=students.map(student=>{const number=Number(student.number);return{number,name:student.name,connections:connectionsFor(number).length,group:groupByStudent.get(number)}}).filter(item=>item.connections<=1&&item.group===undefined);
-  const groupMetrics=[];
-  for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++){
-    const between=[],internal=[];
-    groups[i].forEach(a=>groups[j].forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)between.push(ab);if(ba!==undefined)between.push(ba)}));
-    [groups[i],groups[j]].forEach(group=>group.forEach((a,index)=>group.slice(index+1).forEach(b=>{const ab=scores.get(`${a}:${b}`),ba=scores.get(`${b}:${a}`);if(ab!==undefined)internal.push(ab);if(ba!==undefined)internal.push(ba)})));
-    if(between.length&&internal.length){const betweenAvg=between.reduce((sum,value)=>sum+value,0)/between.length,internalAvg=internal.reduce((sum,value)=>sum+value,0)/internal.length;if(internalAvg-betweenAvg>=1.2)groupMetrics.push({a:i,b:j,internalAvg,betweenAvg})}
-  }
-  return{ready,total,submitted,relationCount,months,students,scores,scoreSamples,mutual,groups,groupByStudent,connectors,peripheral,groupMetrics};
-}
+function buildCumulativeRelationshipAnalysis(responses){return IeumRelationshipCore.build(responses,classSettings.students,IeumAnalysisCore)}
