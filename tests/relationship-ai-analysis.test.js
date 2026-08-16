@@ -24,7 +24,7 @@ test('관계 AI는 선택한 달의 익명 관계 계산과 이전 달 비교를
   assert.match(edge,/관계 구조만 해석하세요/);
   assert.match(edge,/인기·고립·문제 학생으로 단정하거나 관계 원인을 추측하지 마세요/);
   assert.match(edge,/익명 번호 뒤에 '학생'을 붙여 언급/);
-  assert.match(edge,/relationship-coaching-v11/);
+  assert.match(edge,/relationship-coaching-v12/);
   assert.match(edge,/teacher_get_class_context_auth/);
   assert.match(edge,/currentStudentNumbers\.has\(Number\(row\.student_number\)\)/);
   assert.match(edge,/currentStudentNumbers\.has\(Number\(item\.targetNumber\)\)/);
