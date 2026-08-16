@@ -7,7 +7,7 @@ const corsHeaders={
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
 const analysisVersion='2026.08.16-student-support-v16';
-const relationshipAnalysisVersion='2026.08.16-relationship-coaching-v12';
+const relationshipAnalysisVersion='2026.08.16-relationship-coaching-v13';
 const openAiTimeoutMs=45000;
 const internalLabelMap:[RegExp,string][]=[
   [/직접 호소/g,'학생이 작성한 서술'],[/직접 경험/g,'경험 여부가 확인되지 않은 서술'],[/직접 목격/g,'목격 여부가 확인되지 않은 서술'],
@@ -23,7 +23,7 @@ const localizeAnalysisValues=(value:unknown):unknown=>{
   if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value as Record<string,unknown>).map(([key,item])=>[key,localizeAnalysisValues(item)]));
   return value;
 };
-const studentNumbersIn=(value:unknown)=>[...String(value||'').matchAll(/학생-(\d+)/g)].map(match=>Number(match[1]));
+const studentNumbersIn=(value:unknown)=>{const source=String(value||''),direct=[...source.matchAll(/학생-(\d+)/g)].map(match=>Number(match[1])),compact=[...source.matchAll(/학생-(\d+(?:\s*[·,/]\s*\d+)+)/g)].flatMap(match=>[...match[1].matchAll(/\d+/g)].map(value=>Number(value[0])));return[...new Set([...direct,...compact])]};
 const monthLabels=(month:string)=>{const [year,value]=month.split('-');return[month,`${year}년 ${Number(value)}월`,`${Number(value)}월`]};
 const mentionsForeignMonth=(value:unknown,allowedMonths:string[])=>{const source=String(value||''),tokens=[...source.matchAll(/20\d{2}-\d{2}|20\d{2}년\s*\d{1,2}월/g)].map(match=>match[0]);return tokens.some(token=>!allowedMonths.some(month=>monthLabels(month).includes(token.replace(/\s+/g,' '))))};
 const hasUnsafeConclusion=(value:unknown)=>/(고립된? 학생|문제 학생|친구가 없|관계가 끊겼|문제가 해결됐|반드시 상담)/.test(String(value||''));
