@@ -59,7 +59,7 @@ test('학교 운영 절차와 현장 결과지는 개인정보 제외·중단·�
   assert.match(results,/담임 화면 T-01~T-10/);
   assert.match(results,/PDF·인쇄 P-01~P-06/);
   assert.match(results,/현재 판정: `통과 \/ 조건부 통과 \/ 재시험 필요`/);
-  assert.match(results,/현장 실행 기준 커밋: `e7f37f2`/);
+  assert.match(results,/현장 실행 기준 커밋: `d982800`/);
   assert.match(results,/실제 태블릿 3~5대 동시 제출 \| 미실행/);
   assert.match(results,/D-04 최초 오류 수정 후 재시험 통과/);
   assert.match(results,/PR #69/);
