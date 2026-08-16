@@ -199,10 +199,10 @@
 ## 2026년 9월 현장 실행 기준선
 
 - 문서 현행화 날짜: 2026-08-16
-- 현장 실행 기준 커밋: `d982800`
+- 현장 실행 기준 커밋: `95db728`
 - 운영 주소: https://class-ieum.vercel.app/
 - 보조 주소: https://hhj3839.github.io/class/
-- 자동 검증: 로컬 Node 테스트 160개와 최신 `main` GitHub 품질 검사 통과
+- 자동 검증: 로컬 Node 테스트 165개와 최신 `main` GitHub 품질 검사 통과
 - 배포 검증: Vercel 프로덕션과 저장소 관리형 GitHub Pages 배포 성공, 두 공개 주소 HTTP 200 확인
 
 | 현장 실행 항목 | 상태 | 결과 기록 |
