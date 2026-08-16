@@ -107,7 +107,7 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   const support=read('student-support-timeline.js');
   assert.match(html,/class="panel signal-review-panel"[^>]*hidden/);
   assert.doesNotMatch(html,/data-view="observations"/);
-  assert.match(app,/최근 제출일/);
+  assert.match(app,/<h3>현재 모습<\/h3>/);
   assert.match(app,/친구 관계 점수 평균/);
   assert.match(app,/id="studentSupportTimelineSlot"/);
   assert.match(support,/querySelector\('#studentSupportTimelineSlot'\)/);
