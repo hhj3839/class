@@ -19,7 +19,7 @@ test('현장 점검표는 태블릿·교사 화면·PDF·권한·복구 시험�
 
 test('사전 파일럿 기준선과 현장 시험 전 변경 범위가 고정되어 있다',()=>{
   assert.match(checklist,/사전 동결 기준선: `7adb7b0`/);
-  assert.match(checklist,/현재 현장 실행 기준선: `d982800`/);
+  assert.match(checklist,/현재 현장 실행 기준선: `95db728`/);
   assert.match(checklist,/신규 기능과 정보 구조 변경은 보류/);
   assert.match(checklist,/P0·P1 오류만 수정/);
   assert.match(checklist,/`여러 달 함께 보기` 다음에 최신 월부터 표시/);
@@ -64,10 +64,10 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
 });
 
 test('PRD는 최신 field 실행 단계와 9월 현장 기준선을 기록한다',()=>{
-  assert.match(prd,/제품 단계: v1\.2\.1-field 현장 파일럿 실행 단계/);
-  assert.match(prd,/현재 단계: `v1\.2\.1-field` \/ 현장 실행 기준선 `d982800`/);
+  assert.match(prd,/제품 단계: v1\.2\.1-field 현장 파일럿 준비 완료 단계/);
+  assert.match(prd,/현재 단계: `v1\.2\.1-field` 준비 완료 \/ 현장 실행 기준선 `95db728`/);
   assert.match(prd,/사전 동결 기준선: `v1\.2\.1-prepilot\.3` \/ `7adb7b0`/);
-  assert.match(prd,/2026-08-16 원격 `main`과 로컬을 `d982800`으로 동기화/);
+  assert.match(prd,/2026-08-16 원격 `main`과 로컬을 `95db728`으로 동기화/);
   assert.match(prd,/2026년 9월 실제 태블릿/);
   assert.match(prd,/실제 태블릿 3~5대 동시 제출/);
 });
