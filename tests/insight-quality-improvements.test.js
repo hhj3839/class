@@ -33,6 +33,8 @@ test('관계 코칭은 계산된 기준과 맞지 않는 결과를 차단하고 
   assert.match(edge,/fallbackCoaching:Record<string,string>/);
   assert.match(edge,/\^\\\[계산 결과\\\]/);
   assert.match(edge,/analysis\.insights\.length/);
+  assert.match(edge,/named\.length>3\?fallbackObservation/);
+  assert.match(edge,/replace\(\/이 둘\|두 학생\/g,'관련 학생들'\)/);
 });
 
 test('관계 AI 카드는 관계 모습에서 확인 장면과 학급 코칭으로 직접 이어진다',()=>{
