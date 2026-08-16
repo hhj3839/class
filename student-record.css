@@ -71,8 +71,9 @@
 }
 
 #studentPanelSummary .student-attention-summary { order: 1; }
-#studentPanelSummary .student-response-insight { order: 2; }
-#studentPanelSummary .student-summary-grid { order: 3; }
+#studentPanelSummary .student-current-snapshot { order: 2; }
+#studentPanelSummary .student-response-insight { order: 3; }
+#studentPanelSummary .student-recurring-patterns { order: 4; }
 
 .student-summary-grid .stat-card:nth-child(1) { order: 3; }
 .student-summary-grid .stat-card:nth-child(2) { order: 1; }

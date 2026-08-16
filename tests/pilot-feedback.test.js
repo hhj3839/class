@@ -24,7 +24,7 @@ test('AI 유용성 평가 버튼은 화면에서 제거하고 기존 감사 구�
 test('AI 근거는 응답 ID와 문항 경로를 검증한 뒤 원문으로 연결한다',()=>{
   assert.match(edge,/response_id:String\(row\.id\)/);
   assert.match(edge,/allowedRefs=new Set/);
-  assert.match(edge,/source_refs=.*filter/);
+  assert.match(edge,/source_refs:\(item\.source_refs\|\|\[\]\)\.filter/);
   assert.match(app,/openAiSourceEvidence/);
   assert.match(app,/valueAtPath/);
 });
