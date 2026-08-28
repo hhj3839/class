@@ -10,6 +10,8 @@ const studentRecordCss=read('student-record.css');
 
 test('설문 관리는 학생 설문 링크와 제출 현황만 탭으로 구분한다',()=>{
   const html=read('index.html');
+  const surveyView=html.slice(html.indexOf('id="surveyView"'),html.indexOf('id="analysisView"'));
+  assert.doesNotMatch(surveyView,/7월 월간 설문/);
   assert.match(html,/data-survey-admin-tab="link"[^>]*>학생 설문 링크/);
   assert.match(html,/data-survey-admin-tab="status"[^>]*>제출 현황/);
   assert.match(html,/id="surveyStatusPanel"[^>]*hidden/);
