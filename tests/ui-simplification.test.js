@@ -129,7 +129,7 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
   assert.match(html,/class="student-navigation"/);
   assert.match(html,/class="student-selection-step"/);
-  assert.match(html,/id="studentSelectionPosition"/);
+  assert.doesNotMatch(html,/class="student-selection-label"|id="studentSelectionPosition"/);
   assert.match(html,/class="student-toolbar-actions"/);
   assert.doesNotMatch(html,/학생 바꾸기|studentDetailMeta/);
   assert.match(html,/id="previousStudent"/);
@@ -138,7 +138,8 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(studentRecordCss,/\.student-picker::after/);
   assert.match(studentRecordCss,/appearance:\s*none/);
   assert.match(studentRecordCss,/\.student-picker:focus-within/);
-  assert.match(studentRecordCss,/grid-template-columns:\s*auto minmax\(180px,1fr\) auto auto/);
+  assert.match(studentRecordCss,/grid-template-columns:\s*80px minmax\(220px,280px\) 80px 110px/);
+  assert.match(html,/aria-label="학생 기록 PDF 저장">PDF 저장/);
   assert.doesNotMatch(studentRecordCss,/\.student-pdf-button\s*\{\s*grid-column:\s*1\s*\/\s*-1/);
   assert.equal((studentRecordCss.match(/\{/g)||[]).length,(studentRecordCss.match(/\}/g)||[]).length);
   assert.match(app,/function studentYearTimelineHTML/);
