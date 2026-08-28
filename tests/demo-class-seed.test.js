@@ -7,6 +7,8 @@ const root=path.join(__dirname,'..');
 const seed=fs.readFileSync(path.join(root,'supabase','demo','seed_demo_class.sql'),'utf8');
 const reset=fs.readFileSync(path.join(root,'supabase','demo','reset_demo_class.sql'),'utf8');
 const guide=fs.readFileSync(path.join(root,'DEMO_CLASS_GUIDE.md'),'utf8');
+const rolling=fs.readFileSync(path.join(root,'supabase','migrations','20260828090000_roll_demo_months_forward.sql'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 
 test('데모 생성 SQL은 이메일 교체를 강제하고 지정 교사의 demo 학급만 초기화한다',()=>{
   assert.match(seed,/REPLACE_WITH_TEST_TEACHER_EMAIL/);
@@ -43,4 +45,17 @@ test('데모 안내는 생성, 확인, 삭제와 실제 API 사용 주의를 설
   for(const term of ['SQL Editor','화면별 빠른 확인','다른 시험 교사','새 분석','reset_demo_class.sql']){
     assert.match(guide,new RegExp(term));
   }
+});
+
+test('실험실 계정은 로그인할 때 데모 자료를 현재 달까지 자동 이동한다',()=>{
+  assert.match(app,/startsWith\('demo-'\)/);
+  assert.match(app,/teacher_roll_demo_months_forward_auth/);
+  assert.match(rolling,/p_class_id not like 'demo-%'/);
+  assert.match(rolling,/teacher_id=auth\.uid\(\)/);
+  assert.match(rolling,/max\(r\.survey_month\)/);
+  assert.match(rolling,/months_to_shift<=0 then return 0/);
+  assert.match(rolling,/update public\.survey_responses/);
+  assert.match(rolling,/update public\.ai_analysis_runs/);
+  assert.match(rolling,/update public\.observations/);
+  assert.match(rolling,/demo_months_rolled_forward/);
 });
