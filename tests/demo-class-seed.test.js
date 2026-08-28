@@ -22,16 +22,17 @@ test('데모 생성 SQL은 핵심 화면 상태와 저장 AI 결과를 포함한
   for(const term of ['survey_responses','safety_signal_reviews','observations','ai_analysis_runs','analysis_excluded=true','demo-saved-analysis']){
     assert.match(seed,new RegExp(term));
   }
+  assert.match(seed,/jsonb_build_object\('students',10,'months',12\)/);
   assert.match(seed,/for student_number in 1\.\.10/);
-  assert.match(seed,/month_offset in reverse 2\.\.0/);
+  assert.match(seed,/month_offset in reverse 11\.\.0/);
 });
 
 test('데모 관계 응답은 묶음·연결·비대칭·월별 변화를 의도적으로 포함한다',()=>{
   assert.match(seed,/A\(1·3·9\), B\(2·5·7\), C\(4·6·8\)/);
   assert.match(seed,/\(3,5\),\(5,3\),\(7,8\),\(8,7\)/);
   assert.match(seed,/\(1,2\),\(5,4\)/);
-  assert.match(seed,/5-month_offset/);
-  assert.match(seed,/2\+month_offset/);
+  assert.match(seed,/greatest\(3,5-month_offset\)/);
+  assert.match(seed,/least\(4,2\+month_offset\)/);
   assert.match(seed,/target_number=4/);
 });
 

@@ -1,4 +1,4 @@
--- 기능 점검용 demo-* 학급을 로그인 시점의 최근 3개월 자료로 유지합니다.
+-- 기능 점검용 demo-* 학급의 최근 12개월 자료를 로그인 시점에 현재 달까지 이동합니다.
 -- 담당 교사가 소유한 데모 학급만 앞으로 이동하며 운영 학급은 변경하지 않습니다.
 create or replace function public.teacher_roll_demo_months_forward_auth(p_class_id text)
 returns integer
