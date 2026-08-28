@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="safety-signals.css?v=20260720-2" />
   <link rel="stylesheet" href="safety-signals-workflow.css?v=20260720-1" />
   <link rel="stylesheet" href="student-support-timeline.css?v=20260724-5" />
-  <link rel="stylesheet" href="student-record.css?v=20260828-4" />
+  <link rel="stylesheet" href="student-record.css?v=20260828-5" />
   <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
   <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
 </head>
@@ -96,12 +96,11 @@
         <div class="page-intro"><div><p class="eyebrow">학생 한 명씩 살펴보기</p><h2>학생별 살펴보기</h2></div></div>
         <div class="student-navigation" aria-label="학생 선택과 살펴보기 화면">
           <div class="student-selection-step">
-            <div class="student-selection-label"><span>1</span><div><strong>학생 선택</strong><small id="studentSelectionPosition">학생을 선택해 주세요</small></div></div>
             <div class="student-toolbar-actions">
               <button class="secondary-button student-step-button" id="previousStudent" type="button" disabled aria-label="이전 학생">‹ <span>이전</span></button>
               <label class="student-picker"><select id="studentDetailSelect" aria-label="살펴볼 학생"></select></label>
               <button class="secondary-button student-step-button" id="nextStudent" type="button" disabled aria-label="다음 학생"><span>다음</span> ›</button>
-              <button class="secondary-button student-pdf-button" id="printStudentReport" type="button" disabled>학생 기록 PDF 저장</button>
+              <button class="secondary-button student-pdf-button" id="printStudentReport" type="button" disabled aria-label="학생 기록 PDF 저장">PDF 저장</button>
             </div>
           </div>
           <div class="student-detail-tabs" id="studentDetailTabs" role="tablist" aria-label="선택한 학생 살펴보기">
