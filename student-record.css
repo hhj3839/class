@@ -44,10 +44,15 @@
 }
 
 .student-toolbar-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(180px,1fr) auto auto;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
+
+.student-toolbar-actions .student-picker { min-width: 0; }
 
 .student-picker {
   position: relative;
@@ -98,6 +103,7 @@
 .student-step-button,
 .student-pdf-button {
   min-height: 44px;
+  white-space: nowrap;
 }
 
 .student-navigation .student-detail-tabs { width: 100%; margin: 0; }
@@ -215,8 +221,7 @@
 @media (max-width: 900px) {
   .student-navigation { top: 76px; }
   .student-selection-step { align-items: stretch; flex-direction: column; }
-  .student-toolbar-actions { display:grid; grid-template-columns:auto minmax(180px,1fr) auto; }
-  .student-pdf-button { grid-column: 1 / -1; }
+  .student-toolbar-actions { grid-template-columns:auto minmax(140px,1fr) auto auto; }
 }
 
 @media (max-width: 760px) {
@@ -228,7 +233,9 @@
 
 @media (max-width: 560px) {
   .student-step-button span { display: none; }
-  .student-pdf-button { width: 100%; }
+  .student-toolbar-actions { grid-template-columns:40px minmax(86px,1fr) 40px auto; gap:6px; }
+  .student-step-button { min-width:40px; padding-right:8px; padding-left:8px; }
+  .student-pdf-button { padding-right:8px; padding-left:8px; font-size:.76rem; }
   .student-picker { min-width:0; }
   .student-picker select { font-size: .88rem; }
 }
