@@ -41,7 +41,6 @@
 .student-selection-label strong,
 .student-selection-label small { display: block; }
 .student-selection-label small { margin-top: 2px; color: var(--muted); }
-}
 
 .student-toolbar-actions {
   display: grid;
