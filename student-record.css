@@ -1,9 +1,46 @@
-.student-toolbar {
+.student-navigation {
+  position: sticky;
+  top: 84px;
+  z-index: 4;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 10px 28px rgba(58,43,92,.08);
+  backdrop-filter: blur(12px);
+}
+
+.student-selection-step {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+}
+
+.student-selection-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 170px;
+}
+
+.student-selection-label > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 900;
+}
+
+.student-selection-label strong,
+.student-selection-label small { display: block; }
+.student-selection-label small { margin-top: 2px; color: var(--muted); }
 }
 
 .student-toolbar-actions {
@@ -63,7 +100,69 @@
   min-height: 44px;
 }
 
-.student-toolbar .student-detail-tabs { margin: 0; }
+.student-navigation .student-detail-tabs { width: 100%; margin: 0; }
+.student-navigation .student-detail-tabs button { flex: 1; }
+.student-navigation button:disabled { color: var(--inactive); cursor: not-allowed; }
+
+.student-year-timeline {
+  margin-bottom: 18px;
+  padding: 18px;
+  overflow-x: auto;
+}
+
+.student-year-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12,minmax(54px,1fr));
+  min-width: 720px;
+  margin-top: 18px;
+}
+
+.student-year-track::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  right: 2.5%;
+  left: 2.5%;
+  height: 2px;
+  background: var(--line);
+}
+
+.student-year-point {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+}
+
+.student-year-point::before {
+  content: "";
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  margin-top: 11px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--inactive);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.student-year-point.submitted { color: var(--ink); cursor: pointer; }
+.student-year-point.submitted::before { background: var(--blue); }
+.student-year-point.attention::before { background: var(--orange); }
+.student-year-point > b { min-height: 18px; color: var(--green); font-weight: 900; }
+.student-year-point > i:empty { display: none; }
+.student-year-point small { font-size: .76rem; white-space: nowrap; }
+.student-year-legend { display: flex; gap: 14px; margin-top: 14px; color: var(--muted); font-size: .8rem; }
+.student-year-legend i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--blue); }
+.student-year-legend i.missing { background: var(--inactive); }
+.student-year-legend i.attention { background: var(--orange); }
+.student-year-legend b { margin-right: 5px; color: var(--green); }
+#studentPanelTrend { overflow-x: hidden; }
 
 #studentPanelSummary {
   display: flex;
@@ -114,7 +213,8 @@
 }
 
 @media (max-width: 900px) {
-  .student-toolbar { align-items: stretch; flex-direction: column; }
+  .student-navigation { top: 76px; }
+  .student-selection-step { align-items: stretch; flex-direction: column; }
   .student-toolbar-actions { display:grid; grid-template-columns:auto minmax(180px,1fr) auto; }
   .student-pdf-button { grid-column: 1 / -1; }
 }

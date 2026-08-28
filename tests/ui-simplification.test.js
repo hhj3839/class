@@ -127,7 +127,9 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(app,/data-student-detail-panel="trend"[^>]*hidden/);
   assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
-  assert.match(html,/class="student-toolbar"/);
+  assert.match(html,/class="student-navigation"/);
+  assert.match(html,/class="student-selection-step"/);
+  assert.match(html,/id="studentSelectionPosition"/);
   assert.match(html,/class="student-toolbar-actions"/);
   assert.doesNotMatch(html,/학생 바꾸기|studentDetailMeta/);
   assert.match(html,/id="previousStudent"/);
@@ -136,6 +138,10 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(studentRecordCss,/\.student-picker::after/);
   assert.match(studentRecordCss,/appearance:\s*none/);
   assert.match(studentRecordCss,/\.student-picker:focus-within/);
+  assert.match(app,/function studentYearTimelineHTML/);
+  assert.match(app,/\.sort\(\)\.slice\(-12\)/);
+  assert.match(app,/미제출은 점수로 계산하지 않음/);
+  assert.match(studentRecordCss,/\.student-year-track/);
   assert.doesNotMatch(app,/student-identity-bar|student-context-sticky/);
 });
 
