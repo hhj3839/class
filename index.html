@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="student-support-timeline.css?v=20260724-5" />
   <link rel="stylesheet" href="student-record.css?v=20260816-1" />
   <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
-  <link rel="stylesheet" href="lavender-theme.css?v=20260828-1" />
+  <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
 </head>
 <body>
   <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
@@ -48,15 +48,16 @@
 
       <section class="view active" id="view-home">
         <div class="notice safe"><span>✓</span><div><strong>분석 결과는 판단이 아닌 관찰의 시작점입니다.</strong><p>원문과 실제 상황을 확인한 뒤 지원 방법을 결정해 주세요.</p></div></div>
-        <div class="stats-grid">
-          <article class="stat-card"><div class="stat-head"><span>이번 달 설문 참여</span><i class="blue">↗</i></div><strong id="homeParticipation">24 <small>/ 28명</small></strong><div class="progress"><span id="homeParticipationBar" style="width:86%"></span></div><p id="homeParticipationText">86% 참여 · 미제출 4명</p></article>
-          <article class="stat-card"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><div class="home-student-links" id="homeUrgentStudents" aria-label="바로 확인할 학생 목록"></div><p class="red-text">바로 도움을 요청한 응답</p></article>
-          <article class="stat-card"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><div class="home-student-links" id="homeWeekStudents" aria-label="살펴볼 학생 목록"></div><p>응답과 실제 상황을 함께 확인해 주세요.</p></article>
-          <article class="stat-card"><div class="stat-head"><span>친절·성장 응답</span><i class="green">↑</i></div><strong id="homePositive">0 <small>건</small></strong><p class="green-text">친구에 관한 서술이 있는 응답</p></article>
+        <div class="home-summary-flow">
+          <article class="stat-card home-participation-card"><div class="stat-head"><span>이번 달 설문 참여</span><i class="blue">↗</i></div><div class="home-participation-row"><strong id="homeParticipation">24 <small>/ 28명</small></strong><p id="homeParticipationText">86% 참여 · 미제출 4명</p></div><div class="progress large"><span id="homeParticipationBar" style="width:86%"></span></div></article>
+          <div class="home-priority-grid" aria-label="이번 달 확인할 학생">
+            <article class="stat-card home-priority-card urgent"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><div class="home-student-links" id="homeUrgentStudents" aria-label="바로 확인할 학생 목록"></div><p class="red-text">바로 도움을 요청한 응답</p></article>
+            <article class="stat-card home-priority-card watch"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><div class="home-student-links" id="homeWeekStudents" aria-label="살펴볼 학생 목록"></div><p>응답과 실제 상황을 함께 확인해 주세요.</p></article>
+          </div>
         </div>
         <div class="dashboard-grid home-trend-grid">
           <div class="panel" id="classTrendPanel">
-            <div class="panel-head"><div><p class="eyebrow">제출한 설문 기준</p><h2>우리 반 월별 변화</h2></div><span class="confidence" id="classTrendConfidence">설문 응답 확인 중</span></div>
+            <div class="panel-head"><div><p class="eyebrow">최근 6개월 · 제출한 설문 기준</p><h2>우리 반 월별 변화</h2></div><div class="home-trend-meta"><span class="home-positive-summary">친절·성장 응답 <strong id="homePositive">0 <small>건</small></strong></span><span class="confidence" id="classTrendConfidence">설문 응답 확인 중</span></div></div>
             <div class="trend-chart" id="classTrendChart" aria-label="월별 학급 자기평가 평균 추세"></div>
             <div class="insight" id="classTrendInsight"><span>ⓘ</span><p>월별 응답을 불러오면 실제 변화가 표시됩니다.</p></div>
           </div>
@@ -181,7 +182,7 @@
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
   <script src="analysis-core.js?v=20260720-2"></script>
   <script src="relationship-core.js?v=20260813-1"></script>
-  <script src="app.js?v=20260828-1"></script>
+  <script src="app.js?v=20260828-2"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260724-8"></script>
   <script src="student-priority.js?v=20260720-1"></script>
