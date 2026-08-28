@@ -140,6 +140,7 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(studentRecordCss,/\.student-picker:focus-within/);
   assert.match(studentRecordCss,/grid-template-columns:\s*auto minmax\(180px,1fr\) auto auto/);
   assert.doesNotMatch(studentRecordCss,/\.student-pdf-button\s*\{\s*grid-column:\s*1\s*\/\s*-1/);
+  assert.equal((studentRecordCss.match(/\{/g)||[]).length,(studentRecordCss.match(/\}/g)||[]).length);
   assert.match(app,/function studentYearTimelineHTML/);
   assert.match(app,/\.sort\(\)\.slice\(-12\)/);
   assert.match(app,/미제출은 점수로 계산하지 않음/);
