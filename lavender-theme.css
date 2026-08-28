@@ -1,0 +1,74 @@
+:root{
+  --blue:#7656b5;
+  --blue-dark:#54358f;
+  --blue-soft:#f0eafd;
+  --ink:#2d2540;
+  --muted:#716882;
+  --line:#ded5ec;
+  --bg:#f8f5fc;
+  --shadow:0 10px 32px rgba(83,57,126,.09)
+}
+
+body{background:linear-gradient(145deg,#faf8fd 0,#f5f0fb 52%,#f8f5fc 100%)}
+.sidebar{background:linear-gradient(180deg,#49316f 0,#34244f 100%);box-shadow:8px 0 30px rgba(54,35,83,.12)}
+.brand-mark{background:linear-gradient(135deg,#cbb7f2,#fff);color:#593d89}
+.brand small,.nav-item,.privacy-card p{color:#d8cbed}
+.nav-item:hover,.nav-item.active{background:rgba(231,218,255,.15)}
+.privacy-icon{color:#d8c0ff}
+.avatar{background:#e9ddfb;color:#553786}
+.profile small{color:#cdbde4}
+.topbar{background:rgba(255,253,255,.92)}
+.stat-card,.panel,.student-month-card,.student-card,.submit-area{border-color:#e3d9ef;box-shadow:var(--shadow)}
+.notice.safe{background:#f1ebfb;border-color:#d9c9ef}
+.progress span,.primary-button,.copy-row button,.filter-tabs button.active{background:var(--blue)}
+.primary-button:hover{background:var(--blue-dark)}
+.student-chip{background:#eee6fa;color:#67469e}
+.student-chip.missing{background:#f0edf3;color:#958ca0}
+.chart-line{background:repeating-linear-gradient(to bottom,#fff,#fff 38px,#eee8f5 39px)}
+.chart-line span{background:#c7b3e5}
+.chart-line span.current{background:#8060bd}
+.observation-column{background:#f1ecf7}
+.observation-card{box-shadow:0 5px 16px rgba(77,53,112,.07)}
+.metric-row span,.backup-actions,.year-end-steps>article,.pilot-check,.response-list details p{background:#f5f1f9}
+.form-grid input:focus,.roster-table input:focus{outline-color:#ded0f2}
+.home-student-link:hover,.home-student-link:focus-visible,:where(button,a,input,select,textarea,summary):focus-visible{outline-color:#b99be4}
+.nav-item::after{background:#302044;box-shadow:0 8px 24px rgba(47,31,68,.24)}
+
+.analysis-view-tabs,.settings-tabs,.auth-mode-tabs,.relation-view-tabs,.survey-admin-tabs,.student-detail-tabs{background:#eee8f5}
+.analysis-view-tabs button.active,.settings-tabs button.active,.auth-mode-tabs button.active,.relation-view-tabs button.active,.survey-admin-tabs button.active,.student-detail-tabs button.active{color:var(--blue);box-shadow:0 3px 12px rgba(81,54,123,.12)}
+.auth-gate{background:radial-gradient(circle at top,#eee5fb,#f7f3fc 55%,#eee8f5)}
+.auth-gate-card{border-color:#dfd3ed;box-shadow:0 22px 70px rgba(69,43,107,.17)}
+.network-fixed-frame{border-color:#ded4eb;background:radial-gradient(circle at center,#fff 0,#faf7fd 70%,#f0e9f8 100%)}
+.actual-relations .nodes rect{stroke:#7656b5;filter:drop-shadow(0 3px 4px rgba(83,54,128,.14))}
+.actual-relations [data-relation-edge].relation-highlighted{stroke:#7656b5}
+.relation-legend{border-color:#e2d9ec;background:#faf7fd}
+.relation-legend span{border-color:#e2d9ec}
+.relation-legend .solid-line{border-color:#a991cf}
+.student-selection-bar{border-color:#cdb9e6;background:linear-gradient(135deg,#f3edfb,#fbf9fd);box-shadow:0 7px 20px rgba(89,57,134,.08)}
+.student-picker span{color:#59427a}
+.student-picker select{border-color:#9575c6}
+.student-trend-row i{background:linear-gradient(180deg,#b69adf,#7656b5)}
+.student-detail-grid blockquote{border-left-color:#a98bd4;background:#faf7fd}
+.analysis-month-picker{border-color:#cab8df;background:#f5f0fb;color:#594575}
+.analysis-month-picker select{border-color:#cab8df}
+.ai-overall-judgment,.relationship-ai-summary{border-color:#d7c9e8;background:linear-gradient(135deg,#f8f4fc,#f1ecf8)}
+.ai-student-rank>b,.class-pattern-number,.class-reading-list article>span{background:#7656b5}
+.coaching-direction,.class-pattern-coaching,.class-reading-coaching{background:#f2ecfa;color:#4b3866}
+.ai-evidence-row b{background:#eee7f8;color:#634793}
+.ai-no-priority,.class-reading-list article{background:#faf7fd}
+.pdf-render-root header{border-bottom-color:#7656b5}
+.pdf-render-root h2{color:#513879}
+.pdf-section-heading{border-bottom-color:#9277b9}
+
+.student-page{color:var(--ink)}
+.student-logo span,.student-page .primary,.survey-welcome{background:#7656b5}
+.student-page .primary:hover{background:#54358f}
+.student-page .student-card,.student-page .survey-welcome,.student-page .submit-area{border-color:#dfd5eb;box-shadow:0 10px 34px rgba(75,49,111,.1)}
+.student-page .field input:focus,.student-page .field select:focus,.student-page .field textarea:focus{outline-color:#dfd1f2;border-color:#7656b5}
+.student-page .safety-note,.student-page .draft-status{background:#f0eafd}
+.student-page .survey-welcome .kicker{color:#eadfff}
+.student-page .survey-welcome p:last-child{color:#eee6fa}
+.student-page .rating-block{border-color:#eee8f4}
+.student-page .relationship-row,.student-page .context-grid .check-field{background:#f7f3fb}
+
+@media(max-width:780px){.sidebar{box-shadow:10px 0 34px rgba(43,28,64,.22)}}
