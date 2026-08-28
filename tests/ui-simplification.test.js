@@ -75,6 +75,16 @@ test('교사 홈은 중복 지원 신호 목록 없이 학생 단위 관찰 인�
   assert.match(html,/바로 확인할 학생/);
   assert.match(html,/살펴볼 학생/);
   assert.match(html,/친절·성장 응답/);
+  assert.match(html,/class="home-summary-flow"/);
+  assert.match(html,/class="home-priority-grid"/);
+  assert.match(html,/최근 6개월 · 제출한 설문 기준/);
+  assert.match(app,/setInsightTone\(steady\?'neutral'/);
+});
+
+test('관계망 학생 선택은 선택 학생과 직접 연결된 학생·선만 강조한다',()=>{
+  assert.match(app,/connectedNumbers=new Set/);
+  assert.match(app,/connectedNumbers\.add\(a\)/);
+  assert.match(app,/relation-focused/);
 });
 
 test('분석은 월 선택을 탭 옆에 두고 설정은 기본 설정과 학년 말 정리만 노출한다',()=>{
