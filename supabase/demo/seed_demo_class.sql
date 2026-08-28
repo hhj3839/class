@@ -55,8 +55,8 @@ begin
     values(demo_class, student_number, student_names[student_number], true, student_id_value);
   end loop;
 
-  -- 지난 3개월 자료. 최신 달에는 6번 학생을 미제출로 남겨 빈 응답+지원 기록을 확인한다.
-  for month_offset in reverse 2..0 loop
+  -- 최근 12개월 자료. 최신 달에는 6번 학생을 미제출로 남겨 빈 응답+지원 기록을 확인한다.
+  for month_offset in reverse 11..0 loop
     for student_number in 1..10 loop
       if (month_offset = 2 and student_number > 8) or (month_offset = 0 and student_number = 6) then
         continue;
@@ -67,10 +67,10 @@ begin
         if target_number <> student_number then
           -- 세 개의 느슨한 관계 묶음, 묶음 사이 연결, 비대칭, 월별 강화·약화를 함께 만든다.
           score := case
-            -- 1↔3은 최근으로 올수록 3→4→5점으로 강화된다.
-            when (student_number,target_number) in ((1,3),(3,1)) then 5-month_offset
-            -- 2↔7은 최근으로 올수록 4→3→2점으로 약화된다.
-            when (student_number,target_number) in ((2,7),(7,2)) then 2+month_offset
+            -- 1↔3은 마지막 3개월에 3→4→5점으로 강화되고 이전 달은 3점으로 유지된다.
+            when (student_number,target_number) in ((1,3),(3,1)) then greatest(3,5-month_offset)
+            -- 2↔7은 마지막 3개월에 4→3→2점으로 약화되고 이전 달은 4점으로 유지된다.
+            when (student_number,target_number) in ((2,7),(7,2)) then least(4,2+month_offset)
             -- A(1·3·9), B(2·5·7), C(4·6·8) 안의 나머지 편안한 상호 관계
             when student_number in (1,3,9) and target_number in (1,3,9) then 5
             when student_number in (2,5,7) and target_number in (2,5,7) then 5
@@ -201,7 +201,7 @@ begin
   );
 
   insert into public.audit_logs(class_id,teacher_id,action,target_type,target_id,reason,details)
-  values(demo_class,target_teacher,'demo_seed_created','class',demo_class,'비식별 기능 점검 자료 생성',jsonb_build_object('students',10,'months',3));
+  values(demo_class,target_teacher,'demo_seed_created','class',demo_class,'비식별 기능 점검 자료 생성',jsonb_build_object('students',10,'months',12));
 
   raise notice '데모 학급 생성 완료: %, 교사: %', demo_class, target_email;
 end $$;
