@@ -139,6 +139,7 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.match(studentRecordCss,/appearance:\s*none/);
   assert.match(studentRecordCss,/\.student-picker:focus-within/);
   assert.match(studentRecordCss,/grid-template-columns:\s*80px minmax\(220px,280px\) 80px 110px/);
+  assert.match(studentRecordCss,/\.student-selection-step\s*\{[^}]*justify-content:\s*flex-start/s);
   assert.match(html,/aria-label="학생 기록 PDF 저장">PDF 저장/);
   assert.doesNotMatch(studentRecordCss,/\.student-pdf-button\s*\{\s*grid-column:\s*1\s*\/\s*-1/);
   assert.equal((studentRecordCss.match(/\{/g)||[]).length,(studentRecordCss.match(/\}/g)||[]).length);

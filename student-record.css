@@ -16,7 +16,7 @@
 .student-selection-step {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .student-toolbar-actions {
@@ -24,7 +24,7 @@
   grid-template-columns: 80px minmax(220px,280px) 80px 110px;
   align-items: center;
   gap: 10px;
-  justify-content: center;
+  justify-content: start;
   width: min(100%,580px);
   min-width: 0;
 }
