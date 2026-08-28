@@ -48,6 +48,8 @@ body{background:linear-gradient(145deg,#faf8fd 0,#f5f0fb 52%,#f8f5fc 100%)}
 .student-picker span{color:#59427a}
 .student-picker select{border-color:#9575c6}
 .student-trend-row i{background:linear-gradient(180deg,#b69adf,#7656b5)}
+.student-month-card>summary:focus-visible{outline-color:#a889d4}
+.monthly-score-list span{background:#f5f1f9}
 .student-detail-grid blockquote{border-left-color:#a98bd4;background:#faf7fd}
 .analysis-month-picker{border-color:#cab8df;background:#f5f0fb;color:#594575}
 .analysis-month-picker select{border-color:#cab8df}
@@ -56,6 +58,23 @@ body{background:linear-gradient(145deg,#faf8fd 0,#f5f0fb 52%,#f8f5fc 100%)}
 .coaching-direction,.class-pattern-coaching,.class-reading-coaching{background:#f2ecfa;color:#4b3866}
 .ai-evidence-row b{background:#eee7f8;color:#634793}
 .ai-no-priority,.class-reading-list article{background:#faf7fd}
+.ai-analysis-panel{border-color:#ded3eb}
+.ai-result-card{background:#fdfbff}
+.ai-limitations,.class-pattern-evidence,.legacy-class-connection,.ai-interpretations,.ai-evidence-details{background:#f7f3fa}
+.ai-attention-reason{background:#f3eef9}
+.ai-protective,.ai-protective-inline{color:#356b52}
+.ai-observation-points article{border-color:#e1d9e9}
+.observation-advanced{background:#f8f5fb}
+.observation-advanced summary{color:#5f5570}
+.observation-outcome.continue{background:#eee7f8;color:#634793}
+.student-insight-section-title,.class-pattern-content>h4{color:#594079}
+.student-insight-card.data{border-left-color:#8f78ad;background:#f8f5fb}
+.class-flow-summary-head>b{background:#eee7f8;color:#61478b}
+.relationship-insight-heading span{background:#eee7f8;color:#634793}
+.relationship-teacher-check,.relationship-coaching-card .relationship-teacher-check{background:#f2edf8;color:#594079}
+.relationship-ai-reading details,.relationship-coaching-card section{background:#faf7fc}
+.relationship-coaching-card section>strong{color:#5d4778}
+.relationship-coaching-card>section.class-reading-coaching{background:#f2ecfa}
 .pdf-render-root header{border-bottom-color:#7656b5}
 .pdf-render-root h2{color:#513879}
 .pdf-section-heading{border-bottom-color:#9277b9}
@@ -70,5 +89,23 @@ body{background:linear-gradient(145deg,#faf8fd 0,#f5f0fb 52%,#f8f5fc 100%)}
 .student-page .survey-welcome p:last-child{color:#eee6fa}
 .student-page .rating-block{border-color:#eee8f4}
 .student-page .relationship-row,.student-page .context-grid .check-field{background:#f7f3fb}
+.student-page .self-row{background:#f5effb;border-color:#d8cae9}
+.student-page .self-smile{border-color:#cdbce1}
+
+.relation-change-summary b{color:#654b88}
+.actual-relations [data-relation-edge]{stroke:#a991cf}
+.actual-relations [data-relation-edge].relationship-new,.actual-relations [data-relation-edge].relationship-weakened{stroke:#d2a24b}
+.relation-legend .dashed-line{border-top-color:#d2a24b}
+.observation-meta span{background:#f0eaf7;color:#625573}
+.pilot-metric-grid article,.feedback-metrics article,.relation-trend-strip article{border-color:#e2d8ed;box-shadow:0 8px 22px rgba(78,52,114,.07)}
+.pilot-metric-grid span,.feedback-metrics span,.relation-trend-strip span{color:#716683}
+.pilot-metric-grid strong,.feedback-metrics strong,.relation-trend-strip strong{color:#5b3f80}
+.pilot-metric-grid small,.feedback-metrics small,.relation-trend-strip small{color:#796f87}
+.pilot-metrics{border-bottom-color:#e6dfee}
+.ai-usefulness{background:#f6f2fa;border-color:#e0d5eb}
+.ai-usefulness button{border-color:#cbb9df;color:#624a80}
+.ai-usefulness button.selected{background:#7656b5;border-color:#7656b5}
+.auth-recovery-button{color:#7656b5}
+.auth-recovery-button:hover{color:#54358f}
 
 @media(max-width:780px){.sidebar{box-shadow:10px 0 34px rgba(43,28,64,.22)}}
