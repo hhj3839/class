@@ -1,0 +1,35 @@
+const {test,expect}=require('@playwright/test');
+for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:900});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const students=[1,2,3].map(number=>({number,name:`가상학생${number}`,student_id:`fixture-${number}`}));
+  const responses=['2026-06','2026-07'].flatMap(month=>students.map(student=>({id:`${month}-${student.number}`,student_number:student.number,student_name:student.name,survey_month:`${month}-01`,submitted_at:`${month}-15T00:00:00Z`,payload_json:{relationships:students.filter(other=>other.number!==student.number).map(other=>({targetNumber:other.number,score:student.number===2||other.number===2?5:2}))}})));
+  await page.route('**/*.supabase.co/**',async route=>{
+    const url=route.request().url();let body=[];
+    if(url.includes('/auth/v1/token'))body={access_token:'test-only',refresh_token:'test-only',expires_in:3600,user:{id:'fixture',email:'fixture@example.invalid'}};
+    if(url.includes('teacher_get_my_classes'))body=[{class_id:'fixture'}];
+    if(url.includes('teacher_get_class_context_auth'))body={classId:'fixture',schoolYear:2026,grade:3,classNumber:1,teacherName:'가상 교사',students};
+    if(url.includes('teacher_get_responses_auth'))body=responses;
+    await route.fulfill({status:200,json:body});
+  });
+  await page.goto('./');
+  await page.locator('#gateLoginButton').click();await page.locator('#authEmail').fill('fixture@example.invalid');await page.locator('#authPassword').fill('fixture-password');await page.locator('#authSubmitButton').click();
+  await expect(page.locator('#teacherApp')).toBeVisible();
+  if(await page.locator('#menuButton').isVisible())await page.locator('#menuButton').click();
+  await page.locator('[data-view="relations"]').click();await page.locator('[data-relation-tab="actual"]').click();
+  await page.locator('#relationshipAnalysisMonth').selectOption('all');
+  await expect(page.locator('.relationship-evidence')).toBeVisible();
+  await page.locator('#relationStudentFocus').selectOption('1');
+  const evidence=page.locator('#relationshipStudentEvidence');
+  await expect(evidence).toContainText('4건 · 2/2명');await expect(evidence).toContainText('관측 2개월');
+  await evidence.locator('summary').click();await expect(evidence.locator('tbody tr')).toHaveCount(2);
+  await expect(evidence.locator('tbody tr').first()).toContainText('5.00점 · 2건');
+  await page.getByText('색상 묶음의 구성 근거 (1개)',{exact:true}).click();
+  await expect(page.locator('.relationship-evidence')).toContainText('내부 강한 연결 2/3쌍 (67%)');
+  await page.locator('.relationship-evidence').screenshot({path:testInfo.outputPath('relationship-evidence.png')});
+  const overflow=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,elements:[...document.querySelectorAll('#view-relations *')].filter(el=>el.getBoundingClientRect().right>innerWidth&&!el.closest('.relationship-evidence-scroll')).slice(0,12).map(el=>({tag:el.tagName,class:el.className,width:el.getBoundingClientRect().width}))}));expect(overflow.scroll,JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.width);
+  await page.locator('#relationshipAnalysisMonth').selectOption('2026-06');await page.locator('#relationStudentFocus').selectOption('1');
+  await expect(page.locator('#relationshipStudentEvidence')).toContainText('2건 · 2/2명');
+  await expect(page.locator('#relationshipStudentEvidence')).toContainText('관측 1개월');
+  expect(errors).toEqual([]);
+});
