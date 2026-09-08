@@ -9,7 +9,7 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
     if(url.includes('teacher_get_class_context_auth'))body={classId:'fixture',schoolYear:2026,grade:3,classNumber:1,teacherName:'가상 교사',students:[{number:1,name:'테스트가',student_id:'a'},{number:2,name:'테스트나',student_id:'b'}]};
     await route.fulfill({status:200,json:body});
   });
-  await page.goto('/');
+  await page.goto('./');
   await expect(page.locator('#teacherApp')).toBeHidden();
   await expect(page.getByText('테스트가',{exact:true})).toHaveCount(0);
   await page.locator('#gateLoginButton').click();
