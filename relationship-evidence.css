@@ -1,0 +1,13 @@
+.relationship-evidence{margin-top:18px;min-width:0}
+.relationship-evidence h3,.relationship-evidence h4{margin-bottom:12px}
+.relationship-evidence p{line-height:1.7;overflow-wrap:anywhere}
+.relationship-evidence details{margin-top:16px;padding:14px;border:1px solid #e4ddef;border-radius:12px;background:#faf8fd}
+.relationship-evidence summary{cursor:pointer;font-weight:600;color:#5b4775}
+.relationship-evidence li{margin:12px 0;line-height:1.7;overflow-wrap:anywhere}
+.relationship-evidence-scroll{overflow-x:auto;max-width:100%;margin-top:12px}
+.relationship-evidence-scroll::before{content:'표가 화면보다 넓으면 좌우로 밀어 확인하세요.';display:block;margin-bottom:8px;font-size:12px;color:#655c70}
+.relationship-evidence table{width:100%;min-width:680px;border-collapse:collapse;text-align:left}
+.relationship-evidence th,.relationship-evidence td{padding:12px;border-bottom:1px solid #e4ddef;font-size:14px;vertical-align:top}
+.relationship-evidence caption{text-align:left;padding:8px 0;color:#655c70}
+#relationTabs{flex-wrap:wrap;max-width:100%}
+@media(max-width:600px){.relationship-evidence{padding:16px}.relationship-evidence details{padding:10px}}

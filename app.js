@@ -292,7 +292,26 @@ function renderRelationshipsV2(){
   const legend=content.querySelector('.relation-legend');if(legend)legend.setAttribute('aria-label','우리 반 관계 지도 범례');
   const networkNote=content.querySelector('.network-panel>.muted');if(networkNote)networkNote.textContent=relationshipMapMode==='monthly'?'1100×640 기준의 반응형 캔버스입니다. 선택한 달의 학생별 최신 응답만 사용하며, 확인되지 않은 연결을 관계 단절로 해석하지 않습니다.':'1100×640 기준의 반응형 캔버스입니다. 전체 월의 실제 응답만 평균하며 결석·미제출 월은 평균에서 제외합니다.';
   confidence.textContent=relationshipMapMode==='monthly'?`${monthLabel(selectedRelationshipMonth)} 친구 관계 응답 반영`:`${analysis.months.length}개월 친구 관계 응답 누적 참고`;
+  content.insertAdjacentHTML('beforeend',relationshipEvidenceHTML(mapState));
+  content.querySelectorAll('.relation-legend span').forEach(span=>{if(span.textContent.startsWith('색상'))span.lastChild.textContent='색상 · 높은 점수로 이어진 연결 묶음';if(span.textContent.startsWith('회색'))span.lastChild.textContent='회색 · 색상 묶음에 포함되지 않음'});
 }
+
+function relationshipEvidenceHTML(mapState){
+  const analysis=mapState.analysis;
+  const groups=IeumRelationshipEvidence.groups(analysis),names=numbers=>numbers.map(number=>classSettings.students.find(student=>Number(student.number)===number)?.name||`${number}번`).join(' · ');
+  const groupHTML=groups.map((group,index)=>`<li><strong>연결 묶음 ${index+1}</strong> · ${escapeHTML(names(group.members))}<br>내부 강한 연결 ${group.links}/${group.possible}쌍 (${Math.round(group.density*100)}%)</li>`).join('');
+  return`<section class="panel relationship-evidence" aria-label="관계 관측 근거"><h3>관계 관측 근거</h3><p class="muted">응답률은 자료량 안내이지 정확도 인증이 아닙니다. 결석·미응답은 0점이나 관계 없음으로 계산하지 않습니다.</p><div id="relationshipStudentEvidence"><p>위에서 학생을 선택하면 받은 응답 수와 관계별 관측 기간을 볼 수 있습니다.</p></div><details><summary>색상 묶음의 구성 근거 (${groups.length}개)</summary><p>서로 누적 평균 4.5점 이상인 연결을 따라 묶었습니다. 월별 화면은 해당 달 점수를 사용합니다. 구성원 모두가 서로 친하거나 고정된 집단이라는 뜻은 아닙니다. 기준점을 바꾸면 묶음도 달라질 수 있습니다.</p>${groupHTML?`<ul>${groupHTML}</ul>`:'<p>표시 기준에 해당하는 연결 묶음이 없습니다.</p>'}</details></section>`;
+}
+function renderRelationshipStudentEvidence(number){
+  const container=$('#relationshipStudentEvidence');if(!container)return;
+  if(!number){container.innerHTML='<p>위에서 학생을 선택하면 받은 응답 수와 관계별 관측 기간을 볼 수 있습니다.</p>';return}
+  const rows=relationshipMapMode==='monthly'?allResponses.filter(item=>monthOf(item)===selectedRelationshipMonth):allResponses,quality=IeumRelationshipEvidence.build(rows,classSettings.students,IeumAnalysisCore),summary=quality.byStudent.get(number),analysis=relationshipMapState().analysis;
+  if(!summary)return;
+  const connections=analysis.mutual.filter(edge=>edge.a===number||edge.b===number).length,pairs=quality.pairs.filter(pair=>pair.a===number||pair.b===number),name=classSettings.students.find(student=>Number(student.number)===number)?.name||'';
+  container.innerHTML=`<h4>${escapeHTML(name)} · 응답 자료</h4><p>받은 응답 <strong>${summary.incomingResponses}건 · ${summary.incomingPeers}/${summary.possible}명</strong> · 관측 ${summary.months.length}개월<br>같은 달 양방향 관측 ${summary.bothPeers}/${summary.possible}명 · 표시된 상호 연결 ${connections}명</p><p>${IeumRelationshipEvidence.description(summary,connections)}</p><p class="muted">양방향 관측 상대가 80% 미만이면 연결 수 해석을 보류하는 운영 기준입니다. 연구로 검증된 신뢰도 기준은 아닙니다.</p><details><summary>관계별 응답과 관측 월 보기</summary><div class="relationship-evidence-scroll"><table><caption>방향별 평균은 각자의 실제 응답만 사용합니다.</caption><thead><tr><th scope="col">상대 학생</th><th scope="col">내가 준 응답</th><th scope="col">받은 응답</th><th scope="col">관측 월</th><th scope="col">같은 달 양방향</th><th scope="col">서로 4점 이상인 달</th></tr></thead><tbody>${pairs.map(pair=>{const forward=pair.a===number,other=forward?pair.b:pair.a,student=classSettings.students.find(item=>Number(item.number)===other),format=(average,count)=>count?`${average.toFixed(2)}점 · ${count}건`:'미관측';return`<tr><th scope="row">${escapeHTML(student?.name||`${other}번`)}</th><td>${format(forward?pair.abAverage:pair.baAverage,forward?pair.abCount:pair.baCount)}</td><td>${format(forward?pair.baAverage:pair.abAverage,forward?pair.baCount:pair.abCount)}</td><td>${pair.months.join(', ')||'미관측'}</td><td>${pair.commonMonths.length}개월</td><td>${pair.positiveMonths.length}개월</td></tr>`}).join('')}</tbody></table></div></details>`;
+}
+document.addEventListener('change',event=>{if(event.target.id==='relationStudentFocus')renderRelationshipStudentEvidence(Number(event.target.value))});
+document.addEventListener('click',event=>{const node=event.target.closest('[data-student-node]'),select=$('#relationStudentFocus');if(node&&select){select.value=node.dataset.number;select.dispatchEvent(new Event('change',{bubbles:true}))}});
 
 function setRelationshipTab(tab){
   const actual=$('#relationActualPanel'),example=$('#relationPreview'),ai=$('#relationAiPanel'),tabs=$('#relationTabs');if(!actual||!example||!ai||!tabs)return;
