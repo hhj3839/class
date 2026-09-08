@@ -11,3 +11,6 @@ tmp/
 .env.local
 supabase/.temp/
 .vercel
+node_modules/
+test-results/
+playwright-report/
