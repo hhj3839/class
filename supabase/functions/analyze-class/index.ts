@@ -1,3 +1,4 @@
+import { redactStudentNames } from './privacy.mjs';
 const corsHeaders={
   'Access-Control-Allow-Origin':'*',
   'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
@@ -6,7 +7,7 @@ const corsHeaders={
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 const text=(value:unknown,max=700)=>String(value||'').trim().slice(0,max);
-const analysisVersion='2026.08.16-student-support-v16';
+const analysisVersion='2026.09.08-student-support-v17';
 const relationshipAnalysisVersion='2026.08.16-relationship-coaching-v13';
 const openAiTimeoutMs=45000;
 const internalLabelMap:[RegExp,string][]=[
@@ -106,6 +107,8 @@ Deno.serve(async request=>{
     if(!latest.size){const message='선택한 월에 분석할 응답이 없습니다.';await failAnalysis(message);return json({error:message},400)}
     const previousDate=new Date(`${month}-01T00:00:00Z`);previousDate.setUTCMonth(previousDate.getUTCMonth()-1);const previousMonth=previousDate.toISOString().slice(0,7),previousLatest=new Map<number,any>();
     (rows||[]).filter((row:any)=>String(row.survey_month||'').slice(0,7)===previousMonth&&!row.analysis_excluded).sort((a:any,b:any)=>new Date(b.submitted_at).getTime()-new Date(a.submitted_at).getTime()).forEach((row:any)=>{if(!previousLatest.has(Number(row.student_number)))previousLatest.set(Number(row.student_number),row)});
+    const classContext=await callRpc('teacher_get_class_context_auth',{p_class_id:classId});
+    const privacyRoster=[...(classContext?.students||[]),...(rows||[]).map((row:any)=>({number:row.student_number,name:row.student_name})),...(rows||[]).map((row:any)=>({number:row.student_number,name:row.payload_json?.studentName}))];
     const evidence=[...latest.values()].map((row:any)=>{const number=Number(row.student_number),p=row.payload_json||{},ratings=p.selfRatings||{},peer=p.peerObservations||{},state=p.studentState||{},before=previousLatest.get(number)?.payload_json||{},beforeRatings=before.selfRatings||{},ratingDeltas=Object.fromEntries(Object.keys(ratings).map(key=>[key,Number(ratings[key]?.score)-Number(beforeRatings[key]?.score)]).filter(([,value])=>Number.isFinite(value)));return{
       student:`학생-${Number(row.student_number)}`,response_id:String(row.id),source_refs:[['studentState.worryDetail',state.worryDetail],['studentState.teacherWish',state.teacherWish],['peerObservations.kind.detail',peer.kind?.detail],['peerObservations.growth.detail',peer.growth?.detail],['peerObservations.hurt.detail',peer.hurt?.detail],['peerObservations.needsHelp.detail',peer.needsHelp?.detail],['unresolved.detail',p.unresolved?.detail],['helpNow',p.helpNow]].filter(([,value])=>text(value,20)).map(([field])=>`${row.id}|${field}`),
       ratings:Object.fromEntries(Object.entries(ratings).map(([key,value]:any)=>[key,{score:Number(value?.score)||null,reason:text(value?.reason,220)}])),
@@ -125,7 +128,7 @@ Deno.serve(async request=>{
     const sourceRefInstruction=' 각 주의 학생의 source_refs에는 입력의 source_refs 중 해당 근거를 직접 뒷받침하는 값만 원문 그대로 최대 4개 복사하세요. 새로운 ID나 경로를 만들지 마세요.';
     const brevityInstruction=' 전체 출력이 잘리지 않도록 각 배열 항목은 한 문장, 각 문장은 120자 이내로 간결하게 작성하세요.';
     const model='gpt-5.4-mini';
-    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',signal:AbortSignal.timeout(openAiTimeoutMs),headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,reasoning:{effort:'low'},instructions:prompt+classCoachingInstruction+sourceRefInstruction+brevityInstruction,input:JSON.stringify({response_count:evidence.length,responses:evidence}),max_output_tokens:5000,text:{format:{type:'json_schema',name:'class_support_analysis',strict:true,schema}}})});
+    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',signal:AbortSignal.timeout(openAiTimeoutMs),headers:{Authorization:`Bearer ${openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify({model,reasoning:{effort:'low'},instructions:prompt+classCoachingInstruction+sourceRefInstruction+brevityInstruction,input:JSON.stringify({response_count:evidence.length,responses:redactStudentNames(evidence,privacyRoster)}),max_output_tokens:5000,text:{format:{type:'json_schema',name:'class_support_analysis',strict:true,schema}}})});
     const result=await ai.json().catch(()=>null);
     if(!ai.ok){const requestId=ai.headers.get('x-request-id')||'',detail=text(result?.error?.message,500)||`OpenAI 응답 코드 ${ai.status}`;console.error('OpenAI API request failed',{status:ai.status,code:result?.error?.code||'',type:result?.error?.type||'',message:detail,requestId});await failAnalysis(detail,requestId);return json({error:`AI 분석 요청에 실패했습니다. ${detail}`,requestId},502)}
     if(result?.status==='incomplete'){const reason=result?.incomplete_details?.reason||'출력 한도';const message=`AI 분석 결과가 ${reason} 때문에 완성되지 않았습니다. 다시 시도해 주세요.`;await failAnalysis(message,ai.headers.get('x-request-id')||'');return json({error:message},502)}
