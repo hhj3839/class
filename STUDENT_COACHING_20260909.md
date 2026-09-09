@@ -22,9 +22,9 @@
 
 ## 배포와 검증
 
-- DB: `supabase/migrations/20260909150000_student_coaching_cards.sql` 별도 적용 필요.
+- DB: `supabase/migrations/20260909150000_student_coaching_cards.sql` 운영 적용 및 마이그레이션 이력 등록 완료(2026-09-09).
 - 함수: `student-coaching`. 기존 `analyze-class`는 변경하지 않는다.
-- DB 검증: `tests/student-coaching.integration.sql`. 가상 학급과 자료만 만들고 반드시 롤백한다.
+- DB 검증: `tests/student-coaching.integration.sql` 적용 전·후 통과. 권한 격리, 저장, 삭제, 자료 변경 감지, 월별 한도를 가상 학급으로 검증하고 모두 롤백했다.
 - Node 검증: 인증·권한·자료 부족·원문 범위·가명 처리·저장 재사용·근거 ID·오류 처리를 모의 API로 검증한다.
 - 화면 검증: 360/768/1440px에서 생성·근거·저장·학생 전환·삭제를 모의 API로 검증한다. 실학생 자료를 외부 AI에 전송하는 검증은 하지 않는다.
 
