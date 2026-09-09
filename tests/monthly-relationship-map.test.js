@@ -58,9 +58,9 @@ test('월별 지도는 선택 월의 최신 응답과 80% 안전장치를 사용
 });
 
 test('이전 달 비교는 단절로 단정하지 않는 세 가지 상태를 표시한다',()=>{
-  assert.match(app,/새로 확인된 상호 연결/);
-  assert.match(app,/이어서 확인된 상호 연결/);
-  assert.match(app,/이번 달 응답에서 확인되지 않음/);
+  assert.match(app,/새로 높은 점수 기준에 해당/);
+  assert.match(app,/두 달 연속 높은 점수 기준에 해당/);
+  assert.match(app,/이번 달 높은 점수 기준 미충족/);
   assert.match(app,/관계가 끊어졌다는 뜻은 아닙니다/);
   assert.match(css,/\.relation-change-summary/);
   assert.match(prd,/연결이 확인되지 않은 것을 관계 단절로 표현하지 않는다/);

@@ -4,6 +4,7 @@ for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const students=[1,2,3].map(number=>({number,name:`가상학생${number}`,student_id:`fixture-${number}`}));
   const responses=['2026-06','2026-07'].flatMap(month=>students.map(student=>({id:`${month}-${student.number}`,student_number:student.number,student_name:student.name,survey_month:`${month}-01`,submitted_at:`${month}-15T00:00:00Z`,payload_json:{relationships:students.filter(other=>other.number!==student.number).map(other=>({targetNumber:other.number,score:student.number===2||other.number===2?5:2}))}})));
+  responses.forEach(row=>{row.student_id=`fixture-${row.student_number}`});
   // Imported malformed duplicates must not change the map while the table uses the last value.
   responses.forEach(row=>{row.payload_json.relationships=row.payload_json.relationships.flatMap(item=>[{...item,score:1},item])});
   await page.route('**/*.supabase.co/**',async route=>{
@@ -21,8 +22,11 @@ for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${
   await page.locator('[data-view="relations"]').click();await page.locator('[data-relation-tab="actual"]').click();
   await page.locator('#relationshipAnalysisMonth').selectOption('all');
   await expect(page.locator('.relationship-evidence')).toBeVisible();
+  await expect(page.locator('.relationship-change-card').first()).toContainText('2026-06 → 2026-07');
+  await expect(page.locator('.relationship-change-card').first()).toContainText('확인된 3쌍');
   await page.locator('#relationStudentFocus').selectOption('1');
   const evidence=page.locator('#relationshipStudentEvidence');
+  await expect(evidence.locator('.relationship-change-card')).toContainText('두 달 연속 높은 점수 기준에 해당: 가상학생2');
   await expect(evidence).toContainText('4건 · 2/2명');await expect(evidence).toContainText('관측 2개월');
   await evidence.locator('summary').click();await expect(evidence.locator('tbody tr')).toHaveCount(2);
   await expect(evidence.locator('tbody tr').first()).toContainText('5.00점 · 2건');
@@ -33,5 +37,6 @@ for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${
   await page.locator('#relationshipAnalysisMonth').selectOption('2026-06');await page.locator('#relationStudentFocus').selectOption('1');
   await expect(page.locator('#relationshipStudentEvidence')).toContainText('2건 · 2/2명');
   await expect(page.locator('#relationshipStudentEvidence')).toContainText('관측 1개월');
+  await expect(page.locator('#relationshipStudentEvidence')).toContainText('직전 달 자료가 없어 비교를 보류');
   expect(errors).toEqual([]);
 });
