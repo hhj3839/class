@@ -20,8 +20,16 @@ for(const width of [360,1440])test(`전출·취소와 월별 집계 ${width}px`,
   await expect(page.locator('#rosterCount')).toContainText('재학 1명 · 전출 1명');await expect(page.locator('[data-transfer-student="1"]')).toHaveText('전출 취소');
   await page.locator('.roster-panel').screenshot({path:testInfo.outputPath('transfer-roster.png')});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  await navigate('survey');await page.getByRole('tab',{name:'제출 현황',exact:true}).click();await expect(page.locator('#surveyParticipation')).toContainText('1 / 1명');await expect(page.locator('#studentGrid')).toContainText('가상학생2');
+  await navigate('survey');await page.getByRole('tab',{name:'제출 현황',exact:true}).click();await expect(page.locator('#surveyParticipation')).toContainText('1 / 1명');await expect(page.locator('#studentGrid')).toContainText('가상학생2(전출)');await expect(page.locator('#studentGrid')).not.toContainText('일부 기간 재적');
   await page.locator('#surveyMonth').selectOption(previous);await expect(page.locator('#surveyParticipation')).toContainText('1 / 2명');
+  await expect(page.locator('#studentGrid')).not.toContainText('(전출)');
+  await navigate('student-detail');
+  await expect(page.locator('#includeTransferredStudents')).not.toBeChecked();
+  await expect(page.locator('#studentDetailSelect option[value="2"]')).toHaveCount(0);
+  await page.locator('#studentDetailSelect').selectOption('1');await expect(page.locator('#nextStudent')).toBeDisabled();
+  await page.locator('#includeTransferredStudents').check();await expect(page.locator('#studentDetailSelect option[value="2"]')).toContainText('전출 ·');
+  await page.locator('#nextStudent').click();await expect(page.locator('#studentDetailSelect')).toHaveValue('2');await expect(page.locator('#printStudentReport')).toBeEnabled();
+  await page.locator('#includeTransferredStudents').uncheck();await expect(page.locator('#studentDetailSelect')).toHaveValue('');await expect(page.locator('#printStudentReport')).toBeDisabled();
   await navigate('settings');await page.locator('[data-transfer-student="1"]').click();await page.locator('#confirmStudentTransfer').click();await expect(page.locator('#rosterCount')).toContainText('재학 2명 · 전출 0명');
   fail=true;await page.locator('[data-transfer-student="1"]').click();await page.locator('#confirmStudentTransfer').click();await expect(page.locator('#studentTransferError')).toContainText('권한');await expect(page.locator('#rosterCount')).toContainText('재학 2명');expect(errors).toEqual([]);
 });

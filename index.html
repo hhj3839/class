@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="student-priority.css?v=20260720-1" />
   <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
   <link rel="stylesheet" href="relationship-evidence.css?v=20260908-1" />
-  <link rel="stylesheet" href="enrollment.css?v=20260909-1" />
+  <link rel="stylesheet" href="enrollment.css?v=20260909-2" />
 </head>
 <body>
   <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
@@ -105,6 +105,7 @@
               <button class="secondary-button student-pdf-button" id="printStudentReport" type="button" disabled aria-label="학생 기록 PDF 저장">PDF 저장</button>
             </div>
           </div>
+          <label class="student-transfer-filter"><input type="checkbox" id="includeTransferredStudents">전출 학생 포함</label>
           <div class="student-detail-tabs" id="studentDetailTabs" role="tablist" aria-label="선택한 학생 살펴보기">
             <button class="active" type="button" id="studentTabSummary" data-student-detail-tab="summary" role="tab" aria-controls="studentPanelSummary" aria-selected="true" disabled>한눈에 보기</button>
             <button type="button" id="studentTabTrend" data-student-detail-tab="trend" role="tab" aria-controls="studentPanelTrend" aria-selected="false" disabled>변화 살펴보기</button>
@@ -183,7 +184,7 @@
   <dialog id="studentTransferDialog" aria-labelledby="studentTransferTitle"><div class="dialog-head"><h2 id="studentTransferTitle">전출 처리</h2><button class="icon-button" type="button" data-close aria-label="닫기">×</button></div><div class="transfer-body"><p id="studentTransferDescription"></p><label>전출일<input id="studentTransferDate" type="date" required></label><p id="studentTransferError" role="alert"></p></div><div class="dialog-actions"><button class="secondary-button" type="button" data-close>닫기</button><button class="primary-button" type="button" id="confirmStudentTransfer">전출 처리하기</button></div></dialog>
   <script src="supabase.js?v=20260720-4"></script>
   <script src="enrollment-core.js?v=20260909-1"></script>
-  <script src="enrollment-ui.js?v=20260909-1"></script>
+  <script src="enrollment-ui.js?v=20260909-2"></script>
   <script src="vendor/qrcode.js?v=2.0.4"></script>
   <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
   <script src="vendor/jspdf.umd.min.js?v=2.5.1"></script>
@@ -193,7 +194,7 @@
   <script src="relationship-evidence.js?v=20260909-1"></script>
   <script src="relationship-changes.js?v=20260909-2"></script>
   <script src="student-calendar.js?v=20260908-1"></script>
-  <script src="app.js?v=20260909-3"></script>
+  <script src="app.js?v=20260909-4"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260724-8"></script>
   <script src="student-priority.js?v=20260720-1"></script>

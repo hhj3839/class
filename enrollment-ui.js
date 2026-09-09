@@ -1,4 +1,6 @@
 function clearEnrollmentDialog(){const dialog=$('#studentTransferDialog');if(!dialog)return;dialog.close();delete dialog.dataset.studentId;delete dialog.dataset.cancelTransfer;$('#studentTransferTitle').textContent='전출 처리';$('#studentTransferDescription').textContent='';$('#studentTransferError').textContent='';$('#studentTransferDate').value=''}
+function studentDetailRoster(){return classSettings.students.filter(student=>$('#includeTransferredStudents')?.checked||!IeumEnrollment.transferDate(student))}
+document.addEventListener('change',event=>{if(event.target.id==='includeTransferredStudents'){renderStudentDetailSelector();renderStudentDetail()}});
 function renderEnrollmentControls(){
   const students=classSettings.students,transferred=students.filter(student=>IeumEnrollment.transferDate(student));
   $('#rosterCount').textContent=`재학 ${students.length-transferred.length}명 · 전출 ${transferred.length}명`;
