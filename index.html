@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
   <link rel="stylesheet" href="relationship-evidence.css?v=20260908-1" />
   <link rel="stylesheet" href="enrollment.css?v=20260909-2" />
-  <link rel="stylesheet" href="student-coaching.css?v=20260909-4" />
+  <link rel="stylesheet" href="student-coaching.css?v=20260909-6" />
 </head>
 <body>
   <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
@@ -103,10 +103,9 @@
               <button class="secondary-button student-step-button" id="previousStudent" type="button" disabled aria-label="이전 학생">‹ <span>이전</span></button>
               <label class="student-picker"><select id="studentDetailSelect" aria-label="살펴볼 학생"></select></label>
               <button class="secondary-button student-step-button" id="nextStudent" type="button" disabled aria-label="다음 학생"><span>다음</span> ›</button>
-              <button class="secondary-button student-pdf-button" id="printStudentReport" type="button" disabled aria-label="학생 기록 PDF 저장">PDF 저장</button>
+              <div class="student-pdf-controls"><button class="secondary-button student-pdf-button" id="printStudentReport" type="button" disabled aria-label="학생 기록 PDF 저장">PDF 저장</button><label class="student-transfer-filter"><input type="checkbox" id="includeTransferredStudents">전출 학생 포함</label></div>
             </div>
           </div>
-          <label class="student-transfer-filter"><input type="checkbox" id="includeTransferredStudents">전출 학생 포함</label>
           <div class="student-detail-tabs" id="studentDetailTabs" role="tablist" aria-label="선택한 학생 살펴보기">
             <button class="active" type="button" id="studentTabSummary" data-student-detail-tab="summary" role="tab" aria-controls="studentPanelSummary" aria-selected="true" disabled>한눈에 보기</button>
             <button type="button" id="studentTabTrend" data-student-detail-tab="trend" role="tab" aria-controls="studentPanelTrend" aria-selected="false" disabled>변화 살펴보기</button>

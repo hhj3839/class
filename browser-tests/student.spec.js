@@ -28,11 +28,13 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   await expect(page.locator('#studentDetailSelect')).toHaveValue('2');
   await expect(page.locator('#studentPanelTrend')).toBeVisible();
   const geometry=await page.locator('.student-toolbar-actions').evaluate(el=>{
-    const boxes=[...el.children].map(child=>child.getBoundingClientRect());
+    const boxes=[...el.children].filter(child=>innerWidth>700||!child.classList.contains('student-pdf-controls')).map(child=>child.getBoundingClientRect());
     return {centers:boxes.map(b=>b.y+b.height/2),right:Math.max(...boxes.map(b=>b.right)),width:innerWidth};
   });
   expect(Math.max(...geometry.centers)-Math.min(...geometry.centers)).toBeLessThan(3);
   expect(geometry.right).toBeLessThanOrEqual(geometry.width);
+  const pair=await page.locator('.student-pdf-controls').evaluate(el=>{const [button,label]=[...el.children].map(child=>child.getBoundingClientRect());return{gap:label.left-button.right,offset:Math.abs(label.y+label.height/2-button.y-button.height/2),right:label.right,width:innerWidth}});
+  expect(pair.gap).toBeGreaterThanOrEqual(0);expect(pair.offset).toBeLessThan(3);expect(pair.right).toBeLessThanOrEqual(pair.width);
   await page.locator('#studentTabResponses').click();
   await expect(page.locator('#studentPanelResponses')).toBeVisible();
   expect(errors).toEqual([]);
