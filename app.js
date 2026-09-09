@@ -336,4 +336,4 @@ document.addEventListener('click',event=>{if(event.target.id==='runRelationshipA
 
 // 관계 분석은 특정 월이 아니라 저장된 전체 월의 실제 응답을 누적 평균한다.
 // 미제출 월(결석 포함)은 0점으로 보지 않고 평균의 분모에서 제외한다.
-function buildCumulativeRelationshipAnalysis(responses){return IeumRelationshipCore.build(responses,classSettings.students,IeumAnalysisCore)}
+function buildCumulativeRelationshipAnalysis(responses){return IeumRelationshipCore.build(IeumRelationshipData.normalizeResponses(responses,classSettings.students),classSettings.students,IeumAnalysisCore)}
