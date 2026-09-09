@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
   <link rel="stylesheet" href="relationship-evidence.css?v=20260908-1" />
   <link rel="stylesheet" href="enrollment.css?v=20260909-2" />
+  <link rel="stylesheet" href="student-coaching.css?v=20260909-1" />
 </head>
 <body>
   <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
@@ -110,6 +111,7 @@
             <button class="active" type="button" id="studentTabSummary" data-student-detail-tab="summary" role="tab" aria-controls="studentPanelSummary" aria-selected="true" disabled>한눈에 보기</button>
             <button type="button" id="studentTabTrend" data-student-detail-tab="trend" role="tab" aria-controls="studentPanelTrend" aria-selected="false" disabled>변화 살펴보기</button>
             <button type="button" id="studentTabResponses" data-student-detail-tab="responses" role="tab" aria-controls="studentPanelResponses" aria-selected="false" disabled>월별 응답</button>
+            <button type="button" id="studentTabCoaching" data-student-detail-tab="coaching" role="tab" aria-controls="studentPanelCoaching" aria-selected="false" disabled>학생 코칭</button>
           </div>
         </div>
         <div id="studentDetailContent" aria-live="polite"><div class="panel student-empty"><strong>학생을 선택해 주세요.</strong><p class="muted">선택한 학생의 요약, 변화 살펴보기, 월별 응답을 표시합니다.</p></div></div>
@@ -194,7 +196,9 @@
   <script src="relationship-evidence.js?v=20260909-1"></script>
   <script src="relationship-changes.js?v=20260909-2"></script>
   <script src="student-calendar.js?v=20260908-1"></script>
-  <script src="app.js?v=20260909-4"></script>
+  <dialog id="studentCoachingEvidence" aria-labelledby="studentCoachingEvidenceTitle"><div class="dialog-head"><h2 id="studentCoachingEvidenceTitle">코칭 제안의 근거</h2><button class="icon-button" type="button" data-close aria-label="닫기">×</button></div><div id="studentCoachingSource"></div></dialog>
+  <script src="student-coaching.js?v=20260909-1"></script>
+  <script src="app.js?v=20260909-5"></script>
   <script src="safety-signals.js?v=20260721-1"></script>
   <script src="student-support-timeline.js?v=20260724-8"></script>
   <script src="student-priority.js?v=20260720-1"></script>
