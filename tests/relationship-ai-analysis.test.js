@@ -24,7 +24,7 @@ test('관계 AI는 선택한 달의 익명 관계 계산과 이전 달 비교를
   assert.match(edge,/관계 구조만 해석하세요/);
   assert.match(edge,/인기·고립·문제 학생으로 단정하거나 관계 원인을 추측하지 마세요/);
   assert.match(edge,/익명 번호 뒤에 '학생'을 붙여 언급/);
-  assert.match(edge,/relationship-coaching-v13/);
+  assert.match(edge,/relationship-coaching-v14/);
   assert.match(edge,/compact=\[\.\.\.source\.matchAll/);
   assert.match(edge,/teacher_get_class_context_auth/);
   assert.match(edge,/currentStudentNumbers\.has\(Number\(row\.student_number\)\)/);
@@ -91,8 +91,8 @@ test('관계 AI 카드는 핵심 관계 문장과 근거 범위를 먼저 표시
 });
 
 test('이전 형식의 저장 관계 분석은 새 분석을 권장한다',()=>{
-  assert.match(edge,/upgradeRecommended=analysisType==='relationship'[\s\S]*coaching_basis/);
-  assert.match(edge,/analysisVersion:upgradeRecommended\?'이전 저장 형식':selectedVersion/);
+  assert.match(edge,/upgradeRecommended=cachedAnalysis\?\._analysis_version!==selectedVersion/);
+  assert.match(edge,/analysisVersion:cachedAnalysis\?\._analysis_version\|\|'이전 저장 형식'/);
   assert.match(app,/이전 형식으로 저장된 결과입니다/);
   assert.match(app,/AI 새 분석을 실행해 주세요/);
   assert.match(app,/meta\.upgradeRecommended\?'이전 저장 결과'/);

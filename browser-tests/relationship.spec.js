@@ -4,6 +4,8 @@ for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const students=[1,2,3].map(number=>({number,name:`가상학생${number}`,student_id:`fixture-${number}`}));
   const responses=['2026-06','2026-07'].flatMap(month=>students.map(student=>({id:`${month}-${student.number}`,student_number:student.number,student_name:student.name,survey_month:`${month}-01`,submitted_at:`${month}-15T00:00:00Z`,payload_json:{relationships:students.filter(other=>other.number!==student.number).map(other=>({targetNumber:other.number,score:student.number===2||other.number===2?5:2}))}})));
+  // Imported malformed duplicates must not change the map while the table uses the last value.
+  responses.forEach(row=>{row.payload_json.relationships=row.payload_json.relationships.flatMap(item=>[{...item,score:1},item])});
   await page.route('**/*.supabase.co/**',async route=>{
     const url=route.request().url();let body=[];
     if(url.includes('/auth/v1/token'))body={access_token:'test-only',refresh_token:'test-only',expires_in:3600,user:{id:'fixture',email:'fixture@example.invalid'}};
