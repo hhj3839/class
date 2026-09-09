@@ -17,7 +17,8 @@ function renderStudentCoachingCard(){
   const result=card?.result,feedback=(data.feedback||[]).find(row=>row.card_id===card?.id),statusLabels={not_tried:'아직 시도 전',helpful:'도움 됨',needs_change:'다른 방법 필요'};
   const busy=state.generating||state.loading||state.saving;
   target.innerHTML=`<div class="panel-head relationship-ai-head coaching-ai-head"><h3>학생 코칭 카드</h3><div class="ai-review-actions"><span class="confidence">${card?`마지막 분석 ${escape(formatAnalysisTimestamp(card.generatedAt))}`:'저장된 분석 없음'}</span><button type="button" class="text-button" data-coaching-reload ${busy?'disabled':''}>${state.loading?'불러오는 중…':'저장된 결과 불러오기'}</button><button type="button" class="text-button" data-coaching-generate ${busy||!data.canGenerate||data.remaining<=0?'disabled':''}>${state.generating?'AI 분석 중…':'AI 새 분석'}</button></div></div>
-    <p class="muted">자료 기준 ${escape(data.basisMonth?monthLabel(data.basisMonth):'자료 없음')} · 최근 12개월 안의 응답·관찰 참고 · 이번 달 남은 생성 ${Number(data.remaining)||0} / 100회</p>
+    <p class="muted">자료 기준 ${escape(data.basisMonth?monthLabel(data.basisMonth):'자료 없음')} · 이번 달 남은 생성 ${Number(data.remaining)||0} / 100회</p>
+    <p class="muted coaching-scope">분석 범위: 최근 12개월 내 본인의 최신 4회 설문 중 고민·도움 요청·자기평가 등, 최근 교사 기록 최대 6회, 본인 응답이 있는 달의 받은 관계 점수입니다. 모든 과거 응답·문항을 분석하는 것은 아니며, 근거별 본문은 최대 500자까지 참고합니다.</p>
     <p class="muted coaching-usage">AI 새 분석을 누르면 등록된 학생 이름·이메일·휴대전화번호를 가린 응답·교사 기록을 외부 AI로 전송하고 1회를 사용합니다. 그 밖의 개인정보는 기록에 포함하지 마세요.</p>
     ${error}${data.stale?'<div class="notice warning"><p>응답·명단·관찰 자료가 변경되었거나 카드 형식이 업데이트되었습니다. 이전 카드는 숨겼습니다. 현재 자료로 다시 생성해 주세요.</p></div>':''}
     ${data.limited?'<p class="coaching-limited">자료가 적어 학생의 특성을 단정할 수 없습니다. 먼저 확인할 질문과 부담이 적은 지원을 중심으로 참고하세요.</p>':''}

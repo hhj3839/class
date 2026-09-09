@@ -1,6 +1,6 @@
 import '../analyze-class/relationship-data.js';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
-import { buildEvidence, validateCard, schema, instructions, VERSION, MODEL } from './coaching.mjs';
+import { buildEvidence, validateCard, schemaForEvidence, instructions, VERSION, MODEL } from './coaching.mjs';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 Deno.serve(async(request:Request)=>{
@@ -26,8 +26,11 @@ Deno.serve(async(request:Request)=>{
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
     const input={limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,text:source.value.slice(0,500)})),prior_feedback:(context.feedback||[]).map((row:any)=>({status:({not_tried:'아직 시도 전',helpful:'도움 됨',needs_change:'다른 방법 필요'} as any)[row.status],note:String(row.note||'').slice(0,500)}))};
-    const redacted=JSON.stringify(redactStudentNames(input,privacyRoster)).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[이메일 비공개]').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g,'[연락처 비공개]');
-    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({model:MODEL,store:false,reasoning:{effort:'low'},instructions,input:redacted,max_output_tokens:5000,text:{format:{type:'json_schema',name:'student_coaching_card',strict:true,schema}}})});
+    const masked=redactStudentNames(input,privacyRoster);
+    // Redaction must never rename structural evidence identifiers.
+    masked.evidence.forEach((source:any,index:number)=>{source.id=input.evidence[index].id});
+    const redacted=JSON.stringify(masked).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[이메일 비공개]').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g,'[연락처 비공개]');
+    const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({model:MODEL,store:false,reasoning:{effort:'low'},instructions,input:redacted,max_output_tokens:5000,text:{format:{type:'json_schema',name:'student_coaching_card',strict:true,schema:schemaForEvidence(evidence.sources)}}})});
     const result=await ai.json().catch(()=>null);
     if(!ai.ok)throw new Error(ai.status===429?'AI 사용량 또는 요청 한도에 도달했습니다. 잠시 후 확인해 주세요.':'AI 코칭 생성 요청에 실패했습니다.');
     if(result?.status!=='completed')throw new Error('AI 코칭 결과가 완성되지 않았습니다. 다시 시도해 주세요.');
