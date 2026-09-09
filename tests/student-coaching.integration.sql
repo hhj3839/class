@@ -12,7 +12,7 @@ begin
     values(class_key,student_key,1,'가상 학생',date_trunc('month',now())::date,'{"studentState":{"worryDetail":"발표 연습을 하고 싶어요."}}') returning id into response_key;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   context:=public.teacher_get_student_coaching_context_auth(class_key,student_key);fingerprint:=context->>'sourceHash';
-  if (context->>'remaining')::integer<>10 then raise exception '초기 횟수 오류'; end if;
+  if (context->>'remaining')::integer<>100 then raise exception '초기 횟수 오류'; end if;
   denied:=false;begin perform public.teacher_get_student_coaching_context_auth(class_key,other_student);exception when others then denied:=true;end;if not denied then raise exception '다른 학생 식별자 차단 실패';end if;
   card_id:=public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));
   denied:=false;begin perform public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));exception when others then denied:=true;end;if not denied then raise exception '중복 생성 차단 실패';end if;
@@ -32,7 +32,9 @@ begin
   perform public.teacher_delete_student_coaching_auth(class_key,card_id);
   context:=public.teacher_get_student_coaching_context_auth(class_key,student_key);
   if context->'card'<>'null'::jsonb or jsonb_array_length(context->'feedback')<>0 then raise exception '카드 삭제 실패';end if;
-  for i in 1..8 loop card_id:=public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));perform public.teacher_finish_student_coaching_auth(class_key,card_id,'{}','fixture',false);end loop;
+  for i in 1..98 loop card_id:=public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));perform public.teacher_finish_student_coaching_auth(class_key,card_id,'{}','fixture',false);end loop;
+  context:=public.teacher_get_student_coaching_context_auth(class_key,student_key);
+  if (context->>'remaining')::integer<>0 then raise exception '100회 사용 후 잔여 횟수 오류';end if;
   denied:=false;begin perform public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));exception when others then denied:=true;end;if not denied then raise exception '월간 한도 차단 실패';end if;
   if (select count(*) from public.survey_responses where class_id=class_key)<>1 then raise exception '원본 자료 보존 실패';end if;
   if has_function_privilege('anon','public.teacher_get_student_coaching_context_auth(text,uuid)','execute') then raise exception '익명 권한 오류';end if;
