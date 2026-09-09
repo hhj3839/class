@@ -16,12 +16,13 @@
     students.forEach((student,index)=>students.slice(index+1).forEach(other=>{
       const a=Number(student.number),b=Number(other.number),records=[before.get(a),before.get(b),current.get(a),current.get(b)],values=[score(records[0],b),score(records[1],a),score(records[2],b),score(records[3],a)];
       let state='unobserved';
-      if(records.some(row=>!row)||values.some(value=>value===undefined))state='missing';
+      if([student,other].some(item=>{const date=item.transferredOn||item.transferred_on;return date&&month>=date.slice(0,7)}))state='enrollment';
+      else if(records.some(row=>!row)||values.some(value=>value===undefined))state='missing';
       else if(!identity(records[0],student)||!identity(records[1],other)||!identity(records[2],student)||!identity(records[3],other))state='identity';
       else{const oldHigh=values[0]>=4&&values[1]>=4,newHigh=values[2]>=4&&values[3]>=4;state=newHigh?(oldHigh?'continued':'new'):(oldHigh?'below':'other')}
       pairs.push({a,b,state});
     }));
-    const summarize=list=>({comparable:list.filter(pair=>['new','continued','below','other'].includes(pair.state)).length,new:list.filter(pair=>pair.state==='new'),continued:list.filter(pair=>pair.state==='continued'),below:list.filter(pair=>pair.state==='below'),missing:list.filter(pair=>pair.state==='missing'),identity:list.filter(pair=>pair.state==='identity')});
+    const summarize=list=>({comparable:list.filter(pair=>['new','continued','below','other'].includes(pair.state)).length,new:list.filter(pair=>pair.state==='new'),continued:list.filter(pair=>pair.state==='continued'),below:list.filter(pair=>pair.state==='below'),missing:list.filter(pair=>pair.state==='missing'),identity:list.filter(pair=>pair.state==='identity'),enrollment:list.filter(pair=>pair.state==='enrollment')});
     return{month,previousMonth,hasPrevious:before.size>0,pairs,total:summarize(pairs),byStudent:new Map(students.map(student=>[Number(student.number),summarize(pairs.filter(pair=>pair.a===Number(student.number)||pair.b===Number(student.number)))]))};
   }
   return{compare};
