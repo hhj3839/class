@@ -67,7 +67,7 @@ test('배포 HTML은 최신 앱·인증·파일럿 스타일 캐시 버전을 �
   assert.match(html,/pilot-feedback\.css\?v=20260720-3/);
   assert.match(html,/supabase\.js\?v=20260720-4/);
   assert.match(html,/analysis-dashboard\.css\?v=20260816-1/);
-  assert.match(html,/app\.js\?v=20260909-5/);
+  assert.match(html,/app\.js\?v=20260911-1/);
   assert.match(html,/relationship-evidence\.js\?v=20260909-1/);
   assert.ok(html.indexOf('relationship-data.js')<html.indexOf('analysis-core.js'));
     assert.match(html,/student-support-timeline\.css\?v=20260724-5/);
