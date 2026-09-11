@@ -71,7 +71,7 @@ test('배포 HTML은 최신 앱·인증·파일럿 스타일 캐시 버전을 �
   assert.match(html,/relationship-evidence\.js\?v=20260909-1/);
   assert.ok(html.indexOf('relationship-data.js')<html.indexOf('analysis-core.js'));
     assert.match(html,/student-support-timeline\.css\?v=20260724-5/);
-    assert.match(html,/student-support-timeline\.js\?v=20260724-8/);
+    assert.match(html,/student-support-timeline\.js\?v=20260912-1/);
   assert.match(html,/student-record\.css\?v=20260828-6/);
   assert.match(fs.readFileSync('student.html','utf8'),/supabase\.js\?v=20260720-4/);
   assert.match(fs.readFileSync('student.html','utf8'),/student-accessibility\.css\?v=20260723-1/);
