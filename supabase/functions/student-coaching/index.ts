@@ -22,11 +22,11 @@ Deno.serve(async(request:Request)=>{
     const responseView=(card:any,cached:boolean)=>({card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
     if(action==='load')return json(responseView(existing,true));
     if(existing&&!stale&&!body.force)return json(responseView(existing,true));
-    if(!evidence.canGenerate)return json({error:'코칭 근거가 될 응답이나 관찰 기록이 없습니다. 학생과 먼저 대화하고 자료를 남겨 주세요.'},422);
+    if(!evidence.canGenerate)return json({error:'코칭 근거가 될 학생 설문 응답이 부족합니다. 학생이 설문을 제출한 뒤 확인해 주세요.'},422);
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
-    const input={limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,text:source.value.slice(0,500)})),prior_feedback:(context.feedback||[]).map((row:any)=>({status:({not_tried:'아직 시도 전',helpful:'도움 됨',needs_change:'다른 방법 필요'} as any)[row.status],note:String(row.note||'').slice(0,500)}))};
+    const input={limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,text:source.value.slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
     // Redaction must never rename structural evidence identifiers.
     masked.evidence.forEach((source:any,index:number)=>{source.id=input.evidence[index].id});

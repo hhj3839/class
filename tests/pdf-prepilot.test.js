@@ -17,7 +17,7 @@ test('PDF 사전 점검은 A4 여백·한글 폰트·긴 블록 분할·페이�
 test('학생 PDF는 긴 이름을 정리하고 월별 응답·AI·지원 이력을 독립 블록으로 구성한다',()=>{
   assert.match(app,/fileName\.replace/);
   assert.match(app,/buildStudentOverviewReportSection\(student\)/);
-  assert.match(app,/buildStudentSupportReportSection\(student\)/);
+  assert.doesNotMatch(app,/buildStudentSupportReportSection\(student\)/);
   assert.match(app,/buildStudentMonthlyResponseReportSection\(student\)/);
-  assert.match(app,/buildAiReportSectionWithoutTimeline/);
+  assert.match(app,/buildStudentOverviewPdfReport/);
 });

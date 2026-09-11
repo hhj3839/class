@@ -12,6 +12,11 @@ begin
     values(class_key,student_key,1,'가상 학생',date_trunc('month',now())::date,'{"studentState":{"worryDetail":"발표 연습을 하고 싶어요."}}') returning id into response_key;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   context:=public.teacher_get_student_coaching_context_auth(class_key,student_key);fingerprint:=context->>'sourceHash';
+  if context ? 'observations' then raise exception '교사 관찰 자료가 반환됨'; end if;
+  perform public.teacher_save_observation_auth(class_key,jsonb_build_object('studentNumber',1,'surveyMonth',date_trunc('month',now())::date,'title','가상 관찰 보존 검사','observedFact','AI 입력에서 제외되어야 할 가상 기록','status','todo'));
+  context:=public.teacher_get_student_coaching_context_auth(class_key,student_key);
+  if context->>'sourceHash'<>fingerprint or context ? 'observations' then raise exception '관찰 기록이 코칭 자료에 영향'; end if;
+  if not exists(select 1 from public.observations where class_id=class_key) then raise exception '관찰 원본 보존 실패'; end if;
   if (context->>'remaining')::integer<>100 then raise exception '초기 횟수 오류'; end if;
   denied:=false;begin perform public.teacher_get_student_coaching_context_auth(class_key,other_student);exception when others then denied:=true;end;if not denied then raise exception '다른 학생 식별자 차단 실패';end if;
   card_id:=public.teacher_begin_student_coaching_auth(class_key,student_key,fingerprint,to_char(now(),'YYYY-MM'));

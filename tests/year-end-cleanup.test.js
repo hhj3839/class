@@ -31,7 +31,7 @@ test('학년 말 자료 정리는 보고서 생성 뒤 바로 이중 확인으�
 test('학년 말 보고서는 AI 실행과 관계없이 전체 학생 기록을 PDF로 만든다',()=>{
   assert.match(app,/function yearEndReportContent\(\)/);
   assert.match(app,/buildStudentOverviewReportSection\(student\)/);
-  assert.match(app,/buildStudentSupportReportSection\(student\)/);
+  assert.doesNotMatch(app,/buildStudentSupportReportSection\(student\)/);
   assert.match(app,/buildStudentMonthlyResponseReportSection\(student\)/);
   assert.match(app,/teacher_mark_year_end_report_auth/);
   assert.doesNotMatch(app.slice(app.indexOf("$('#downloadYearEndReport')"),app.indexOf("['#yearEndClassLabel','#yearEndConfirmation'")),/ensureAiAnalysis|runAiAnalysis/);
