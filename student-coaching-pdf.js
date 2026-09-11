@@ -25,10 +25,10 @@ function buildStudentCoachingPdfSection(data,{includeNames=true,includeOriginals
 function buildCompactCoachingPdf(data,{includeNames}){
   if(!includeNames||data?.stale||!data?.card?.result)return '';
   const escape=value=>escapeHTML(String(value??'')),short=value=>{const text=String(value||'');return escape(text.length>180?text.slice(0,180)+'…':text)},result=data.card.result;
-  const refs=ids=>[...new Set(ids||[])].map(id=>data.sources?.find(row=>row.id===id)).filter(Boolean).slice(0,2).map(row=>`${escape(row.month)} · ${escape(row.label)}`).join(' / ');
+  const refs=ids=>[...new Set(ids||[])].map(id=>data.sources?.find(row=>row.id===id)).filter(row=>row&&row.kind!=='observation'&&!/^교사/.test(row.type||'')).slice(0,2).map(row=>`${escape(row.month)} · ${escape(row.label)}`).join(' / ');
   const block=(title,text,ids)=>`<article class="pdf-block pdf-coaching-compact"><h3>${escape(title)}</h3><p>${text}</p>${refs(ids)?`<small>근거: ${refs(ids)}</small>`:''}</article>`;
   const feedback=(data.feedback||[]).filter(row=>row.card_id===data.card.id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];
-  return `<section class="pdf-ai-section"><section class="pdf-block pdf-coaching-page-heading" data-pdf-page-start><h2>상담·지도 참고</h2><p>저장 코칭: 최신 4회 설문 일부·교사 기록 최대 6회 기준. 누적 비교의 AI 재분석은 아닙니다.</p></section>${block('학생에게 물어볼 말',short(result.question?.text),result.question?.refs)}${(result.actions||[]).slice(0,2).map((action,i)=>block(`지도 방향 ${i+1}: ${action.title}`,(action.steps||[]).slice(0,2).map(short).join('<br>'),action.refs)).join('')}${block('다음에 확인할 점',short(result.check_after))}${feedback?block('교사의 적용 결과',short(feedback.note)):''}</section>`;
+  return `<section class="pdf-ai-section"><section class="pdf-block pdf-coaching-page-heading" data-pdf-page-start><h2>학생 코칭</h2><p>저장된 최근 자료 기준의 지도 초안입니다. 전체 이력을 새로 분석한 결과는 아닙니다.</p></section>${block('이번 코칭의 초점',short(result.summary?.text),result.summary?.refs)}${block('학생에게 물어볼 말',short(result.question?.text),result.question?.refs)}${(result.actions||[]).slice(0,2).map((action,i)=>block(`지도 방향 ${i+1}: ${action.title}`,(action.steps||[]).slice(0,2).map(short).join('<br>'),action.refs)).join('')}${block('다음에 확인할 점',short(result.check_after))}</section>`;
 }
 async function loadStudentCoachingPdfSection(student,options){
   if(!options.includeNames||!student?.studentId)return buildStudentCoachingPdfSection(null,options);

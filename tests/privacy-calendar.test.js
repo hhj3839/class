@@ -1,6 +1,11 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {calendarMonths,observationMonthState}=require('../student-calendar.js');
+const {calendarMonths,academicYearMonths,observationMonthState}=require('../student-calendar.js');
+
+test('학년도는 3월부터 다음 해 2월까지 12개월을 고정 표시한다',()=>{
+  assert.deepEqual(academicYearMonths(2026),['2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12','2027-01','2027-02']);
+  assert.equal(academicYearMonths(2023).at(-1),'2024-02');assert.throws(()=>academicYearMonths('bad'));
+});
 test('달력은 응답 유무와 무관하게 연속 12개월이며 연도를 넘긴다',()=>{
   const months=calendarMonths('2026-09');
   assert.equal(months.length,12);assert.equal(months[0],'2025-10');assert.equal(months.at(-1),'2026-09');assert.ok(months.includes('2026-06'));
