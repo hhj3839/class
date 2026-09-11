@@ -1,4 +1,10 @@
 // 분석 제외/삭제 응답을 빼고 월별 마지막 제출을 사용합니다. 미참여는 0점이 아닙니다.
+function buildStudentOverviewPdfReport(student,{includeNames=true,includeOriginals=false}={},coachingSection=''){
+  const escape=value=>escapeHTML(String(value??'')),monthly=studentMonthlyResponses(student.number),latest=monthly.at(-1),relation=latest?incomingRelationshipFor(student.number,latest.month):null,mentions=latest?receivedPositiveMentions(student,latest.month).length:0,payload=latest?payloadOf(latest.item):{};
+  const card=(title,body)=>`<article class="pdf-block pdf-coaching-compact"><h3>${escape(title)}</h3><p>${body}</p></article>`;
+  const excerpt=value=>{const text=String(value||'').trim();return escape(text.length>180?text.slice(0,180)+'…':text)};
+  return `<header><h1>${escape(includeNames?student.name:'선택 학생')} 학생 기록</h1><p>${escape(classSettings.schoolYear)}학년도 · 최근 응답 ${escape(latest?.month||'없음')}</p></header><section class="pdf-ai-section"><section class="pdf-block pdf-comparison-heading"><h2>학생 한눈에 보기</h2></section>${card('친구 관계 점수 평균',relation?`${relation.average.toFixed(1)}점 / 5점 · 친구 ${relation.count}명 응답`:'비교할 수 있는 친구 관계 평가가 없습니다.')}${card('긍정적인 친구 언급',`${mentions}건 · 최근 응답 달의 친절·존중 및 긍정적 변화 문항 기준`)}${includeNames&&includeOriginals&&payload.studentState?.worryDetail?card('최근 학교생활 고민',excerpt(payload.studentState.worryDetail)):''}${includeNames&&includeOriginals&&payload.helpNow?card('최근 도움 요청',excerpt(payload.helpNow)):''}</section>${coachingSection}<p class="pdf-block pdf-comparison-note">학생 지원을 위한 교사용 참고 자료이며 진단이 아닙니다. 긴 내용은 발췌해 …로 표시합니다.</p>`;
+}
 function studentReportComparison(student,responses,observations=[]){
   const payload=row=>{try{return typeof row.payload_json==='string'?JSON.parse(row.payload_json):row.payload_json||{}}catch{return{}}};
   const month=row=>String(row.survey_month||'').slice(0,7);

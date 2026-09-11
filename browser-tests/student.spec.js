@@ -1,6 +1,7 @@
 const {test,expect}=require('@playwright/test');
 for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});
+  await page.clock.setFixedTime(new Date('2026-09-11T00:00:00Z'));
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.route('**/*.supabase.co/**',async route=>{
     const url=route.request().url();let body=[];
@@ -24,6 +25,10 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   await page.locator('#studentTabTrend').click();
   await expect(page.locator('#studentPanelTrend')).toBeVisible();
   await expect(page.locator('.student-year-point')).toHaveCount(12);
+  await expect(page.locator('.student-year-point').first()).toHaveAttribute('aria-label',/2026년 3월/);
+  await expect(page.locator('.student-year-point').last()).toHaveAttribute('aria-label',/2027년 2월/);
+  await expect(page.locator('.student-year-point').last()).toContainText('예정');
+  await expect(page.locator('.student-year-timeline')).toContainText('2026학년도 · 3월~다음 해 2월');
   await page.locator('#nextStudent').click();
   await expect(page.locator('#studentDetailSelect')).toHaveValue('2');
   await expect(page.locator('#studentPanelTrend')).toBeVisible();

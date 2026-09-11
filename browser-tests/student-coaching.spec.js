@@ -25,7 +25,7 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
     const download=page.waitForEvent('download');await page.locator('#printStudentReport').click();const file=await download;
     await file.saveAs(testInfo.outputPath('student-coaching.pdf'));
     const content=await page.evaluate(()=>window.__pdfContent);
-    expect(content).toContain('최근 달과 이전 누적 기록');expect(content).toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).toContain('모둠에서 말하기 어려워요.');expect(content).toContain('발표가 걱정돼요.');expect(content).toContain('+1.00점');expect(content).not.toContain('월별 실제 응답 추세');expect(generated).toBe(callsBefore);
+    expect(content).toContain('학생 한눈에 보기');expect(content).toContain('학생 코칭');expect(content).toContain('모둠에서 말하기 어려워요.');expect(content).toContain('이번 코칭의 초점');expect(content).not.toContain('교사 관찰');expect(content).not.toContain('교사의 적용 결과');expect(content).not.toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).not.toContain('최근 달과 이전 누적 기록');expect(generated).toBe(callsBefore);
     await expect(page.locator('.pdf-render-root')).toHaveCount(0);
     // 긴 원문·교사 기록과 두 지도 방향에서도 실제 PDF 다운로드를 검증합니다.
     result.actions=[{title:'학습 도움 약속',steps:['교사는 학생이 어려움을 느끼는 장면을 비공개로 듣고 함께 도움 요청 방법을 정합니다. '.repeat(5)],refs:['E1']},{title:'관계 상황 확인',steps:['당사자의 이야기를 각각 듣고 필요한 지원을 확인합니다. '.repeat(5)],refs:['E1']}];
