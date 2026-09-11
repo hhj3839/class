@@ -29,10 +29,10 @@ test('AI 근거는 응답 ID와 문항 경로를 검증한 뒤 원문으로 연�
   assert.match(app,/valueAtPath/);
 });
 
-test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
-  assert.match(html,/id="observationFeedbackSummary"/);
+test('관찰 지표는 화면에서 제거하고 설문 파일럿 지표와 기존 DB 집계를 보존한다',()=>{
+  assert.doesNotMatch(html,/id="observationFeedbackSummary"/);
   assert.match(html,/id="pilotMetrics"/);
-  assert.match(app,/renderObservationFeedbackSummary/);
+  assert.doesNotMatch(app,/renderObservationFeedbackSummary|data.observation_count/);
   assert.match(migration,/observation_support_count/);
   assert.match(migration,/observation_no_issue_count/);
   assert.match(signalMetrics,/signal_review_checked_count/);
@@ -40,8 +40,8 @@ test('관찰 결과 환류와 파일럿 지표를 집계한다',()=>{
   assert.match(signalMetrics,/support_connected','no_issue','closed/);
   assert.match(signalMetrics,/from public\.safety_signal_reviews s/);
   assert.doesNotMatch(signalMetrics,/from public\.signal_reviews s/);
-  assert.match(app,/안전 신호 확인/);
-  assert.match(app,/안전 신호 처리/);
+  assert.match(app,/최근 참여율/);
+  assert.match(app,/평균 작성 시간/);
 });
 
 test('서로 다른 실제 교사 계정의 운영 학급 접근을 재시험할 수 있다',()=>{

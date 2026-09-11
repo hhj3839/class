@@ -20,7 +20,7 @@ document.addEventListener('click',async event=>{
   const filterButton=event.target.closest('[data-signal-review-filter]');
   if(filterButton){signalReviewFilter=filterButton.dataset.signalReviewFilter;renderSignalInbox();return}
   const evidenceButton=event.target.closest('[data-review-evidence]');
-  if(evidenceButton){openEvidence(evidenceButton.dataset.reviewEvidence);$('#saveObservation').hidden=true;return}
+  if(evidenceButton){openEvidence(evidenceButton.dataset.reviewEvidence);return}
   const button=event.target.closest('[data-save-signal-review]');
   if(!button)return;
   const signal=signals.find(item=>String(item.id)===button.dataset.saveSignalReview);

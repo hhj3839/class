@@ -39,5 +39,5 @@ test('확인함은 상태 요약·기한 경과·처리 완료 필터와 근거 
   assert.match(app,/기한 경과/);
   assert.match(app,/data-review-evidence/);
   assert.match(helper,/openEvidence/);
-  assert.match(helper,/saveObservation.*hidden=true/);
+  assert.doesNotMatch(helper,/saveObservation/);
 });

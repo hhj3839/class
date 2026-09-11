@@ -8,7 +8,7 @@ const priority=fs.readFileSync('student-priority.js','utf8');
 test('교사 홈에서는 담임 확인 우선순위를 제거하되 계산 기능은 보존한다',()=>{
   assert.doesNotMatch(html,/담임 확인 우선순위|studentPriorityList|studentPriorityCount/);
   assert.match(priority,/signalReviewFor/);
-  assert.match(priority,/getObservations\(\)/);
+  assert.doesNotMatch(priority,/getObservations\(\)/);
   assert.match(priority,/resolved\.has/);
 });
 

@@ -191,7 +191,7 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.doesNotMatch(insight,/자기평가 응답|자기평가 점수 변화|학생이 직접 남긴 내용|직접 작성한 내용의 변화/);
   assert.doesNotMatch(app,/응답 요약과 눈에 띄는 변화|응답에서 알 수 있는 점/);
   assert.doesNotMatch(app,/학생별 간단한 자동 분석/);
-  assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
+  assert.doesNotMatch(app,/studentSupportTimelineSlot/);
   assert.match(html,/data-student-detail-tab="summary"/);
   assert.match(html,/data-student-detail-tab="trend"/);
   assert.match(html,/data-student-detail-tab="responses"/);
@@ -222,7 +222,7 @@ test('학생을 바꿔도 현재 탭을 유지하고 응답이 없어도 지원 
   assert.match(html,/data-student-detail-tab="summary"/);
   assert.match(html,/data-student-detail-tab="trend"/);
   assert.match(html,/data-student-detail-tab="responses"/);
-  assert.match(emptyStudent,/studentSupportTimelineSlot/);
+  assert.match(emptyStudent,/studentYearTimelineHTML/);
   assert.match(emptyStudent,/아직 제출된 설문이 없습니다/);
 });
 

@@ -121,11 +121,11 @@ test('교사 홈과 학생 상세는 단순화된 탐색 구조를 사용한다'
   assert.doesNotMatch(html,/data-view="observations"/);
   assert.match(app,/<h3>현재 모습<\/h3>/);
   assert.match(app,/친구 관계 점수 평균/);
-  assert.match(app,/id="studentSupportTimelineSlot"/);
-  assert.match(support,/querySelector\('#studentSupportTimelineSlot'\)/);
+  assert.doesNotMatch(app,/id="studentSupportTimelineSlot"/);
+  assert.doesNotMatch(support,/studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="summary"/);
   assert.match(app,/data-student-detail-panel="trend"[^>]*hidden/);
-  assert.match(app,/data-student-detail-panel="trend"[^`]*studentSupportTimelineSlot/);
+  assert.doesNotMatch(app,/studentSupportTimelineSlot/);
   assert.match(app,/data-student-detail-panel="responses"[^>]*hidden/);
   assert.match(html,/class="student-navigation"/);
   assert.match(html,/class="student-selection-step"/);
