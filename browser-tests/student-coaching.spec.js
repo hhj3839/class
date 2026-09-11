@@ -19,12 +19,13 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
   await expect(page.locator('.coaching-info')).not.toHaveAttribute('open','');await expect(page.locator('.coaching-analysis')).not.toHaveAttribute('open','');await expect(page.locator('.coaching-feedback')).not.toHaveAttribute('open','');await expect(page.locator('.coaching-question')).toContainText('학생에게 건넬 말');await page.locator('.coaching-summary .coaching-refs > summary').click();await expect(page.locator('.coaching-summary [data-coaching-source]')).toContainText('학교생활 고민');await page.locator('[data-coaching-source]').first().click();await expect(page.locator('#studentCoachingSource')).toContainText('모둠에서 말하기 어려워요.');await page.locator('#studentCoachingEvidence [data-close]').click();
   await page.locator('.coaching-feedback > summary').click();await page.locator('#studentCoachingOutcome').selectOption('helpful');await page.locator('#studentCoachingNote').fill('짝과 연습한 뒤 자신의 생각을 이야기함.');await page.locator('[data-coaching-feedback]').click();await expect(page.locator('#studentCoachingOutcome')).toHaveValue('helpful');await expect(page.locator('#studentCoachingNote')).toHaveValue('짝과 연습한 뒤 자신의 생각을 이야기함.');
   if(width===1440){
+    await page.evaluate(()=>{allResponses.push({student_number:1,survey_month:'2026-06-01',submitted_at:'2026-06-02',payload_json:{studentState:{worryDetail:'발표가 걱정돼요.'},helpNow:'이야기하고 싶어요.'}},{student_number:2,survey_month:'2026-06-01',submitted_at:'2026-06-02',payload_json:{relationships:[{targetNumber:1,score:3}]}},{student_number:2,survey_month:'2026-09-01',submitted_at:'2026-09-02',payload_json:{relationships:[{targetNumber:1,score:4}]}})});
     const callsBefore=generated;
     await page.evaluate(()=>{window.__pdfOriginal=downloadPdfDocument;downloadPdfDocument=async(content,name)=>{window.__pdfContent=content;await window.__pdfOriginal(content,name)}});
     const download=page.waitForEvent('download');await page.locator('#printStudentReport').click();const file=await download;
     await file.saveAs(testInfo.outputPath('student-coaching.pdf'));
     const content=await page.evaluate(()=>window.__pdfContent);
-    expect(content).toContain('학생 코칭 카드');expect(content).toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).toContain('원문 제외 설정');expect(generated).toBe(callsBefore);
+    expect(content).toContain('최근 달과 이전 누적 기록');expect(content).toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).toContain('모둠에서 말하기 어려워요.');expect(content).toContain('발표가 걱정돼요.');expect(content).toContain('+1.00점');expect(content).not.toContain('월별 실제 응답 추세');expect(generated).toBe(callsBefore);
     await expect(page.locator('.pdf-render-root')).toHaveCount(0);
   }
   await page.locator('#studentTabSummary').click();await page.locator('#studentTabCoaching').click();expect(generated).toBe(1);
