@@ -27,9 +27,9 @@ test('단순 괜찮음 응답만으로는 AI 코칭을 생성하지 않는다',a
 test('없는 근거 ID와 영어 출력은 저장 전 거부한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),value=validCard();value.summary.refs=['UNKNOWN'];assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/근거/);value.summary.refs=['E1'];value.summary.text='The student needs support';assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/표현/)});
 test('조회는 API 키 없이 가능하며 AI 호출을 하지 않는다',async()=>{const result=await harness({key:false});assert.equal(result.status,200);assert.equal(result.aiBody,undefined);assert.equal(result.result.canGenerate,true)});
 test('자료가 바뀐 저장 카드는 숨기고 갱신 안내만 반환한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:'old',result_json:{...validCard(),version:'old'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
-test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-student-survey-only-v2'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
-test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-student-survey-only-v2'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
-test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.12-student-survey-only-v2')});
+test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-grounded-coaching-v3'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
+test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-grounded-coaching-v3'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
+test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.12-grounded-coaching-v3')});
 test('잘못된 근거 결과는 실패 처리하며 저장하지 않는다',async()=>{const output=validCard();output.actions[0].refs=['E999'];const result=await harness({action:'generate',output});assert.equal(result.status,500);assert.equal(result.saved.length,1);assert.equal(result.saved[0].p_success,false)});
 test('인증·학급 권한 실패는 AI 호출 전에 차단한다',async()=>{for(const options of [{authorized:false},{denied:true}]){const result=await harness({...options,action:'generate'});assert.ok([401,403].includes(result.status));assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)}});
 test('자료 없음과 API 실패를 구분하고 실패 실행을 닫는다',async()=>{const context=makeContext();context.responses=[];const empty=await harness({action:'generate',context});assert.equal(empty.status,422);assert.equal(empty.aiBody,undefined);const failure=await harness({action:'generate',apiStatus:429});assert.equal(failure.saved[0].p_success,false);assert.match(failure.result.error,/한도/)});
@@ -42,4 +42,17 @@ test('교사 관찰·면담·적용 결과는 근거와 외부 AI 요청에서 �
 test('설문 전용 이전 버전은 자료 해시가 같아도 조회 시 숨기며 AI를 호출하지 않는다',async()=>{
  const context=makeContext();context.card={id:'legacy',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.09-student-coaching-v1'}};
  const result=await harness({context});assert.equal(result.result.card,null);assert.equal(result.result.stale,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0);
+});
+test('실제 요청은 강화된 코칭 지침과 문항별 비교 근거만 전달한다',async()=>{
+ const context=makeContext();context.responses.push({...context.responses[0],id:'prior',survey_month:'2026-07-01'});
+ const result=await harness({action:'generate',context}),input=JSON.parse(result.aiBody.input);
+ const group=input.comparison_context.find(row=>row.question==='학교생활 고민');
+ assert.equal(group.latest_month,'2026-09');assert.equal(group.previous[0].month,'2026-07');assert.equal(group.comparable,true);
+ assert.ok(input.evidence.some(row=>row.id===group.previous[0].ref));assert.doesNotMatch(JSON.stringify(input.comparison_context),/가상학생|test@example|010-1234/);
+ for(const rule of ['성적 고민만으로','과제 시작의 어려움','조건부 제안','과제 수행·규칙 준수 여부만','양쪽 시점의 근거'])assert.ok(result.aiBody.instructions.includes(rule));
+ assert.equal(result.aiBody.model,'gpt-5.6-terra');
+});
+test('이전 설문 전용 카드도 새 코칭 지침으로 위장하거나 자동 생성하지 않는다',async()=>{
+ const context=makeContext();context.card={id:'previous',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-student-survey-only-v2'}};
+ const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0);
 });

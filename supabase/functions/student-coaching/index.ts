@@ -1,7 +1,7 @@
 import '../analyze-class/relationship-data.js';
 import { coachingApiError } from './api-errors.mjs';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
-import { buildEvidence, validateCard, schemaForEvidence, instructions, VERSION, MODEL } from './coaching.mjs';
+import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, instructions, VERSION, MODEL } from './coaching.mjs';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 Deno.serve(async(request:Request)=>{
@@ -26,9 +26,10 @@ Deno.serve(async(request:Request)=>{
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
-    const input={limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,text:source.value.slice(0,500)}))};
+    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,text:source.value.slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
     // Redaction must never rename structural evidence identifiers.
+    masked.comparison_context=input.comparison_context;
     masked.evidence.forEach((source:any,index:number)=>{source.id=input.evidence[index].id});
     const redacted=JSON.stringify(masked).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[이메일 비공개]').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g,'[연락처 비공개]');
     const ai=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({model:MODEL,store:false,reasoning:{effort:'low'},instructions,input:redacted,max_output_tokens:5000,text:{format:{type:'json_schema',name:'student_coaching_card',strict:true,schema:schemaForEvidence(evidence.sources)}}})});
