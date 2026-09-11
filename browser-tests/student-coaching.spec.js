@@ -27,6 +27,13 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
     const content=await page.evaluate(()=>window.__pdfContent);
     expect(content).toContain('최근 달과 이전 누적 기록');expect(content).toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).toContain('모둠에서 말하기 어려워요.');expect(content).toContain('발표가 걱정돼요.');expect(content).toContain('+1.00점');expect(content).not.toContain('월별 실제 응답 추세');expect(generated).toBe(callsBefore);
     await expect(page.locator('.pdf-render-root')).toHaveCount(0);
+    // 긴 원문·교사 기록과 두 지도 방향에서도 실제 PDF 다운로드를 검증합니다.
+    result.actions=[{title:'학습 도움 약속',steps:['교사는 학생이 어려움을 느끼는 장면을 비공개로 듣고 함께 도움 요청 방법을 정합니다. '.repeat(5)],refs:['E1']},{title:'관계 상황 확인',steps:['당사자의 이야기를 각각 듣고 필요한 지원을 확인합니다. '.repeat(5)],refs:['E1']}];
+    result.question.text='최근 수업과 친구 관계에서 선생님이 알아주었으면 하는 장면을 들려줄 수 있니? '.repeat(5);
+    feedback[0].note='짝과 연습한 뒤 자신의 생각을 이야기함. '.repeat(30);
+    await page.evaluate(()=>{allResponses.filter(row=>row.student_number===1).forEach(row=>{row.payload_json.studentState={worryDetail:'모둠 활동에서 말할 차례를 기다리다가 생각을 말하지 못해 아쉬웠어요. '.repeat(20)};row.payload_json.helpNow='친구에게 내 생각을 전할 수 있도록 선생님과 이야기하고 싶어요. '.repeat(20)});observationCache=[{studentNumber:1,surveyMonth:'2026-06',observedFact:'교사가 질문하자 학생은 생각을 적은 종이를 보면서 이야기했다. '.repeat(20)},{studentNumber:1,surveyMonth:'2026-09',observedFact:'모둠 활동에서 짝에게 먼저 질문하고 차례가 되었을 때 말하는 모습을 확인했다. '.repeat(20)}]});
+    const longDownload=page.waitForEvent('download');await page.locator('#printStudentReport').click();await(await longDownload).saveAs(testInfo.outputPath('student-coaching-long.pdf'));
+    expect(generated).toBe(callsBefore);await expect(page.locator('.pdf-render-root')).toHaveCount(0);
   }
   await page.locator('#studentTabSummary').click();await page.locator('#studentTabCoaching').click();expect(generated).toBe(1);
   const typography=await page.locator('.coaching-summary>p,.coaching-question>blockquote,.coaching-action li,.coaching-followup>p').evaluateAll(nodes=>nodes.map(node=>{const style=getComputedStyle(node);return{size:style.fontSize,line:style.lineHeight,weight:style.fontWeight}}));

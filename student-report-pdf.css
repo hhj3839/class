@@ -1,0 +1,17 @@
+/* PDF 전용. 앱 화면의 카드와 글자 크기에는 영향을 주지 않습니다. */
+.pdf-render-root article.pdf-comparison-card{padding:9px 14px;margin-bottom:8px;border:1px solid #d9d2e5;border-radius:8px;font-size:16px;line-height:1.4}
+.pdf-render-root .pdf-comparison-card h3{margin:0 0 5px;color:#55407a;font-size:18px}
+.pdf-render-root .pdf-comparison-card table{table-layout:fixed;margin:0;width:100%;border-collapse:collapse;font-size:16px;line-height:1.4;overflow-wrap:anywhere}
+.pdf-render-root .pdf-comparison-card th,.pdf-render-root .pdf-comparison-card td{width:50%;padding:4px 9px;border:0;vertical-align:top}
+.pdf-render-root .pdf-comparison-card th{background:#f3eff9;color:#655777;font-size:13px;font-weight:600}
+.pdf-render-root .pdf-comparison-card th+th,.pdf-render-root .pdf-comparison-card td+td{border-left:1px solid #e5dfed}
+.pdf-render-root .pdf-comparison-card p.pdf-comparison-change{margin:5px 0 0;padding:5px 9px 0;border-top:1px solid #e5dfed;color:#51445e;font-size:14px}
+.pdf-render-root .pdf-comparison-change b{margin-right:8px}
+.pdf-render-root .pdf-comparison-heading{padding-top:0;padding-bottom:0;margin-bottom:4px}
+.pdf-render-root .pdf-comparison-heading h2{margin:0;font-size:21px}
+.pdf-render-root .pdf-comparison-note{font-size:12px;line-height:1.55;color:#665e70;padding-top:0;padding-bottom:0}
+.pdf-render-root .pdf-coaching-page-heading h2{font-size:24px;margin-bottom:8px}
+.pdf-render-root .pdf-coaching-page-heading p{font-size:13px;line-height:1.55;color:#665e70}
+.pdf-render-root article.pdf-coaching-compact{padding:12px 16px;margin-bottom:8px;line-height:1.5}
+.pdf-render-root .pdf-coaching-compact h3{margin:0 0 7px;font-size:18px}
+.pdf-render-root .pdf-coaching-compact p{margin:7px 0}
