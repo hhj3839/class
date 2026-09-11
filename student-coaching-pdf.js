@@ -1,5 +1,6 @@
 // PDF에서는 저장 결과만 조회합니다. 생성 요청이나 사용량 차감은 하지 않습니다.
-function buildStudentCoachingPdfSection(data,{includeNames=true,includeOriginals=false}={}){
+function buildStudentCoachingPdfSection(data,{includeNames=true,includeOriginals=false,compact=false}={}){
+  if(compact)return buildCompactCoachingPdf(data,{includeNames});
   const escape=value=>escapeHTML(String(value??''));
   const block=(title,body)=>`<article class="pdf-block pdf-coaching-block"><h3>${escape(title)}</h3>${body}</article>`;
   const heading='<section class="pdf-block pdf-section-heading"><h2>학생 코칭 카드</h2><p>저장된 교사용 지도 초안입니다. 학생 유형·성격 진단이나 사실 판정이 아닙니다.</p></section>';
@@ -20,6 +21,14 @@ function buildStudentCoachingPdfSection(data,{includeNames=true,includeOriginals
   sections.push(block('교사의 적용 결과',feedback?`<p>${escape(labels[feedback.status]||'확인 필요')} · ${escape(new Date(feedback.created_at).toLocaleString('ko-KR'))}</p><p>${escape(feedback.note)}</p><p>교사의 관찰 기록이며 지도 효과를 확정하는 평가는 아닙니다.</p>`:'<p>저장된 적용 결과가 없습니다.</p>'));
   for(const {number,source} of used.values())sections.push(block(`근거 [${number}] ${source.label}`,`<p>${escape(source.month)} · ${escape(source.type)}</p>${includeOriginals?`<p>${escape(source.value)}</p>`:'<p>원문 제외 설정에 따라 문항 정보만 표시합니다.</p>'}`));
   return `<section class="pdf-ai-section pdf-coaching-section">${sections.join('')}</section>`;
+}
+function buildCompactCoachingPdf(data,{includeNames}){
+  if(!includeNames||data?.stale||!data?.card?.result)return '';
+  const escape=value=>escapeHTML(String(value??'')),short=value=>{const text=String(value||'');return escape(text.length>180?text.slice(0,180)+'…':text)},result=data.card.result;
+  const refs=ids=>[...new Set(ids||[])].map(id=>data.sources?.find(row=>row.id===id)).filter(Boolean).slice(0,2).map(row=>`${escape(row.month)} · ${escape(row.label)}`).join(' / ');
+  const block=(title,text,ids)=>`<article class="pdf-block"><h3>${escape(title)}</h3><p>${text}</p>${refs(ids)?`<small>근거: ${refs(ids)}</small>`:''}</article>`;
+  const feedback=(data.feedback||[]).filter(row=>row.card_id===data.card.id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];
+  return `<section class="pdf-ai-section"><section class="pdf-block"><h2>지도에 참고할 저장 코칭</h2><p>최신 4회 설문 일부·교사 기록 최대 6회 범위의 별도 초안입니다. 위 전체 기간 비교를 AI가 분석한 결과는 아닙니다.</p></section>${block('학생에게 물어볼 말',short(result.question?.text),result.question?.refs)}${(result.actions||[]).slice(0,2).map((action,i)=>block(`지도 방향 ${i+1}: ${action.title}`,(action.steps||[]).slice(0,2).map(short).join('<br>'),action.refs)).join('')}${block('다음에 확인할 점',short(result.check_after))}${feedback?block('교사의 적용 결과',short(feedback.note)):''}</section>`;
 }
 async function loadStudentCoachingPdfSection(student,options){
   if(!options.includeNames||!student?.studentId)return buildStudentCoachingPdfSection(null,options);
