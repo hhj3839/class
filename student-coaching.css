@@ -5,3 +5,19 @@
 .student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup) h4{font-size:16px;font-weight:700;line-height:1.5;margin:0 0 12px}.student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup) :is(p,blockquote,li){font-size:16px;line-height:1.7;font-weight:400;color:var(--text,#272137)}.student-coaching-card .coaching-question blockquote{margin:0}.student-coaching-card .coaching-action h5{font-size:16px;line-height:1.5;font-weight:600;margin:0 0 12px}.student-coaching-card .coaching-action h5 span{font-size:inherit}.student-coaching-card .coaching-refs{font-size:13px;margin-top:12px}
 .coaching-actions-grid>.coaching-action:only-child,.coaching-actions-grid>.coaching-action:last-child:nth-child(odd){grid-column:1/-1}.student-coaching-card .coaching-dialogue-help{margin:0 0 16px;color:#625b70;font-size:14px!important}.coaching-action ol{list-style:none;padding-left:0}
 .coaching-followup>p{white-space:pre-line}
+/* Conversation-first hierarchy; no change to saved content or PDF styles. */
+.student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup){margin-top:16px;padding:16px 20px}
+.student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup) h4{margin-bottom:8px}
+.student-coaching-card>section.coaching-summary>p{font-size:15px;color:#625b70;margin:6px 0;line-height:1.65}
+.student-coaching-card>section.coaching-question>blockquote{font-size:19px;font-weight:600;line-height:1.65;color:#42305e}
+.student-coaching-card .coaching-actions-grid{gap:12px}
+.student-coaching-card .coaching-action{padding:14px 16px}
+.student-coaching-card .coaching-action h5{margin-bottom:8px}
+.student-coaching-card .coaching-action ol{margin:8px 0}
+.student-coaching-card>section.coaching-action-section li{color:#625b70;margin:6px 0}
+.student-coaching-card .coaching-spoken{color:#30253f;font-weight:600}
+.student-coaching-card .coaching-dialogue-help{margin-bottom:12px}
+.student-coaching-card .coaching-refs{margin-top:6px}
+.student-coaching-card .coaching-refs>summary{min-height:32px}
+.student-coaching-card .coaching-followup>p{margin:6px 0}
+@media(max-width:600px){.student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup){padding:14px 16px}.student-coaching-card>section.coaching-question>blockquote{font-size:18px}}
