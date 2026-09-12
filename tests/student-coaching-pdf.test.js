@@ -1,12 +1,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const code=fs.readFileSync('student-coaching-pdf.js','utf8');
+test('PDF는 선택 전과 시도 후를 줄바꿈으로 구분하고 원문을 이스케이프한다',()=>{const result=structuredClone(data.card.result);result.check_after='선택할 때: <선택>\n실제로 해 본 뒤: 어땠니?';const html=render({...data,card:{result}});assert.ok(html.includes('선택할 때: &lt;선택&gt;<br>실제로 해 본 뒤: 어땠니?'))});
 const item={text:'가상 코칭 <script>',refs:['E1']};
 const data={card:{id:'card',result:{summary:item,question:item,actions:[{title:'연습하기',steps:['한 문장 말하기'],refs:['E1']}],check_after:'다시 확인',strengths:[item],needs:[],limitations:['단정하지 않기']},basisMonth:'2026-09'},sources:[{id:'E1',label:'고민',month:'2026-09',type:'학생 응답',value:'원문 비밀'}],feedback:[{card_id:'other',note:'다른 학생 비밀'},{card_id:'card',status:'helpful',note:'교사 기록',created_at:'2026-09-11'}]};
 function context(extra={}){return vm.createContext({escapeHTML:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),...extra})}
 function render(value,options){const ctx=context();vm.runInContext(code,ctx);return ctx.buildStudentCoachingPdfSection(value,options)}
 test('PDF는 세 조건부 대화와 마지막 선택권 문장을 생략하지 않는다',()=>{const result=structuredClone(data.card.result);result.actions=Array.from({length:3},(_,i)=>({title:`대화 ${i+1}`,steps:['학생의 답을 기다립니다.'],refs:['E1']}));result.check_after='학생의 이야기를 듣습니다. '.repeat(15)+'지금 시도하지 않아도 괜찮습니다.';const html=render({...data,card:{result}});assert.ok(html.includes('대화 3'));assert.ok(html.includes('지금 시도하지 않아도 괜찮습니다.'));assert.ok(!html.includes('지도 방향'))});
 test('코칭 PDF는 학생 설문 코칭만 출력하고 HTML을 이스케이프한다',()=>{
- const html=render(data);for(const title of ['함께 탐색할 주제','대화를 여는 질문','답에 따라 이어갈 대화','학생이 선택한 시도와 돌아보기'])assert.ok(html.includes(title));
+ const html=render(data);for(const title of ['함께 탐색할 주제','대화를 여는 질문','답에 따라 이어갈 대화','원한다면, 작은 시도와 돌아보기'])assert.ok(html.includes(title));
  assert.ok(html.includes('&lt;script&gt;'));assert.ok(html.includes('2026-09 · 고민'));
  for(const privateText of ['교사 기록','다른 학생 비밀','원문 비밀','교사의 적용 결과'])assert.ok(!html.includes(privateText));
  assert.ok(!render(data,{includeOriginals:true}).includes('교사 기록'));
