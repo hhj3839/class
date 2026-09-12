@@ -38,8 +38,13 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
     expect(generated).toBe(callsBefore);await expect(page.locator('.pdf-render-root')).toHaveCount(0);
   }
   await page.locator('#studentTabSummary').click();await page.locator('#studentTabCoaching').click();expect(generated).toBe(1);
-  const typography=await page.locator('.coaching-summary>p,.coaching-question>blockquote,.coaching-action li,.coaching-followup>p').evaluateAll(nodes=>nodes.map(node=>{const style=getComputedStyle(node);return{size:style.fontSize,line:style.lineHeight,weight:style.fontWeight}}));
-  expect(typography.length).toBeGreaterThanOrEqual(4);for(const item of typography){expect(item.size).toBe('16px');expect(item.line).toBe('27.2px');expect(item.weight).toBe('400')}
+  await expect(page.locator('.coaching-summary>p')).toHaveCSS('font-size','15px');
+  await expect(page.locator('.coaching-question>blockquote')).toHaveCSS('font-size',width<600?'18px':'19px');
+  await expect(page.locator('.coaching-question>blockquote')).toHaveCSS('font-weight','600');
+  await expect(page.locator('.coaching-action li').first()).toHaveCSS('color','rgb(98, 91, 112)');
+  await expect(page.locator('.coaching-spoken').first()).toHaveCSS('font-weight','600');
+  await expect(page.locator('.coaching-spoken').first()).toContainText('조금 편하게 말했던 때');
+  await expect(page.locator('.coaching-action-section')).toHaveCSS('margin-top','16px');
   await page.locator('#studentPanelCoaching').screenshot({path:testInfo.outputPath('student-coaching-card.png')});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   await page.locator('#studentDetailSelect').selectOption('2');await expect(page.locator('#studentCoachingContent')).toContainText('코칭을 만들 근거가 부족');await expect(page.locator('[data-coaching-generate]')).toBeDisabled();await expect(page.locator('#studentCoachingContent')).not.toContainText('발표가 편해지는');
   await page.locator('#studentDetailSelect').selectOption('1');await expect(page.locator('.coaching-summary')).toBeVisible();await page.locator('.coaching-more > summary').click();await page.locator('[data-coaching-delete]').click();await expect(page.locator('.coaching-summary')).toHaveCount(0);expect(generated).toBe(1);expect(dialogs).toHaveLength(1);expect(dialogs[0]).toContain('삭제할까요');expect(errors).toEqual([]);
