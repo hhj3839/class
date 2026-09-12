@@ -22,6 +22,6 @@ test('같은 달 근거가 여러 건이어도 과거 비교로 분류하지 않
 });
 test('코칭 지침은 자료 부족·구체적 호소·안전 요청을 구분한다',async()=>{
  const {instructions,schema}=await import('../supabase/functions/student-coaching/coaching.mjs');
- for(const rule of ['비교 자료 부족','자기평가 점수 상승은 실제 성적·행동 향상이 아니며','해결됐다고 판단하지','1개를 기본','조건부 제안','긴 문장을 이해하기 어려워요','안전 확인을 우선'])assert.ok(instructions.includes(rule),rule);
- assert.equal(schema.properties.actions.minItems,1);assert.equal(schema.properties.actions.maxItems,2);
+ for(const rule of ['비교 자료 부족','자기평가 점수 상승은 실제 성적·행동 향상이 아니며','해결됐다고 판단하지','자료가 부족하거나 안전 확인만 필요하면 1개','조건부 제안','긴 문장을 이해하기 어려워요','안전 확인을 우선'])assert.ok(instructions.includes(rule),rule);
+ assert.equal(schema.properties.actions.minItems,1);assert.equal(schema.properties.actions.maxItems,3);
 });
