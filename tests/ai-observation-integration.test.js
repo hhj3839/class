@@ -3,7 +3,7 @@ const data=require('../supabase/functions/analyze-class/relationship-data.js');
 const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
 const students=[1,2,3].map(number=>({number,name:`가상${number}`}));
 const rows=['2026-06','2026-07','2026-08'].flatMap(month=>students.map(student=>({id:`${month}-${student.number}`,student_number:student.number,student_name:student.name,survey_month:`${month}-01`,submitted_at:`${month}-15T00:00:00Z`,payload_json:{relationships:students.filter(other=>other.number!==student.number).flatMap(other=>[{targetNumber:other.number,score:1},{targetNumber:other.number,score:5}])}})));
-async function harness(type,{cached=null,authorized=true}={}){
+async function harness(type,{cached=null,authorized=true,force=false}={}){
   let handler,requestBody,saved;const calls=[];
   const fetch=async(url,options={})=>{
     calls.push(url);const body=options.body?JSON.parse(options.body):{};
@@ -22,11 +22,11 @@ async function harness(type,{cached=null,authorized=true}={}){
   };
   const {redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');
   vm.runInNewContext(source,{IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
-  const response=await handler(new Request('https://mock.invalid/analyze',{method:'POST',headers:{Authorization:'Bearer test-only','Content-Type':'application/json'},body:JSON.stringify({classId:'fixture',month:'2026-07',analysisType:type})}));
+  const response=await handler(new Request('https://mock.invalid/analyze',{method:'POST',headers:{Authorization:'Bearer test-only','Content-Type':'application/json'},body:JSON.stringify({classId:'fixture',month:'2026-07',analysisType:type,force})}));
   return{status:response.status,result:await response.json(),requestBody,saved,calls};
 }
 for(const type of ['class','relationship'])test(`${type} API 경로가 정규화된 관측 근거와 보류 지침을 실제 요청 본문에 넣는다`,async()=>{
-  const result=await harness(type);assert.equal(result.status,200);assert.ok(result.saved);
+  const result=await harness(type,{force:true});assert.equal(result.status,200);assert.ok(result.saved);
   const input=JSON.parse(result.requestBody.input),observations=input.observation_evidence;
   assert.equal(observations.selected.students[0].incoming_response_count,2);
   assert.equal(observations.cumulative.students[0].incoming_response_count,4);
