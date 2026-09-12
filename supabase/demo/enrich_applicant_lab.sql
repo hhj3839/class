@@ -14,6 +14,12 @@ begin
   if owner_id is null then raise exception '지정된 시험 계정의 실험실 학급이 아닙니다.'; end if;
   transfer_id:=md5(owner_id::text||':demo-experience:transfer')::uuid;
   empty_id:=md5(owner_id::text||':demo-experience:empty')::uuid;
+  -- 월 이동으로 미래가 된 수동 데모 예시가 실제 AI 생성 결과를 가리지 않게 한다.
+  -- 실제 생성 결과와 설문 날짜는 변경하지 않는다.
+  update public.ai_analysis_runs
+    set created_at=least(created_at,date_trunc('month',current_date)),
+        completed_at=least(completed_at,date_trunc('month',current_date))
+    where class_id=class_key and teacher_id=owner_id and model='demo-saved-analysis';
   if exists(select 1 from public.students where class_id=class_key and student_number in(11,12)
       and student_id not in(transfer_id,empty_id)) then raise exception '11·12번 학생이 이미 사용 중입니다. 기존 자료는 변경하지 않습니다.'; end if;
   insert into public.students(class_id,student_id,student_number,student_name,active,transferred_on)
