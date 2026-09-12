@@ -49,14 +49,17 @@ Deno.serve(async request=>{
     const {classId,month,force=false,analysisType='class'}=await request.json();
     if(!['class','relationship'].includes(analysisType))return json({error:'지원하지 않는 분석 유형입니다.'},400);
     if(!classId||!/^\d{4}-\d{2}$/.test(month||''))return json({error:'학급과 분석 기준 월을 확인해 주세요.'},400);
-    const openaiKey=Deno.env.get('OPENAI_API_KEY');
-    if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
     const callRpc=async(name:string,body:Record<string,unknown>)=>{const response=await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(body)});const value=await response.json().catch(()=>null);if(!response.ok)throw new Error(value?.message||value?.error||'DB 작업에 실패했습니다.');return value};
     const surveyMonth=`${month}-01`;
     const cachedRpc=analysisType==='relationship'?'teacher_get_cached_relationship_analysis_auth':'teacher_get_cached_ai_analysis_auth';
     const beginRpc=analysisType==='relationship'?'teacher_begin_relationship_analysis_auth':'teacher_begin_ai_analysis_auth';
     const selectedVersion=analysisType==='relationship'?relationshipAnalysisVersion:analysisVersion;
     if(!force){const cached=await callRpc(cachedRpc,{p_class_id:classId,p_survey_month:surveyMonth});if(cached?.[0]){const row=cached[0],cachedAnalysis=localizeAnalysisValues(row.result_json) as any,upgradeRecommended=cachedAnalysis?._analysis_version!==selectedVersion;return json({analysis:cachedAnalysis,meta:{runId:row.id,model:row.model,month,responseCount:row.response_count,generatedAt:row.created_at,reviewStatus:row.review_status,cached:true,analysisVersion:cachedAnalysis?._analysis_version||'이전 저장 형식',analysisType,upgradeRecommended}})}}
+    // Read-only is the default, including older clients that omit force.
+    // Never reserve quota or contact OpenAI on a cache miss.
+    if(force!==true)return json({empty:true,analysis:null,meta:{cached:true,month,analysisType}});
+    const openaiKey=Deno.env.get('OPENAI_API_KEY');
+    if(!openaiKey)return json({error:'서버 AI 비밀값이 설정되지 않았습니다.'},503);
     runId=await callRpc(beginRpc,{p_class_id:classId,p_survey_month:surveyMonth});
     failAnalysis=async(reason:string,requestId='')=>{await callRpc('teacher_fail_ai_analysis_auth',{p_class_id:classId,p_run_id:runId,p_request_id:requestId,p_error_message:text(reason,500)}).catch(()=>null)};
     const rpc=await fetch(`${supabaseUrl}/rest/v1/rpc/teacher_get_responses_auth`,{method:'POST',headers:{apikey:anonKey,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify({p_class_id:classId})});
