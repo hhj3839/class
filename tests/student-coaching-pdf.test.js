@@ -7,8 +7,8 @@ function context(extra={}){return vm.createContext({escapeHTML:s=>String(s).repl
 function render(value,options){const ctx=context();vm.runInContext(code,ctx);return ctx.buildStudentCoachingPdfSection(value,options)}
 test('PDF는 세 조건부 대화와 마지막 선택권 문장을 생략하지 않는다',()=>{const result=structuredClone(data.card.result);result.actions=Array.from({length:3},(_,i)=>({title:`대화 ${i+1}`,steps:['학생의 답을 기다립니다.'],refs:['E1']}));result.check_after='학생의 이야기를 듣습니다. '.repeat(15)+'지금 시도하지 않아도 괜찮습니다.';const html=render({...data,card:{result}});assert.ok(html.includes('대화 3'));assert.ok(html.includes('지금 시도하지 않아도 괜찮습니다.'));assert.ok(!html.includes('지도 방향'))});
 test('코칭 PDF는 학생 설문 코칭만 출력하고 HTML을 이스케이프한다',()=>{
- const html=render(data);for(const title of ['함께 탐색할 주제','대화를 여는 질문','답에 따라 이어갈 대화','원한다면, 작은 시도와 돌아보기'])assert.ok(html.includes(title));
- assert.ok(html.includes('&lt;script&gt;'));assert.ok(html.includes('2026-09 · 고민'));
+ const html=render(data);for(const title of ['함께 탐색할 주제','대화를 여는 질문','답에 따라 이어갈 대화','대화 마무리'])assert.ok(html.includes(title));
+ assert.ok(html.includes('&lt;script&gt;'));assert.ok(html.includes('2026-09 · 고민'));assert.ok(render({...data,previousGuidance:true}).includes('이전 대화 지침'));
  for(const privateText of ['교사 기록','다른 학생 비밀','원문 비밀','교사의 적용 결과'])assert.ok(!html.includes(privateText));
  assert.ok(!render(data,{includeOriginals:true}).includes('교사 기록'));
 });
