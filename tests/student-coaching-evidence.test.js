@@ -1,4 +1,21 @@
 const test=require('node:test'),assert=require('node:assert/strict');
+test('짧은 선택값이 서술 원문에 있어도 선택형 오표현으로 오인하지 않는다',async()=>{
+ const {validateEvidenceMonths:check}=await import('../supabase/functions/student-coaching/coaching.mjs');
+ for(const choice of ['이번 주','즉시','괜찮음']){
+   const evidence=[{id:'E1',month:'2026-09',field:'helpNow',inputKind:'선택형',value:choice},{id:'E2',month:'2026-09',field:'studentState.worryDetail',inputKind:'서술형',value:choice+'이라는 말을 들었어요'}];
+   assert.doesNotThrow(()=>check('9월 학교생활 고민에 '+choice+'이라는 말을 들었다고 적었습니다.',['E1','E2'],evidence));
+   assert.throws(()=>check('9월 도움 요청에 '+choice+'이라고 적었습니다.',['E1','E2'],evidence),/선택형/);
+ }
+});
+test('선택과 서술을 각각 올바르게 표현한 연결절은 허용한다',async()=>{
+ const {validateEvidenceMonths:check}=await import('../supabase/functions/student-coaching/coaching.mjs');
+ assert.doesNotThrow(()=>check('9월 도움 요청에 지금은 괜찮아요를 선택했고, 선생님께 듣고 싶은 말로 격려해 주세요라고 적었습니다.',['E1','E2'],sources));
+ assert.throws(()=>check('9월 선생님께 듣고 싶은 말로 격려해 주세요라고 적었습니다. 도움 요청에도 괜찮음이라고 썼습니다.',['E1','E2'],sources),/선택형/);
+});
+test('문항명을 생략한 선택형 직접 인용의 쓰기 표현도 차단한다',async()=>{
+ const {validateEvidenceMonths:check}=await import('../supabase/functions/student-coaching/coaching.mjs');
+ for(const quote of ['괜찮음이라고 적었습니다.','‘지금은 괜찮아요’라고 썼습니다.'])assert.throws(()=>check('9월에 '+quote,['E1','E2'],sources),/선택형/);
+});
 const sources=[
  {id:'E1',month:'2026-09',field:'helpNow',inputKind:'선택형',value:'괜찮음',displayValue:'지금은 괜찮아요'},
  {id:'E2',month:'2026-09',field:'studentState.teacherWish',inputKind:'서술형',value:'격려해 주세요'},

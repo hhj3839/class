@@ -39,7 +39,9 @@ Deno.serve(async(request:Request)=>{
     if(!ai.ok)throw coachingApiError(ai.status,result);
     if(result?.status!=='completed')throw new Error('AI 코칭 결과가 완성되지 않았습니다. 다시 시도해 주세요.');
     const output=result.output?.flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
-    const card=validateCard(JSON.parse(output||'null'),evidence.sources);
+    let card;
+    try{card=validateCard(JSON.parse(output||'null'),evidence.sources)}
+    catch{throw new Error('AI가 만든 내용과 설문 근거가 일치하는지 확인하지 못해 새 카드를 저장하지 않았습니다. 학생 응답을 수정할 필요는 없습니다. 이번 요청은 1회 사용되었으며 자동 재시도하지 않습니다. 반복되면 점검을 요청해 주세요.')}
     await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:card,p_model:MODEL,p_success:true});
     quota=quotaStamp();
     const refreshed=await rpc('teacher_get_student_coaching_context_auth',args);
