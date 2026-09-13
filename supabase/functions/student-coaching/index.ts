@@ -19,9 +19,10 @@ Deno.serve(async(request:Request)=>{
     const quotaStamp=()=>({quotaMonth:new Date(Date.now()+9*60*60*1000).toISOString().slice(0,7),quotaCheckedAt:Date.now()});
     let quota=quotaStamp();
     const args={p_class_id:classId,p_student_id:body.studentId},context=await rpc('teacher_get_student_coaching_context_auth',args),evidence=buildEvidence(context,(globalThis as any).IeumRelationshipData);
+    const safetyPriority=urgentEvidence(evidence.sources).length>0;
     const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.validationVersion!==VALIDATION_VERSION||typeof existing.result_json?.version!=='string');
     if(existing&&!stale){try{existing.result_json={...validateCard(existing.result_json,evidence.sources),version:existing.result_json.version}}catch{stale=true}}
-    const responseView=(card:any,cached:boolean)=>({...quota,previousGuidance:!!card&&!stale&&card.result_json?.version!==VERSION,card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
+    const responseView=(card:any,cached:boolean)=>({...quota,safetyPriority,previousGuidance:!!card&&!stale&&card.result_json?.version!==VERSION,card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
     if(action==='load')return json(responseView(existing,true));
     if(existing&&!stale&&!body.force)return json(responseView(existing,true));
     if(!evidence.canGenerate)return json({error:'코칭 근거가 될 학생 설문 응답이 부족합니다. 학생이 설문을 제출한 뒤 확인해 주세요.'},422);
@@ -46,8 +47,8 @@ Deno.serve(async(request:Request)=>{
     await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:card,p_model:MODEL,p_success:true});
     quota=quotaStamp();
     const refreshed=await rpc('teacher_get_student_coaching_context_auth',args);
-    if(refreshed.sourceHash!==context.sourceHash)return json({...quota,card:null,stale:true,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:[],feedback:[],cached:false});
-    return json({...quota,card:{id:runId,result:card,generatedAt:refreshed.card?.completed_at,basisMonth:evidence.basisMonth,model:MODEL},stale:false,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:evidence.sources,feedback:refreshed.feedback||[],cached:false});
+    if(refreshed.sourceHash!==context.sourceHash)return json({...quota,safetyPriority,card:null,stale:true,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:[],feedback:[],cached:false});
+    return json({...quota,safetyPriority,card:{id:runId,result:card,generatedAt:refreshed.card?.completed_at,basisMonth:evidence.basisMonth,model:MODEL},stale:false,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:evidence.sources,feedback:refreshed.feedback||[],cached:false});
   }catch(error){
     if(runId&&rpc)await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:{},p_model:MODEL,p_success:false}).catch(()=>null);
     const message=error instanceof Error?error.message:'학생 코칭 처리에 실패했습니다.';
