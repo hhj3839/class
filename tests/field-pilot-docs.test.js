@@ -68,8 +68,8 @@ test('PRD는 현재 기준과 과거 이력을 분리하고 현장 미완료를 
   assert.match(prd,/기능 기준선: `f216217`/);
   assert.match(prd,/핵심 구현 완료 · 현장 검증 대기/);
   assert.match(prd,/PRD_v1.2_HISTORY_20260912.md/);
-  assert.match(prd,/Node 261개 및 Chromium 화면 검사 14개/);
-  assert.match(prd,/evidence-fidelity-v6/);
+  assert.match(prd,/Node 264개 및 Chromium 화면 검사 14개/);
+  assert.match(prd,/open-experience-v7/);
   assert.match(prd,/relationship-coaching-v15/);
   assert.match(prd,/실제 태블릿 3~5대/);
   assert.match(prd,/미완료/);

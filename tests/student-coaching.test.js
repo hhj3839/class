@@ -1,4 +1,20 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{stripTypeScriptTypes}=require('node:module');
+test('고민 없음 지침은 좋은 경험과 대화 종료를 허용하고 안전 규칙을 유지한다',async()=>{
+ const result=await harness({action:'generate'});
+ for(const rule of ['숨은 문제나 어려움이 있다는 증거가 아닙니다','좋았던 일이 반드시 있었다고 전제하지','모든 이야기를 개선 목표로 바꾸지','학생이 지금 고른 이야기를 우선','두 줄은 강제하지 않습니다','교사의 비공개 안전 확인을 우선'])
+   assert.ok(result.aiBody.instructions.includes(rule),rule);
+});
+test('바라는 변화가 없으면 실천 과제 없는 짧은 마무리도 저장한다',async()=>{
+ const output=validCard();output.question.text='요즘 학교에서 좋았거나 기억에 남는 일이 있니?';
+ output.check_after='오늘 나눈 이야기만으로 마쳐도 괜찮습니다. 나중에 학생이 바라는 변화를 말할 때 함께 살펴보세요.';
+ const result=await harness({action:'generate',output});
+ assert.equal(result.status,200);assert.equal(result.result.card.result.check_after,output.check_after);
+ assert.equal(result.calls.filter(url=>url==='https://api.openai.com/v1/responses').length,1);
+});
+test('이전 근거 강화 카드는 새 대화 기준으로 위장하거나 자동 재생성하지 않는다',async()=>{
+ const context=makeContext();context.card={id:'previous',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-evidence-fidelity-v6'}};
+ const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);
+});
 const data=require('../supabase/functions/analyze-class/relationship-data.js');
 const studentId='11111111-1111-4111-8111-111111111111',otherId='22222222-2222-4222-8222-222222222222';
 test('후속 질문 지침은 중립적 표현과 선택 전·실행 후를 구분한다',async()=>{const {instructions}=await import('../supabase/functions/student-coaching/coaching.mjs');for(const rule of ['부정적인 자기평가를 그대로 반복하거나 강화하지','원문에 없는 걱정·슬픔','본인에게 어떤 점에서 좋은지','선택할 때:','실제로 해 본 뒤:','지금 안전 확인:','보호 후 다시 확인:'])assert.ok(instructions.includes(rule),rule)});
@@ -32,9 +48,9 @@ test('단순 괜찮음 응답만으로는 AI 코칭을 생성하지 않는다',a
 test('없는 근거 ID와 영어 출력은 저장 전 거부한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),value=validCard();value.summary.refs=['UNKNOWN'];assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/근거/);value.summary.refs=['E1'];value.summary.text='The student needs support';assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/표현/)});
 test('조회는 API 키 없이 가능하며 AI 호출을 하지 않는다',async()=>{const result=await harness({key:false});assert.equal(result.status,200);assert.equal(result.aiBody,undefined);assert.equal(result.result.canGenerate,true)});
 test('자료가 바뀐 저장 카드는 숨기고 갱신 안내만 반환한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:'old',result_json:{...validCard(),version:'old'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
-test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-evidence-fidelity-v6'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
-test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-evidence-fidelity-v6'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
-test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-evidence-fidelity-v6')});
+test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-open-experience-v7'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
+test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-open-experience-v7'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
+test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-open-experience-v7')});
 test('잘못된 근거 결과는 실패 처리하며 저장하지 않는다',async()=>{const output=validCard();output.actions[0].refs=['E999'];const result=await harness({action:'generate',output});assert.equal(result.status,500);assert.equal(result.saved.length,1);assert.equal(result.saved[0].p_success,false)});
 test('인증·학급 권한 실패는 AI 호출 전에 차단한다',async()=>{for(const options of [{authorized:false},{denied:true}]){const result=await harness({...options,action:'generate'});assert.ok([401,403].includes(result.status));assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)}});
 test('자료 없음과 API 실패를 구분하고 실패 실행을 닫는다',async()=>{const context=makeContext();context.responses=[];const empty=await harness({action:'generate',context});assert.equal(empty.status,422);assert.equal(empty.aiBody,undefined);const failure=await harness({action:'generate',apiStatus:429});assert.equal(failure.saved[0].p_success,false);assert.match(failure.result.error,/한도/)});
