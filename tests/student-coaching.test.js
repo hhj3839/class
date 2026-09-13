@@ -133,7 +133,7 @@ test('선택형만 인용하면서 적었다고 표현하면 저장하지 않는
  const context=makeContext();context.responses[0].payload_json.helpNow='괜찮음';
  const output=validCard();output.summary.text='9월에 괜찮음이라고 적었습니다.';
  const result=await harness({context,action:'generate',output});
- assert.equal(result.status,500);assert.match(result.result.error,/선택형/);assert.equal(result.saved[0].p_success,false);
+ assert.equal(result.status,500);assert.match(result.result.error,/학생 응답을 수정할 필요는 없습니다/);assert.match(result.result.error,/1회 사용/);assert.doesNotMatch(result.result.error,/선택형 응답은|문항별로 문장을/);assert.equal(result.saved[0].p_success,false);assert.equal(result.calls.filter(url=>url.includes('api.openai.com')).length,1);
 });
 test('조회는 한도 기준월과 확인 시각을 포함하며 AI를 호출하지 않는다',async()=>{
  const result=await harness();assert.match(result.result.quotaMonth,/^\d{4}-\d{2}$/);assert.ok(result.result.quotaCheckedAt>0);assert.equal(result.aiBody,undefined);

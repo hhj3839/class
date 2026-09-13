@@ -32,10 +32,20 @@ export function validateEvidenceClaims(text,refs,sources){
      const numeric=named.length?dated.filter(source=>source.field===named[0]):dated;
      for(const score of scoreClaims)if(!numeric.some(source=>scoreValues(source).includes(score)))throw new Error('코칭 문장의 점수가 해당 월·문항의 근거와 일치하지 않습니다.');
    }
-   // A narrative reference alongside a choice must not bypass the modality check.
-   if(written.test(sentence)){
+   // Attribute the writing verb to its clause, not every reference on the card.
+   // Short stored choices such as "이번 주" also occur in genuine narratives.
+   for(const clause of sentence.split(/(?<=선택했고|선택했으며|선택하였고|선택하였으며|선택했지만)[,\s]+/u)){
+     if(!written.test(clause))continue;
      const choices=dated.filter(source=>source.inputKind==='선택형');
-     if(choices.length&&(named.includes('helpNow')||choices.some(source=>[source.value,source.displayValue].some(value=>value&&sentence.includes(String(value))))))
+     const fields=fieldRules.filter(([pattern])=>pattern.test(clause)).map(([,field])=>field);
+     const explicitChoice=fields.includes('helpNow');
+     const explicitNarrative=fields.length>0&&!explicitChoice&&fields.every(field=>dated.some(source=>source.field===field&&source.inputKind!=='선택형'));
+     const choiceQuotation=choices.some(source=>[source.value,source.displayValue].some(value=>{
+       if(!value)return false;
+       const escaped=String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+       return new RegExp('[“‘"\u0027]?'+escaped+'[”’"\u0027]?(?:이?라고|라며|을|를)\\s*(?:적었|썼|써\\s*주|적어\\s*주)').test(clause);
+     }));
+     if(choices.length&&(explicitChoice||(!explicitNarrative&&choiceQuotation)))
        throw new Error('선택형 응답은 적었다가 아니라 선택했다고 표현해야 합니다. 문항별로 문장을 나누어 주세요.');
    }
  }
