@@ -23,7 +23,7 @@ async function harness({action='load',authorized=true,context=makeContext(),outp
   const response=await handler(new Request('https://mock.invalid/coaching',{method:'POST',headers:{Authorization:'Bearer test-only'},body:JSON.stringify({classId:'fixture',studentId,action,force})}));return{status:response.status,result:await response.json(),calls,aiBody,saved};
 }
 test('학생 코칭 근거는 선택 학생 자료와 계산값만 포함한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),result=api.buildEvidence(makeContext(),data);assert.equal(result.sources.length,2);assert.match(result.sources[1].value,/평균 5.00점/);assert.doesNotMatch(JSON.stringify(result.sources),/관련 없는/);assert.equal(result.limited,true)});
-test('모든 근거 필드는 현재 요청의 ID만 허용하며 요청끼리 섞이지 않는다',async()=>{const {schemaForEvidence,schema}=await import('../supabase/functions/student-coaching/coaching.mjs');const check=(value,ids)=>{const p=value.properties;for(const refs of [p.summary.properties.refs,p.strengths.items.properties.refs,p.needs.items.properties.refs,p.question.properties.refs,p.actions.items.properties.refs]){assert.deepEqual(refs.items.enum,ids);assert.equal(refs.minItems,1);assert.equal(refs.maxItems,3)}};const first=schemaForEvidence([{id:'E1'},{id:'E2'}]);check(first,['E1','E2']);check(schemaForEvidence([{id:'E9'}]),['E9']);check(first,['E1','E2']);assert.equal(schema.properties.summary.properties.refs.items.enum,undefined);assert.throws(()=>schemaForEvidence([]),/근거/)});
+test('모든 근거 필드는 현재 요청의 ID만 허용하며 요청끼리 섞이지 않는다',async()=>{const {schemaForEvidence,schema}=await import('../supabase/functions/student-coaching/coaching.mjs');const check=(value,ids)=>{const p=value.properties;for(const refs of [p.summary.properties.refs,p.strengths.items.properties.refs,p.needs.items.properties.refs,p.question.properties.refs,p.actions.items.properties.refs]){assert.deepEqual(refs.items.enum,ids);assert.equal(refs.minItems,1);assert.equal(refs.maxItems,8)}};const first=schemaForEvidence([{id:'E1'},{id:'E2'}]);check(first,['E1','E2']);check(schemaForEvidence([{id:'E9'}]),['E9']);check(first,['E1','E2']);assert.equal(schema.properties.summary.properties.refs.items.enum,undefined);assert.throws(()=>schemaForEvidence([]),/근거/)});
 test('실제 API 요청 스키마의 근거 목록은 전송한 근거 목록과 일치한다',async()=>{const result=await harness({action:'generate'});const input=JSON.parse(result.aiBody.input),ids=input.evidence.map(row=>row.id);assert.deepEqual(result.aiBody.text.format.schema.properties.summary.properties.refs.items.enum,ids);assert.deepEqual(result.aiBody.text.format.schema.properties.actions.items.properties.refs.items.enum,ids);assert.equal(result.aiBody.text.format.strict,true)});
 test('가명 처리로 근거 ID가 바뀌지 않는다',async()=>{const context=makeContext();context.roster.push({number:3,name:'E1'});const result=await harness({action:'generate',context});assert.equal(JSON.parse(result.aiBody.input).evidence[0].id,'E1');assert.equal(result.status,200)});
 test('다섯 번째 과거 설문은 코칭 서술 근거에서 제외한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),context=makeContext();context.responses=Array.from({length:5},(_,i)=>({...context.responses[0],id:`own-${i}`,survey_month:`2026-0${9-i}-01`,payload_json:{studentState:{worryDetail:`가상 고민 ${i}`}}}));const result=api.buildEvidence(context,data);assert.equal(result.sources.length,4);assert.equal(result.sources.some(row=>row.responseId==='own-4'),false);assert.equal(result.sources[0].month,'2026-09')});
@@ -32,9 +32,9 @@ test('단순 괜찮음 응답만으로는 AI 코칭을 생성하지 않는다',a
 test('없는 근거 ID와 영어 출력은 저장 전 거부한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),value=validCard();value.summary.refs=['UNKNOWN'];assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/근거/);value.summary.refs=['E1'];value.summary.text='The student needs support';assert.throws(()=>api.validateCard(value,[{id:'E1'}]),/표현/)});
 test('조회는 API 키 없이 가능하며 AI 호출을 하지 않는다',async()=>{const result=await harness({key:false});assert.equal(result.status,200);assert.equal(result.aiBody,undefined);assert.equal(result.result.canGenerate,true)});
 test('자료가 바뀐 저장 카드는 숨기고 갱신 안내만 반환한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:'old',result_json:{...validCard(),version:'old'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
-test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-gentle-reflection-v5'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
-test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-gentle-reflection-v5'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
-test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.12-gentle-reflection-v5')});
+test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-evidence-fidelity-v6'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
+test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-evidence-fidelity-v6'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
+test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-evidence-fidelity-v6')});
 test('잘못된 근거 결과는 실패 처리하며 저장하지 않는다',async()=>{const output=validCard();output.actions[0].refs=['E999'];const result=await harness({action:'generate',output});assert.equal(result.status,500);assert.equal(result.saved.length,1);assert.equal(result.saved[0].p_success,false)});
 test('인증·학급 권한 실패는 AI 호출 전에 차단한다',async()=>{for(const options of [{authorized:false},{denied:true}]){const result=await harness({...options,action:'generate'});assert.ok([401,403].includes(result.status));assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)}});
 test('자료 없음과 API 실패를 구분하고 실패 실행을 닫는다',async()=>{const context=makeContext();context.responses=[];const empty=await harness({action:'generate',context});assert.equal(empty.status,422);assert.equal(empty.aiBody,undefined);const failure=await harness({action:'generate',apiStatus:429});assert.equal(failure.saved[0].p_success,false);assert.match(failure.result.error,/한도/)});
@@ -60,4 +60,38 @@ test('실제 요청은 강화된 코칭 지침과 문항별 비교 근거만 전
 test('이전 설문 전용 카드도 새 코칭 지침으로 위장하거나 자동 생성하지 않는다',async()=>{
  const context=makeContext();context.card={id:'previous',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-student-survey-only-v2'}};
  const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0);
+});
+test('비교 문장은 양쪽 월의 근거를 요구하며 연도도 검증한다',async()=>{
+ const {validateCard}=await import('../supabase/functions/student-coaching/coaching.mjs');
+ const sources=[{id:'E1',month:'2026-08'},{id:'E2',month:'2026-09'}],card=validCard();
+ card.summary.text='8월에는 괜찮다고 했고 9월에는 도움을 요청했습니다.';
+ assert.throws(()=>validateCard(card,sources),/월의 근거/);
+ card.summary.refs=['E1','E2'];assert.equal(validateCard(card,sources).summary.refs.length,2);
+ card.summary.text='2025년 8월에는 도움을 요청했습니다.';assert.throws(()=>validateCard(card,sources),/월의 근거/);
+ card.summary.text='8~9월에 응답했습니다.';assert.throws(()=>validateCard(card,sources),/각각 명시/);
+});
+test('여러 달의 비교 근거는 최대 여덟 개까지 연결한다',async()=>{
+ const {validateCard}=await import('../supabase/functions/student-coaching/coaching.mjs'),card=validCard();
+ const sources=Array.from({length:8},(_,i)=>({id:'E'+(i+1),month:'2026-0'+(i%4+6)}));
+ card.summary={text:'6월과 7월, 8월과 9월의 응답을 확인했습니다.',refs:sources.map(s=>s.id)};
+ assert.equal(validateCard(card,sources).summary.refs.length,8);
+ card.summary.refs.push('E1');assert.throws(()=>validateCard(card,sources),/근거/);
+});
+test('도움 요청은 선택형이며 저장값과 표시값을 구분한다',async()=>{
+ const context=makeContext();context.responses[0].payload_json.helpNow='괜찮음';
+ const output=validCard();output.summary={text:'학생은 지금은 괜찮아요를 선택했습니다.',refs:['E1']};
+ const result=await harness({context,action:'generate',output});
+ const input=JSON.parse(result.aiBody.input),source=result.result.sources.find(s=>s.field==='helpNow');
+ assert.equal(input.evidence[0].input_kind,'선택형');assert.equal(input.evidence[0].text,'지금은 괜찮아요');
+ assert.equal(source.value,'괜찮음');assert.equal(source.displayValue,'지금은 괜찮아요');
+ assert.equal(input.evidence[1].input_kind,'서술형');
+});
+test('선택형만 인용하면서 적었다고 표현하면 저장하지 않는다',async()=>{
+ const context=makeContext();context.responses[0].payload_json.helpNow='괜찮음';
+ const output=validCard();output.summary.text='9월에 괜찮음이라고 적었습니다.';
+ const result=await harness({context,action:'generate',output});
+ assert.equal(result.status,500);assert.match(result.result.error,/선택형/);assert.equal(result.saved[0].p_success,false);
+});
+test('조회는 한도 기준월과 확인 시각을 포함하며 AI를 호출하지 않는다',async()=>{
+ const result=await harness();assert.match(result.result.quotaMonth,/^\d{4}-\d{2}$/);assert.ok(result.result.quotaCheckedAt>0);assert.equal(result.aiBody,undefined);
 });

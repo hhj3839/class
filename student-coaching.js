@@ -1,4 +1,16 @@
 const studentCoachingState=new Map();let studentCoachingEpoch=0;
+const studentCoachingQuota=new Map();
+function acceptCoachingData(key,data){
+  const classId=key.slice(0,key.lastIndexOf(':')),prior=studentCoachingQuota.get(classId);
+  if(Number.isFinite(data.remaining)&&(!prior||Number(data.quotaCheckedAt||0)>=prior.checkedAt)){
+    const quota={remaining:data.remaining,month:data.quotaMonth||'',checkedAt:Number(data.quotaCheckedAt||0)};
+    studentCoachingQuota.set(classId,quota);
+    for(const [otherKey,state] of studentCoachingState){if(otherKey.startsWith(classId+':')&&state.data)state.data={...state.data,remaining:quota.remaining,quotaMonth:quota.month}}
+  }
+  const quota=studentCoachingQuota.get(classId);
+  return {...data,...(quota?{remaining:quota.remaining,quotaMonth:quota.month}:{})};
+}
+
 // Only highlight explicit quoted speech or a standalone question; never rewrite saved content.
 function coachingDialogueMarkup(value){
   const text=String(aiTeacherDisplayText(value)),pattern=/“[^”\n]+”|‘[^’\n]+’|"[^"\n]+"|'[^'\n]+'/g;
@@ -8,7 +20,7 @@ function coachingDialogueMarkup(value){
   return result+escapeHTML(text.slice(offset));
 }
 function coachingKey(){const student=classSettings.students.find(row=>Number(row.number)===Number($('#studentDetailSelect')?.value));return student?.studentId?`${classSettings.classId}:${student.studentId}`:''}
-function clearStudentCoachingState(){studentCoachingEpoch++;studentCoachingState.clear();const dialog=$('#studentCoachingEvidence');if(dialog){dialog.close();$('#studentCoachingSource').replaceChildren()}}
+function clearStudentCoachingState(){studentCoachingEpoch++;studentCoachingState.clear();studentCoachingQuota.clear();const dialog=$('#studentCoachingEvidence');if(dialog){dialog.close();$('#studentCoachingSource').replaceChildren()}}
 function renderStudentCoachingShell(student){
   const content=$('#studentDetailContent');if(!content||$('#studentPanelCoaching'))return;
   content.insertAdjacentHTML('beforeend','<section id="studentPanelCoaching" data-student-detail-panel="coaching" role="tabpanel" aria-labelledby="studentTabCoaching" hidden><div id="studentCoachingContent" class="panel student-coaching-card" aria-live="polite"></div></section>');
@@ -16,7 +28,7 @@ function renderStudentCoachingShell(student){
 }
 function renderStudentCoachingCard(){
   const target=$('#studentCoachingContent'),key=coachingKey();if(!target||!key)return;
-  const state=studentCoachingState.get(key)||{},data=state.data,card=data?.card,escape=escapeHTML;
+  const state=studentCoachingState.get(key)||{},data=state.data?{...state.data,remaining:studentCoachingQuota.get(key.slice(0,key.lastIndexOf(':')))?.remaining??state.data.remaining}:null,card=data?.card,escape=escapeHTML;
   if(state.loading&&!data){target.innerHTML='<p role="status">저장된 코칭 카드를 확인하고 있습니다…</p>';return}
   const error=state.error?`<p class="coaching-error" role="alert">${escape(state.error)}</p><button type="button" class="text-button" data-coaching-reload>다시 불러오기</button>`:'';
   if(!data){target.innerHTML=error||'<p>학생 코칭 탭을 열면 저장된 카드를 확인합니다.</p>';return}
@@ -39,24 +51,30 @@ function renderStudentCoachingCard(){
     `<div class="coaching-empty"><h4>${data.canGenerate?'아직 현재 자료의 코칭 카드가 없습니다.':'코칭을 만들 근거가 부족합니다.'}</h4><p>${data.canGenerate?'상단의 AI 새 분석을 누르면 응답 근거에 맞춘 대화 초안을 생성합니다.':'학생이 설문을 제출한 뒤 확인해 주세요.'}</p></div>`}`;
 }
 async function loadStudentCoaching(forceReload=false){
-  const key=coachingKey();if(!key)return;const state=studentCoachingState.get(key)||{};if(state.loading||state.generating)return;if(state.data&&!forceReload){renderStudentCoachingCard();return}
+  const key=coachingKey();if(!key)return;const state=studentCoachingState.get(key)||{};if(state.loading||state.generating)return;
   const epoch=studentCoachingEpoch,studentId=key.slice(key.lastIndexOf(':')+1),classId=classSettings.classId;studentCoachingState.set(key,{...state,loading:true,error:''});renderStudentCoachingCard();
-  try{const data=await teacherEdgeFunction('student-coaching',{classId,studentId,action:'load'});if(epoch!==studentCoachingEpoch||!getTeacherSession())return;studentCoachingState.set(key,{data})}
+  try{const data=await teacherEdgeFunction('student-coaching',{classId,studentId,action:'load'});if(epoch!==studentCoachingEpoch||!getTeacherSession())return;studentCoachingState.set(key,{data:acceptCoachingData(key,data)})}
   catch(error){if(epoch===studentCoachingEpoch)studentCoachingState.set(key,{...state,error:error.message})}
-  finally{if(epoch===studentCoachingEpoch&&coachingKey()===key)renderStudentCoachingCard()}
+  finally{if(epoch===studentCoachingEpoch)renderStudentCoachingCard()}
 }
 document.addEventListener('class-ieum:data-updated',()=>{clearStudentCoachingState();if(activeStudentDetailTab==='coaching')loadStudentCoaching()});
 document.addEventListener('click',async event=>{
   const sourceButton=event.target.closest('[data-coaching-source]'),key=coachingKey(),state=studentCoachingState.get(key);if(!key)return;
-  if(sourceButton){const source=state?.data?.sources.find(source=>source.id===sourceButton.dataset.coachingSource);if(!source)return;const container=$('#studentCoachingSource');container.replaceChildren();const heading=document.createElement('h3'),meta=document.createElement('p'),value=document.createElement('p');heading.textContent=source.label;meta.textContent=`${monthLabel(source.month)} · ${source.type}`;value.textContent=source.value;value.className='coaching-original';container.append(heading,meta,value);$('#studentCoachingEvidence').showModal();return}
+  if(sourceButton){const source=state?.data?.sources.find(source=>source.id===sourceButton.dataset.coachingSource);if(!source)return;const container=$('#studentCoachingSource');container.replaceChildren();const heading=document.createElement('h3'),meta=document.createElement('p'),value=document.createElement('p');heading.textContent=source.label;meta.textContent=`${monthLabel(source.month)} · ${source.type}`;value.textContent=source.displayValue||source.value;value.className='coaching-original';container.append(heading,meta,value);$('#studentCoachingEvidence').showModal();return}
   if(event.target.closest('[data-coaching-reload]')){loadStudentCoaching(true);return}
-  const generate=event.target.closest('[data-coaching-generate]'),save=event.target.closest('[data-coaching-feedback]'),remove=event.target.closest('[data-coaching-delete]');if(!generate&&!save&&!remove)return;if(!state?.data||state.generating||state.saving)return;
+  const generate=event.target.closest('[data-coaching-generate]'),save=event.target.closest('[data-coaching-feedback]'),remove=event.target.closest('[data-coaching-delete]');if(!generate&&!save&&!remove)return;if(!state?.data||state.generating||state.loading||state.saving)return;
   if(remove&&!confirm('이 코칭 카드와 카드의 적용 결과를 삭제할까요? 학생 설문은 유지됩니다.'))return;
   const epoch=studentCoachingEpoch,studentId=key.slice(key.lastIndexOf(':')+1),classId=classSettings.classId,status=$('#studentCoachingOutcome')?.value,note=$('#studentCoachingNote')?.value||'';
   studentCoachingState.set(key,{...state,generating:!!generate,saving:!generate,error:''});renderStudentCoachingCard();
   try{
-    if(generate){const data=await teacherEdgeFunction('student-coaching',{classId,studentId,action:'generate',force:true});if(epoch===studentCoachingEpoch&&getTeacherSession()){studentCoachingState.set(key,{data});showToast(data.cached?'저장된 코칭 카드를 불러왔습니다.':'학생 코칭 카드를 저장했습니다.')}}
+    if(generate){const data=await teacherEdgeFunction('student-coaching',{classId,studentId,action:'generate',force:true});if(epoch===studentCoachingEpoch&&getTeacherSession()){studentCoachingState.set(key,{data:acceptCoachingData(key,data)});showToast(data.cached?'저장된 코칭 카드를 불러왔습니다.':'학생 코칭 카드를 저장했습니다.')}}
     else{await teacherRpc(remove?'teacher_delete_student_coaching_auth':'teacher_record_student_coaching_feedback_auth',{p_class_id:classId,p_card_id:state.data.card.id,...(remove?{}:{p_status:status,p_note:note})});if(epoch===studentCoachingEpoch&&getTeacherSession()){studentCoachingState.delete(key);if(coachingKey()===key)await loadStudentCoaching(true);showToast(remove?'코칭 카드와 적용 결과를 삭제했습니다.':'적용 결과를 저장했습니다.')}}
-  }catch(error){if(epoch===studentCoachingEpoch)studentCoachingState.set(key,{...state,error:error.message})}
-  finally{if(epoch===studentCoachingEpoch&&coachingKey()===key)renderStudentCoachingCard()}
+  }catch(error){
+    if(epoch===studentCoachingEpoch){
+      let data=state.data;
+      if(generate){try{const refreshed=await teacherEdgeFunction('student-coaching',{classId,studentId,action:'load'});if(epoch===studentCoachingEpoch&&getTeacherSession())data=acceptCoachingData(key,refreshed)}catch{}}
+      if(epoch===studentCoachingEpoch&&getTeacherSession())studentCoachingState.set(key,{...state,data,error:error.message});
+    }
+  }
+  finally{if(epoch===studentCoachingEpoch)renderStudentCoachingCard()}
 });
