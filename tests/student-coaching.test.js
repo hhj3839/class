@@ -1,4 +1,24 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{stripTypeScriptTypes}=require('node:module');
+test('안전 우선 안내와 근거를 갖춘 긴급 코칭은 저장한다',async()=>{
+ const context=makeContext();context.responses[0].payload_json.helpNow='바로 도와주세요.';
+ const output=validCard();output.summary={text:'교사가 지금 비공개로 안전을 확인합니다.',refs:['E1']};
+ output.question={text:'지금 안전하게 지내는 데 어떤 도움이 필요하니?',refs:['E1']};
+ output.actions=[{title:'교사가 지금 안전을 확인하기',steps:['교사는 지금 비공개로 안전과 필요한 보호를 확인합니다.'],refs:['E1']}];
+ output.check_after='지금 안전 확인: 필요한 보호를 확인합니다.\n보호 후 다시 확인: 안전을 다시 확인합니다.';
+ const result=await harness({context,action:'generate',output});assert.equal(result.status,200);assert.equal(result.saved[0].p_success,true);
+});
+test('긴급 선택은 AI 입력에 구조화하고 일반 코칭 출력은 저장 전에 차단한다',async()=>{
+ const context=makeContext();context.responses[0].payload_json.helpNow='바로 도와주세요.';
+ const result=await harness({context,action:'generate'});
+ assert.deepEqual(JSON.parse(result.aiBody.input).urgent_refs,['E1']);
+ assert.match(result.result.error,/C-SAFETY/);assert.equal(result.saved[0].p_success,false);
+ assert.equal(result.calls.filter(url=>url.includes('api.openai.com')).length,1);
+});
+test('기존 긴급 요청 카드도 일반 대화로 작성되었다면 무료 조회에서 숨긴다',async()=>{
+ const context=makeContext();context.responses[0].payload_json.helpNow='즉시';
+ context.card={id:'old-unsafe',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-safe-evidence-v8',validationVersion:'2026.09.13-safety-evidence-v1'}};
+ const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);
+});
 test('안전 문항은 선택 학생의 작성 내용과 출처 표시만 AI에 전달한다',async()=>{
  const context=makeContext();context.responses[0].payload_json.peerObservations={hurt:{detail:'가상학생나가 밀치는 장면을 들었습니다.',sourceType:'전해 들음',frequency:'2~3번',ongoing:false},needsHelp:{detail:'친구에게 도움이 필요하다고 생각해요.'}};
  context.responses[1].payload_json.peerObservations={hurt:{detail:'다른 응답자의 비공개 안전 내용'}};
@@ -52,7 +72,7 @@ test('이전 지도형 카드는 대화형으로 위장하지 않고 자동 생�
 test('조건부 대화는 최대 세 개이며 근거 없는 네 번째 카드는 저장하지 않는다',async()=>{const output=validCard();output.actions=Array.from({length:3},()=>({...output.actions[0]}));assert.equal((await harness({action:'generate',output})).status,200);output.actions.push({...output.actions[0]});const failed=await harness({action:'generate',output});assert.equal(failed.status,500);assert.equal(failed.saved[0].p_success,false)});
 test('대화 지침은 학생의 선택과 말하지 않을 권리 및 교사의 보호 책임을 명시한다',async()=>{const result=await harness({action:'generate'});for(const rule of ['학생이 자기 경험과 바람','학생이 하지 않은 말이나 감정','말하고 싶지 않아','문제·목표·실천 약속을 만들어낼 필요가 없습니다','교사의 즉시 보호','보호를 학생의 해결 의지나 실천 약속에 조건부로 맡기지'])assert.ok(result.aiBody.instructions.includes(rule),rule)});
 async function harness({action='load',authorized=true,context=makeContext(),output=validCard(),apiStatus=200,apiError=null,denied=false,key=true,force=false}={}){
-  const {coachingApiError}=await import('../supabase/functions/student-coaching/api-errors.mjs');const api=await import('../supabase/functions/student-coaching/coaching.mjs'),{redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');let handler,aiBody;const calls=[],saved=[];
+  const {coachingApiError,coachingValidationError}=await import('../supabase/functions/student-coaching/api-errors.mjs');const api=await import('../supabase/functions/student-coaching/coaching.mjs'),{redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');let handler,aiBody;const calls=[],saved=[];
   const fetch=async(url,options={})=>{const body=options.body?JSON.parse(options.body):{};calls.push(url);
     if(url.endsWith('/auth/v1/user'))return Response.json(authorized?{id:'teacher'}:{},{status:authorized?200:401});
     if(url.endsWith('/rpc/teacher_get_student_coaching_context_auth'))return Response.json(denied?{message:'담당 학급에 대한 권한이 없습니다.'}:context,{status:denied?403:200});
@@ -62,7 +82,7 @@ async function harness({action='load',authorized=true,context=makeContext(),outp
     throw Error('Unexpected mock request');
   };
   const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/student-coaching/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
-  vm.runInNewContext(source,{...api,coachingApiError,Error,IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
+  vm.runInNewContext(source,{...api,coachingApiError,coachingValidationError,Error,IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/coaching',{method:'POST',headers:{Authorization:'Bearer test-only'},body:JSON.stringify({classId:'fixture',studentId,action,force})}));return{status:response.status,result:await response.json(),calls,aiBody,saved};
 }
 test('학생 코칭 근거는 선택 학생 자료와 계산값만 포함한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),result=api.buildEvidence(makeContext(),data);assert.equal(result.sources.length,2);assert.match(result.sources[1].value,/평균 5.00점/);assert.doesNotMatch(JSON.stringify(result.sources),/관련 없는/);assert.equal(result.limited,true)});
@@ -77,7 +97,7 @@ test('조회는 API 키 없이 가능하며 AI 호출을 하지 않는다',async
 test('자료가 바뀐 저장 카드는 숨기고 갱신 안내만 반환한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:'old',result_json:{...validCard(),version:'old'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
 test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-safe-evidence-v8',validationVersion:'2026.09.13-safety-evidence-v1'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
 test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-safe-evidence-v8',validationVersion:'2026.09.13-safety-evidence-v1'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
-test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-safe-evidence-v8')});
+test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-safety-priority-v9')});
 test('잘못된 근거 결과는 실패 처리하며 저장하지 않는다',async()=>{const output=validCard();output.actions[0].refs=['E999'];const result=await harness({action:'generate',output});assert.equal(result.status,500);assert.equal(result.saved.length,1);assert.equal(result.saved[0].p_success,false)});
 test('인증·학급 권한 실패는 AI 호출 전에 차단한다',async()=>{for(const options of [{authorized:false},{denied:true}]){const result=await harness({...options,action:'generate'});assert.ok([401,403].includes(result.status));assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)}});
 test('자료 없음과 API 실패를 구분하고 실패 실행을 닫는다',async()=>{const context=makeContext();context.responses=[];const empty=await harness({action:'generate',context});assert.equal(empty.status,422);assert.equal(empty.aiBody,undefined);const failure=await harness({action:'generate',apiStatus:429});assert.equal(failure.saved[0].p_success,false);assert.match(failure.result.error,/한도/)});
