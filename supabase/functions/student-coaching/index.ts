@@ -1,7 +1,7 @@
 import '../analyze-class/relationship-data.js';
-import { coachingApiError } from './api-errors.mjs';
+import { coachingApiError, coachingValidationError } from './api-errors.mjs';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
-import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, instructions, VERSION, VALIDATION_VERSION, MODEL } from './coaching.mjs';
+import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, urgentEvidence, instructions, VERSION, VALIDATION_VERSION, MODEL } from './coaching.mjs';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 Deno.serve(async(request:Request)=>{
@@ -30,6 +30,7 @@ Deno.serve(async(request:Request)=>{
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
     const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
+    masked.urgent_refs=urgentEvidence(evidence.sources).map((source:any)=>source.id);
     // Redaction must never rename structural evidence identifiers.
     masked.comparison_context=input.comparison_context;
     masked.evidence.forEach((source:any,index:number)=>{source.id=input.evidence[index].id});
@@ -41,7 +42,7 @@ Deno.serve(async(request:Request)=>{
     const output=result.output?.flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
     let card;
     try{card=validateCard(JSON.parse(output||'null'),evidence.sources)}
-    catch{throw new Error('AI가 만든 내용과 설문 근거가 일치하는지 확인하지 못해 새 카드를 저장하지 않았습니다. 학생 응답을 수정할 필요는 없습니다. 이번 요청은 1회 사용되었으며 자동 재시도하지 않습니다. 반복되면 점검을 요청해 주세요.')}
+    catch(error){throw coachingValidationError(error)}
     await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:card,p_model:MODEL,p_success:true});
     quota=quotaStamp();
     const refreshed=await rpc('teacher_get_student_coaching_context_auth',args);
