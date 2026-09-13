@@ -12,7 +12,8 @@ const issue=read('FIELD_ISSUE_TEMPLATE.md');
 const pages=read('.github/workflows/pages.yml');
 
 test('9월 현장 기준선은 최신 배포 커밋과 두 운영 주소를 사용한다',()=>{
-  for(const document of [prd,checklist,results]) assert.match(document,/`95db728`/);
+  for(const document of [checklist,results]) assert.match(document,/`95db728`/); // Historical field records retain their original baseline.
+  assert.match(prd,/`f216217`/);
   assert.match(checklist,/대상 시기: 2026년 9월/);
   assert.match(results,/2026년 9월 현장 실행 기준선/);
   assert.match(prd,/운영 주소: https:\/\/class-ieum\.vercel\.app\//);
