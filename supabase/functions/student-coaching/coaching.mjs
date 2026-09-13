@@ -1,4 +1,6 @@
-export const VERSION='2026.09.13-open-experience-v7';
+import { validateEvidenceClaims } from './evidence-validation.mjs';
+export const VERSION='2026.09.13-safe-evidence-v8';
+export const VALIDATION_VERSION='2026.09.13-safety-evidence-v1';
 export const MODEL='gpt-5.6-terra';
 const helpChoices={'괜찮음':'지금은 괜찮아요','이번 주':'이번 주에 이야기하고 싶어요','즉시':'바로 도와주세요'};
 const labels={study:'학습',listening:'경청',respect:'관계 존중',manners:'예의',responsibility:'책임감'};
@@ -10,6 +12,15 @@ export function buildEvidence(context,normalizer){
   for(const row of own.slice(0,4)){
     const month=row.survey_month.slice(0,7),p=row.payload_json||{},ref=field=>({kind:'response',responseId:row.id,field,inputKind:field==='helpNow'?'선택형':field.startsWith('selfRatings.')?'점수 선택과 서술형 이유':'서술형'});
     for(const [field,label,value] of [['helpNow','도움 요청',p.helpNow],['studentState.worryDetail','학교생활 고민',p.studentState?.worryDetail],['studentState.teacherWish','선생님께 듣고 싶은 말',p.studentState?.teacherWish],['unresolved.detail','아직 속상한 마음이 남은 관계',p.unresolved?.detail]])add('학생 응답',month,label,value,ref(field));
+
+    const hurt=p.peerObservations?.hurt||{};
+    const context={
+      sourceType:['직접 경험','직접 목격','전해 들음'].includes(hurt.sourceType)?hurt.sourceType:'확인되지 않음',
+      frequency:['한 번','2~3번','4번 이상'].includes(hurt.frequency)?hurt.frequency:'확인되지 않음',
+      ongoing:hurt.ongoing===true?'계속됨을 선택':hurt.ongoing===false?'계속됨을 선택하지 않음':'확인되지 않음'
+    };
+    add('학생이 작성한 안전 관련 응답',month,'놀림·상처·폭력 관련 경험',hurt.detail||((context.sourceType!=='확인되지 않음'||hurt.ongoing===true)?'서술 응답 없음':''),{...ref('peerObservations.hurt.detail'),safetyContext:context});
+    add('학생이 작성한 안전 관련 응답',month,'도움이 필요하다고 생각한 친구와 까닭',p.peerObservations?.needsHelp?.detail,ref('peerObservations.needsHelp.detail'));
     for(const [key,label] of Object.entries(labels)){const rating=p.selfRatings?.[key];if(rating&&Number(rating.score)>=1&&Number(rating.score)<=5){add('학생 자기평가',month,`${label} 자기평가`,`${Number(rating.score)}점${rating.reason?` · ${rating.reason}`:''}`,ref(`selfRatings.${key}`))}}
   }
   // Only use peer scores when the selected student's stable identity and historical number exist in that month.
@@ -42,6 +53,7 @@ export function comparisonContext(sources){
   });
 }
 export function validateEvidenceMonths(text,refs,sources){
+  validateEvidenceClaims(text,refs,sources);
   const cited=sources.filter(source=>refs.includes(source.id));
   if(/(?:\d{1,2}월?\s*[~～–-]\s*\d{1,2}월|지난달|전월)/.test(text))throw new Error('비교 문장은 근거가 있는 월을 각각 명시해야 합니다.');
   if(cited.length&&cited.every(source=>source.inputKind==='선택형')&&/(?:적었|적어|썼|써\s*주|쓴\s)/.test(text))throw new Error('선택형 응답을 학생이 쓴 문장으로 표현할 수 없습니다.');
@@ -62,7 +74,7 @@ export const instructions=`초등 담임교사를 위한 학생 주도 코칭 �
 2. question — 대화를 여는 질문. 학생이 쓴 표현에서 출발해 요즘 경험을 묻는 쉬운 개방형 질문 하나를 쓰세요. 이전 고민이 현재도 있다고 단정하지 마세요. 원인·감정·잘못을 미리 정하거나 해결책·약속부터 요구하지 마세요. 학생에게 직접 건네는 질문에서는 부정적인 자기평가를 그대로 반복하거나 강화하지 말고, 원문의 뜻을 바꾸지 않는 중립적인 주제로 바꾸세요. 원문에 없는 걱정·슬픔 등의 감정을 덧붙이지 마세요. 정확한 원문은 근거에서 그대로 확인할 수 있습니다.
 3. actions — 답에 따라 이어갈 대화. 기존 저장 필드 이름이지만 교사 지시나 수행 과제가 아니라 조건부 대화 카드입니다. 서로 다른 답에 맞는 2~3개를 기본으로 하되 자료가 부족하거나 안전 확인만 필요하면 1개도 가능합니다. title은 '어려움을 이야기하면'처럼 학생의 답에 따른 조건으로 쓰세요. steps는 각 카드에 1~2문장만 쓰세요. 실제로 들은 학생의 말을 짧게 되짚어 맞는지 확인하고, 바라는 모습·전에 조금 나았던 경험·도움이 될 사람이나 방법 중 필요한 질문 하나를 골라 제안하세요. 학생이 하지 않은 말이나 감정을 교사의 반영 문장으로 만들지 마세요. 학생 답변 예측이나 가상 대화를 사실처럼 쓰지 마세요. 질문을 모두 순서대로 묻는 면담 대본으로 만들지 마세요.
 '모르겠어', '지금은 괜찮아', '말하고 싶지 않아'도 존중하는 선택지를 포함하세요. 기다리거나 대화를 마쳐도 되며 문제·목표·실천 약속을 만들어낼 필요가 없습니다. 학생이 바라는 변화를 말하면 방법으로 바로 넘어가지 말고, 그 변화가 본인에게 어떤 점에서 좋은지 묻는 질문을 선택적으로 제안하세요. 학생이 이미 이유나 방법을 말했다면 반복 질문하지 마세요. 해결 방법은 학생이 먼저 떠올리도록 묻고, 도움이 필요하다고 할 때만 허락을 구해 선택지를 제안하세요. 조건부 제안이지 교사가 답을 정하는 지시가 아닙니다.
-4. check_after — 원한다면, 작은 시도와 돌아보기. 학생이 바라는 변화나 시도를 이야기한 경우에만 다음 두 줄을 제안하세요. 첫 줄은 "선택할 때:"로 시작해 학생이 변화를 원할 때만 해 보고 싶은 방법이 있는지 묻고 지금 정하지 않아도 됨을 안내하세요. 두 번째 줄은 "실제로 해 본 뒤:"로 시작해 그때에만 경험과 유지하거나 바꿀 점을 묻도록 쓰세요. 두 줄 사이에 줄바꿈을 넣으세요. 실제 시도 여부가 확인되지 않았는데 과거형 질문을 지금 바로 건네도록 쓰지 마세요. 아직 선택하지 않은 행동을 약속·완료 사실로 쓰지 마세요. 시도하지 않거나 대화를 멈출 자유를 존중하세요. 과제 수행·규칙 준수 여부만으로 성공을 판단하지 마세요.
+4. check_after — 대화 마무리. 학생이 바라는 변화나 시도를 이야기한 경우에만 다음 두 줄을 제안하세요. 첫 줄은 "선택할 때:"로 시작해 학생이 변화를 원할 때만 해 보고 싶은 방법이 있는지 묻고 지금 정하지 않아도 됨을 안내하세요. 두 번째 줄은 "실제로 해 본 뒤:"로 시작해 그때에만 경험과 유지하거나 바꿀 점을 묻도록 쓰세요. 두 줄 사이에 줄바꿈을 넣으세요. 실제 시도 여부가 확인되지 않았는데 과거형 질문을 지금 바로 건네도록 쓰지 마세요. 아직 선택하지 않은 행동을 약속·완료 사실로 쓰지 마세요. 시도하지 않거나 대화를 멈출 자유를 존중하세요. 과제 수행·규칙 준수 여부만으로 성공을 판단하지 마세요.
 
 [고민이 없다고 응답한 학생과의 대화]
 '없음', '지금은 괜찮아요'는 그 시점의 응답이지 숨은 문제나 어려움이 있다는 증거가 아닙니다. 반대로 아무 어려움도 없다고 확정하지도 마세요.
@@ -81,6 +93,9 @@ input_kind가 선택형이면 학생이 직접 쓴 문장이 아닙니다. 반�
 
 [안전 우선 — 다른 규칙보다 우선]
 폭력·괴롭힘·즉각적인 도움 요청이 있으면 학생의 자율 해결보다 교사의 비공개 안전 확인을 우선하세요. summary와 첫 대화 카드에서 교사가 현재 안전과 필요한 보호를 바로 확인하도록 안내하세요. check_after는 일반적인 두 줄 형식 대신 "지금 안전 확인:"과 "보호 후 다시 확인:"으로 구분해 주간 확인을 기다리지 말고 교사의 즉시 보호와 안전 재확인을 안내하세요. 피해 학생에게 화해·사과 유도·관계 개선 책임을 떠넘기지 마세요. 학생의 말할 권리와 멈출 권리는 존중하되 보호를 학생의 해결 의지나 실천 약속에 조건부로 맡기지 마세요.
+
+안전 관련 응답은 선택 학생이 작성한 글입니다. 그 글의 대상이 작성 학생 본인인지 다른 친구인지 확인되지 않으면 단정하지 마세요. safety_context의 직접 경험·직접 목격·전해 들음을 구분해 표현하고, 정보가 없으면 확인되지 않았다고 쓰세요. 전해 들은 일을 확인된 사실이나 작성 학생 본인의 피해 경험으로 바꾸지 마세요. '계속됨을 선택하지 않음'은 사건이 끝났다는 증거가 아닙니다. '해당 없음'이나 도움 요청의 '괜찮음'만으로 다른 문항의 호소를 무시하지 마세요.
+근거를 설명하는 문장은 한 문장에 한 문항·한 시점의 사실만 쓰세요. 점수 비교도 '7월 학습 자기평가 3점입니다. 8월 학습 자기평가 4점입니다.'처럼 나누세요. 문항명과 수치는 그 문항 근거와 일치해야 합니다. 선택형 인용과 서술형 인용을 같은 문장에 섞지 마세요.
 
 limited가 참이면 limitations에 자료 부족을 명시하세요. 결석·미응답·전출은 부정적 평가 근거가 아닙니다. 전출 학생은 과거 자료임을 밝히세요. 이름이나 다른 학생 식별자는 쓰지 마세요. refs 이외 자연어는 한국어만 사용하고 각 문장은 150자 이내로 쓰세요. 영어 필드명을 본문에 출력하지 마세요.
 
@@ -120,5 +135,5 @@ export function validateCard(value,sources){
   const text=value=>{if(typeof value!=='string'||!value.trim()||value.length>500||/[A-Za-z]{3,}/.test(value)||/(?:성격|유형|장애|우울증|ADHD|고립형|공격형|내향형|외향형)(?:이다|입니다|으로 확정)/i.test(value))throw new Error('코칭 표현을 검증하지 못했습니다.');return value.trim()};
   const refs=values=>{if(!Array.isArray(values)||values.length<1||values.length>8||values.some(value=>!allowed.has(value)))throw new Error('코칭 근거를 검증하지 못했습니다.');return [...new Set(values)]};
   const item=value=>{const result={text:text(value?.text),refs:refs(value?.refs)};validateEvidenceMonths(result.text,result.refs,sources);return result},list=(value,max,fn,min=0)=>{if(!Array.isArray(value)||value.length>max||value.length<min)throw new Error('코칭 형식이 올바르지 않습니다.');return value.map(fn)};
-  return{summary:item(value?.summary),strengths:list(value?.strengths,2,item),needs:list(value?.needs,2,item),question:item(value?.question),actions:list(value?.actions,3,action=>{const result={title:text(action?.title),steps:list(action?.steps,2,text,1),refs:refs(action?.refs)};validateEvidenceMonths([result.title,...result.steps].join(' '),result.refs,sources);return result},1),check_after:text(value?.check_after),limitations:list(value?.limitations,3,text,1),version:VERSION};
+  return{summary:item(value?.summary),strengths:list(value?.strengths,2,item),needs:list(value?.needs,2,item),question:item(value?.question),actions:list(value?.actions,3,action=>{const result={title:text(action?.title),steps:list(action?.steps,2,text,1),refs:refs(action?.refs)};validateEvidenceMonths([result.title,...result.steps].join(' '),result.refs,sources);return result},1),check_after:text(value?.check_after),limitations:list(value?.limitations,3,text,1),version:VERSION,validationVersion:VALIDATION_VERSION};
 }

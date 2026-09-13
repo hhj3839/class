@@ -1,7 +1,7 @@
 import '../analyze-class/relationship-data.js';
 import { coachingApiError } from './api-errors.mjs';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
-import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, instructions, VERSION, MODEL } from './coaching.mjs';
+import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, instructions, VERSION, VALIDATION_VERSION, MODEL } from './coaching.mjs';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
 Deno.serve(async(request:Request)=>{
@@ -19,16 +19,16 @@ Deno.serve(async(request:Request)=>{
     const quotaStamp=()=>({quotaMonth:new Date(Date.now()+9*60*60*1000).toISOString().slice(0,7),quotaCheckedAt:Date.now()});
     let quota=quotaStamp();
     const args={p_class_id:classId,p_student_id:body.studentId},context=await rpc('teacher_get_student_coaching_context_auth',args),evidence=buildEvidence(context,(globalThis as any).IeumRelationshipData);
-    const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.version!==VERSION);
-    if(existing&&!stale){try{existing.result_json=validateCard(existing.result_json,evidence.sources)}catch{stale=true}}
-    const responseView=(card:any,cached:boolean)=>({...quota,card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
+    const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.validationVersion!==VALIDATION_VERSION||typeof existing.result_json?.version!=='string');
+    if(existing&&!stale){try{existing.result_json={...validateCard(existing.result_json,evidence.sources),version:existing.result_json.version}}catch{stale=true}}
+    const responseView=(card:any,cached:boolean)=>({...quota,previousGuidance:!!card&&!stale&&card.result_json?.version!==VERSION,card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
     if(action==='load')return json(responseView(existing,true));
     if(existing&&!stale&&!body.force)return json(responseView(existing,true));
     if(!evidence.canGenerate)return json({error:'코칭 근거가 될 학생 설문 응답이 부족합니다. 학생이 설문을 제출한 뒤 확인해 주세요.'},422);
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
-    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',text:(source.displayValue||source.value).slice(0,500)}))};
+    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
     // Redaction must never rename structural evidence identifiers.
     masked.comparison_context=input.comparison_context;
