@@ -7,6 +7,7 @@ const issue=fs.readFileSync('FIELD_ISSUE_TEMPLATE.md','utf8');
 const studentGuide=fs.readFileSync('STUDENT_SURVEY_GUIDE.md','utf8');
 const teacherGuide=fs.readFileSync('TEACHER_QUICK_GUIDE.md','utf8');
 const prd=fs.readFileSync('PRD_v1.2.md','utf8');
+const historicalPrd=fs.readFileSync('PRD_v1.2_HISTORY_20260912.md','utf8');
 
 test('현장 점검표는 태블릿·교사 화면·PDF·권한·복구 시험을 포함한다',()=>{
   for(const id of ['D-01','D-06','S-01','S-09','T-01','T-10','P-01','P-06','A-01','A-04'])assert.match(checklist,new RegExp(id));
@@ -24,7 +25,7 @@ test('사전 파일럿 기준선과 현장 시험 전 변경 범위가 고정되
   assert.match(checklist,/P0·P1 오류만 수정/);
   assert.match(checklist,/`여러 달 함께 보기` 다음에 최신 월부터 표시/);
   assert.match(prd,/### 사전 파일럿 기능 동결/);
-  assert.match(prd,/동결 기준선: `7adb7b0`/);
+  assert.match(historicalPrd,/동결 기준선: `7adb7b0`/);
 });
 
 test('오류 기록 양식은 개인정보 제외와 심각도·재현·재시험 정보를 요구한다',()=>{
@@ -58,16 +59,19 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
   assert.match(prd,/35명·12개월 관계 계산 성능 검사/);
   assert.match(prd,/학교 장애 대응·백업·복구 절차/);
   assert.match(prd,/자동 테스트: Node \d+개 및 Chromium 화면 검사 \d+개/);
-  assert.match(prd,/PR #77·#79·#80·#81/);
-  assert.match(prd,/20260723223000_update_year_end_cleanup_messages\.sql/);
+  assert.match(historicalPrd,/PR #77·#79·#80·#81/);
+  assert.match(historicalPrd,/20260723223000_update_year_end_cleanup_messages\.sql/);
   assert.match(prd,/화면 하단의 안전 안내/);
 });
 
-test('PRD는 최신 field 실행 단계와 9월 현장 기준선을 기록한다',()=>{
-  assert.match(prd,/제품 단계: v1\.2\.1-field 현장 파일럿 준비 완료 단계/);
-  assert.match(prd,/현재 단계: `v1\.2\.1-field` 준비 완료 \/ 현장 실행 기준선 `95db728`/);
-  assert.match(prd,/사전 동결 기준선: `v1\.2\.1-prepilot\.3` \/ `7adb7b0`/);
-  assert.match(prd,/2026-08-16 원격 `main`과 로컬을 `95db728`으로 동기화/);
-  assert.match(prd,/2026년 9월 실제 태블릿/);
-  assert.match(prd,/실제 태블릿 3~5대 동시 제출/);
+test('PRD는 현재 기준과 과거 이력을 분리하고 현장 미완료를 명시한다',()=>{
+  assert.match(prd,/기능 기준선: `f216217`/);
+  assert.match(prd,/핵심 구현 완료 · 현장 검증 대기/);
+  assert.match(prd,/PRD_v1.2_HISTORY_20260912.md/);
+  assert.match(prd,/Node 253개 및 Chromium 화면 검사 14개/);
+  assert.match(prd,/gentle-reflection-v5/);
+  assert.match(prd,/relationship-coaching-v15/);
+  assert.match(prd,/실제 태블릿 3~5대/);
+  assert.match(prd,/미완료/);
+  assert.doesNotMatch(prd,/현장 실행 기준선 `95db728`/);
 });
