@@ -1,0 +1,8 @@
+.guest-entry{border-top:1px solid #e4dcf2;margin-top:20px;padding-top:20px;display:grid;gap:8px}
+.guest-entry button{width:100%;min-height:44px}
+.guest-entry small{line-height:1.6}
+.guest-banner{margin:12px 0;padding:14px 18px;background:#f3edfc;border:1px solid #ded0f2;border-radius:12px;color:#493365;font-size:14px;line-height:1.7}
+.guest-banner strong,.guest-banner span{display:block}
+.guest-mode [data-view="settings"],.guest-mode #view-settings,.guest-mode #surveyLinkPanel,.guest-mode [data-survey-admin-tab="link"],
+.guest-mode .coaching-feedback,.guest-mode [data-coaching-delete],.guest-mode [data-response-action],.guest-mode [data-ai-review],
+.guest-mode [data-signal-action]{display:none!important}
