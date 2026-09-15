@@ -26,6 +26,14 @@ function renderStudentCoachingShell(student){
   content.insertAdjacentHTML('beforeend','<section id="studentPanelCoaching" data-student-detail-panel="coaching" role="tabpanel" aria-labelledby="studentTabCoaching" hidden><div id="studentCoachingContent" class="panel student-coaching-card" aria-live="polite"></div></section>');
   if(!student.studentId){$('#studentCoachingContent').innerHTML='<p>학생 명단을 DB에 저장한 뒤 코칭 카드를 사용할 수 있습니다.</p>';return}renderStudentCoachingCard();
 }
+function coachingLastAnalysisMeta(data){
+  const card=data?.card;if(!card)return '마지막 분석: 현재 자료의 저장 결과 없음';
+  const date=card.generatedAt?new Date(card.generatedAt):null;
+  let timestamp='생성 시각 확인 불가';
+  if(date&&!Number.isNaN(date.getTime())){const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date).map(part=>[part.type,part.value]));timestamp=`${parts.year}. ${parts.month}. ${parts.day}. ${parts.hour}:${parts.minute}:${parts.second}`}
+  const month=card.basisMonth||data.basisMonth;
+  return `마지막 분석 ${timestamp} · ${month?monthLabel(month)+' 자료 기준':'자료 기준 확인 불가'} · ${data.cached===false?'새 분석':'저장 결과'} · ${card.model||'모델 확인 불가'}`;
+}
 function renderStudentCoachingCard(){
   const target=$('#studentCoachingContent'),key=coachingKey();if(!target||!key)return;
   const state=studentCoachingState.get(key)||{},data=state.data?{...state.data,remaining:studentCoachingQuota.get(key.slice(0,key.lastIndexOf(':')))?.remaining??state.data.remaining}:null,card=data?.card,escape=escapeHTML;
@@ -36,7 +44,7 @@ function renderStudentCoachingCard(){
   const item=value=>`<p>${escape(aiTeacherDisplayText(value.text))}</p>${refs(value.refs)}`;
   const result=card?.result,feedback=(data.feedback||[]).find(row=>row.card_id===card?.id),statusLabels={not_tried:'아직 시도 전',helpful:'도움 됨',needs_change:'다른 방법 필요'};
   const busy=state.generating||state.loading||state.saving;
-  target.innerHTML=`<div class="panel-head relationship-ai-head coaching-ai-head"><h3>학생 코칭 카드</h3><div class="ai-review-actions"><button type="button" class="text-button" data-coaching-reload ${busy?'disabled':''}>${state.loading?'불러오는 중…':'저장된 결과 불러오기'}</button><button type="button" class="text-button" data-coaching-generate ${busy||!data.canGenerate||data.remaining<=0?'disabled':''}>${state.generating?'AI 분석 중…':'AI 새 분석'}</button></div></div>
+  target.innerHTML=`<div class="panel-head relationship-ai-head coaching-ai-head"><h3>학생 코칭 카드</h3><div class="coaching-analysis-toolbar"><p class="coaching-last-analysis" role="status">${escape(coachingLastAnalysisMeta(data))}</p><div class="ai-review-actions"><button type="button" class="text-button" data-coaching-reload ${busy?'disabled':''}>${state.loading?'불러오는 중…':'저장된 결과 불러오기'}</button><button type="button" class="text-button" data-coaching-generate ${busy||!data.canGenerate||data.remaining<=0?'disabled':''}>${state.generating?'AI 분석 중…':'AI 새 분석'}</button></div></div></div>
     <div class="coaching-meta"><span>${escape(data.basisMonth?monthLabel(data.basisMonth):'자료 없음')} 자료 기준 · 남은 생성 ${Number(data.remaining)||0} / 100회</span><span>새 분석: 외부 AI 전송 · 1회 사용</span></div>
     <details class="coaching-disclosure coaching-info"><summary>분석 범위·전송 안내</summary><p class="coaching-scope">최근 12개월 내 본인의 최신 4회 설문 중 고민·도움 요청·놀림·폭력 관련 경험·도움이 필요한 친구·자기평가 등, 본인 응답이 있는 달의 받은 관계 점수를 참고합니다. 모든 과거 응답·문항을 분석하는 것은 아니며, 근거별 본문은 최대 500자까지 참고합니다.</p><p>등록된 학생 이름·이메일·휴대전화번호를 가린 학생 설문 응답을 외부 AI로 전송합니다. 그 밖의 개인정보는 기록에 포함하지 마세요.</p><p>학급당 월 100회(실패한 요청 포함). 저장 결과 조회는 차감하지 않습니다. 새 분석에는 외부 AI 비용이 발생합니다.</p></details>
     ${error}${data.previousGuidance?'<p class="coaching-limited">이전 대화 지침으로 생성된 카드입니다. 현재 자료와 안전·근거 검사를 통과해 유지하며, 새 생성은 선택 사항입니다.</p>':''}${data.stale?'<div class="notice warning"><p>자료 또는 분석 기준이 변경되어 이전 카드를 숨겼습니다. 학생 주도 대화 기준으로 다시 생성해 주세요.</p></div>':''}
