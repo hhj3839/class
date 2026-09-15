@@ -6,6 +6,10 @@
 .coaching-actions-grid>.coaching-action:only-child,.coaching-actions-grid>.coaching-action:last-child:nth-child(odd){grid-column:1/-1}.student-coaching-card .coaching-dialogue-help{margin:0 0 16px;color:#625b70;font-size:14px!important}.coaching-action ol{list-style:none;padding-left:0}
 .coaching-followup>p{white-space:pre-line}
 /* Conversation-first hierarchy; no change to saved content or PDF styles. */
+.coaching-analysis-toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px 16px;min-width:0}
+.coaching-last-analysis{margin:0;color:#625b70;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.coaching-analysis-toolbar .ai-review-actions{flex-shrink:0}
+@media(max-width:700px){.coaching-analysis-toolbar{width:100%;justify-content:flex-start}.coaching-last-analysis{flex-basis:100%}}
 .student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup){margin-top:16px;padding:16px 20px}
 .student-coaching-card>section:is(.coaching-summary,.coaching-question,.coaching-action-section,.coaching-followup) h4{margin-bottom:8px}
 .student-coaching-card>section.coaching-summary>p{font-size:15px;color:#625b70;margin:6px 0;line-height:1.65}
