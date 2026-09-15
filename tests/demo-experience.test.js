@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const sql=fs.readFileSync('supabase/demo/enrich_applicant_lab.sql','utf8');
-test('미래 날짜 정리는 지정 학급의 수동 데모 결과만 대상으로 한다',()=>{assert.ok(sql.includes("where class_id=class_key and teacher_id=owner_id and model='demo-saved-analysis'"));assert.ok(sql.includes("least(created_at,date_trunc('month',current_date))"))});
-test('실험실 보완은 계정과 학급을 함께 검사하며 기존 자료를 삭제하지 않는다',()=>{for(const expected of ["c.class_id=class_key","c.class_id like 'demo-%'","lower(u.email)='applicant-test@hhj3839.dev'",'기존 자료는 변경하지 않습니다.'])assert.ok(sql.includes(expected));assert.doesNotMatch(sql,/\b(delete|truncate|drop)\b/i)});
-test('전출·미응답 예시는 기존 번호 충돌을 막고 반복 실행 시 중복 생성하지 않는다',()=>{for(const expected of ['student_number in(11,12)','on conflict(student_id) do nothing','on conflict(id) do nothing','demo_experience_enriched','set local lock_timeout'])assert.ok(sql.includes(expected))});
+test('폐기된 실험실 보완은 AI 날짜를 변경하지 않는다',()=>{assert.doesNotMatch(sql,/\bupdate\b/i);assert.match(sql,/2026-09-15/)});
+test('이전 보완 링크를 실행해도 자료를 변경하거나 삭제하지 않는다',()=>{assert.doesNotMatch(sql,/\b(insert|update|delete|truncate|drop)\b/i);assert.match(sql,/기존 자료는 변경하지 않습니다/)});
+test('삭제한 두 가상 학생을 재등록하지 않고 폐기 안내만 한다',()=>{assert.doesNotMatch(sql,/insert into public\.students/i);assert.match(sql,/raise notice/);assert.match(sql,/현재 실험실은 10명/)});

@@ -65,10 +65,10 @@ test('PRD 현재 기준선은 최신 교사 UI와 파일럿 안정성 범위를 
 });
 
 test('PRD는 현재 기준과 과거 이력을 분리하고 현장 미완료를 명시한다',()=>{
-  assert.match(prd,/기능 기준선: `f216217`/);
+  assert.match(prd,/기능 기준선: `6a0b291`/);
   assert.match(prd,/핵심 구현 완료 · 현장 검증 대기/);
   assert.match(prd,/PRD_v1.2_HISTORY_20260912.md/);
-  assert.match(prd,/Node 285개 및 Chromium 화면 검사 14개/);
+  assert.match(prd,/Node 295개 및 Chromium 화면 검사 17개/);
   assert.match(prd,/question-first-v10/);
   assert.match(prd,/relationship-coaching-v15/);
   assert.match(prd,/실제 태블릿 3~5대/);
