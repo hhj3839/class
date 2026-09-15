@@ -7,7 +7,7 @@ const root=path.join(__dirname,'..');
 const seed=fs.readFileSync(path.join(root,'supabase','demo','seed_demo_class.sql'),'utf8');
 const reset=fs.readFileSync(path.join(root,'supabase','demo','reset_demo_class.sql'),'utf8');
 const guide=fs.readFileSync(path.join(root,'DEMO_CLASS_GUIDE.md'),'utf8');
-const rolling=fs.readFileSync(path.join(root,'supabase','migrations','20260828090000_roll_demo_months_forward.sql'),'utf8');
+const rolling=fs.readFileSync(path.join(root,'supabase','migrations','20260915140000_preserve_demo_ai_history.sql'),'utf8');
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 
 test('데모 생성 SQL은 이메일 교체를 강제하고 지정 교사의 demo 학급만 초기화한다',()=>{
@@ -56,7 +56,9 @@ test('실험실 계정은 로그인할 때 데모 자료를 현재 달까지 자
   assert.match(rolling,/max\(r\.survey_month\)/);
   assert.match(rolling,/months_to_shift<=0 then return 0/);
   assert.match(rolling,/update public\.survey_responses/);
-  assert.match(rolling,/update public\.ai_analysis_runs/);
+  assert.doesNotMatch(rolling,/update public\.(ai_analysis_runs|student_coaching_cards)/);
+  assert.match(rolling,/ai_history_preserved/);
+  assert.match(rolling,/for update/);
   assert.match(rolling,/update public\.observations/);
   assert.match(rolling,/demo_months_rolled_forward/);
 });
