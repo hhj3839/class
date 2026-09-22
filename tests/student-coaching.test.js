@@ -93,7 +93,7 @@ async function harness({action='load',authorized=true,context=makeContext(),outp
     throw Error('Unexpected mock request');
   };
   const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/student-coaching/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
-  vm.runInNewContext(source,{...api,coachingApiError,coachingValidationError,Error,IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
+  vm.runInNewContext(source,{...api,coachingApiError,coachingValidationError,Error,IeumRelationshipChanges:require('../relationship-changes.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/coaching',{method:'POST',headers:{Authorization:'Bearer test-only'},body:JSON.stringify({classId:'fixture',studentId,action,force})}));return{status:response.status,result:await response.json(),calls,aiBody,saved};
 }
 test('학생 코칭 근거는 선택 학생 자료와 계산값만 포함한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),result=api.buildEvidence(makeContext(),data);assert.equal(result.sources.length,2);assert.match(result.sources[1].value,/평균 5.00점/);assert.doesNotMatch(JSON.stringify(result.sources),/관련 없는/);assert.equal(result.limited,true)});
@@ -108,7 +108,7 @@ test('조회는 API 키 없이 가능하며 AI 호출을 하지 않는다',async
 test('자료가 바뀐 저장 카드는 숨기고 갱신 안내만 반환한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:'old',result_json:{...validCard(),version:'old'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
 test('현재 자료의 저장 카드는 생성 요청에서도 명시적 갱신 없이는 재사용한다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-safe-evidence-v8',validationVersion:'2026.09.13-safety-evidence-v1'}};const result=await harness({context,action:'generate'});assert.equal(result.status,200);assert.equal(result.result.card.id,'saved');assert.equal(result.result.cached,true);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
 test('저장 카드의 근거가 깨진 경우에도 결과를 숨긴다',async()=>{const context=makeContext();context.card={id:'saved',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.13-safe-evidence-v8',validationVersion:'2026.09.13-safety-evidence-v1'}};context.card.result_json.summary.refs=['E999'];const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null)});
-test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.13-question-first-v10')});
+test('생성은 가명·연락처 가림과 store:false를 사용하고 결과를 저장한다',async()=>{const result=await harness({action:'generate'});assert.equal(result.status,200);assert.equal(result.aiBody.model,'gpt-5.6-terra');assert.equal(result.aiBody.store,false);assert.doesNotMatch(result.aiBody.input,/가상학생가|가상학생나|test@example|010-1234|관련 없는/);assert.equal(result.saved[0].p_success,true);assert.equal(result.result.card.result.version,'2026.09.22-relationship-questions-v11')});
 test('잘못된 근거 결과는 실패 처리하며 저장하지 않는다',async()=>{const output=validCard();output.actions[0].refs=['E999'];const result=await harness({action:'generate',output});assert.equal(result.status,500);assert.equal(result.saved.length,1);assert.equal(result.saved[0].p_success,false)});
 test('인증·학급 권한 실패는 AI 호출 전에 차단한다',async()=>{for(const options of [{authorized:false},{denied:true}]){const result=await harness({...options,action:'generate'});assert.ok([401,403].includes(result.status));assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)}});
 test('자료 없음과 API 실패를 구분하고 실패 실행을 닫는다',async()=>{const context=makeContext();context.responses=[];const empty=await harness({action:'generate',context});assert.equal(empty.status,422);assert.equal(empty.aiBody,undefined);const failure=await harness({action:'generate',apiStatus:429});assert.equal(failure.saved[0].p_success,false);assert.match(failure.result.error,/한도/)});
@@ -168,4 +168,15 @@ test('선택형만 인용하면서 적었다고 표현하면 저장하지 않는
 });
 test('조회는 한도 기준월과 확인 시각을 포함하며 AI를 호출하지 않는다',async()=>{
  const result=await harness();assert.match(result.result.quotaMonth,/^\d{4}-\d{2}$/);assert.ok(result.result.quotaCheckedAt>0);assert.equal(result.aiBody,undefined);
+});
+
+test('코칭 요청에 관계 관측 계산을 E근거로 보내고 다른 학생의 서술은 보내지 않는다',async()=>{
+ const context=makeContext();
+ context.roster=context.roster.map(student=>({...student,studentId:student.number===1?studentId:otherId}));
+ const result=await harness({action:'generate',context});assert.equal(result.status,200);
+ const calculation=result.result.sources.find(source=>source.field==='relationship_context');
+ assert.ok(calculation);assert.equal(calculation.kind,'calculation');
+ const input=JSON.parse(result.aiBody.input);
+ assert.ok(input.evidence.some(source=>source.id===calculation.id&&source.input_kind==='관계 관측 계산'));
+ assert.match(result.aiBody.instructions,/점수나 다른 친구의 평가를 학생에게 공개하는 질문/);
 });
