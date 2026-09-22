@@ -30,6 +30,7 @@ for(const width of [360,768,1440])test(`관계 관측 근거와 연결 묶음 ${
   await expect(evidence).toContainText('4건 · 2/2명');await expect(evidence).toContainText('관측 2개월');
   await evidence.locator('summary').click();await expect(evidence.locator('tbody tr')).toHaveCount(2);
   await expect(evidence.locator('tbody tr').first()).toContainText('5.00점 · 2건');
+  await expect(evidence.locator('tbody tr').first()).toContainText('함께 응답한 2개월 중 서로 4점 이상 2개월');
   await page.getByText('색상 묶음의 구성 근거 (1개)',{exact:true}).click();
   await expect(page.locator('.relationship-evidence')).toContainText('내부 강한 연결 2/3쌍 (67%)');
   await page.locator('.relationship-evidence').screenshot({path:testInfo.outputPath('relationship-evidence.png')});
