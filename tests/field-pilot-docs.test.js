@@ -70,7 +70,7 @@ test('PRD는 현재 기준과 과거 이력을 분리하고 현장 미완료를 
   assert.match(prd,/PRD_v1.2_HISTORY_20260912.md/);
   assert.match(prd,/Node 295개 및 Chromium 화면 검사 17개/);
   assert.match(prd,/question-first-v10/);
-  assert.match(prd,/relationship-coaching-v15/);
+  assert.match(prd,/relationship-coaching-v16/);
   assert.match(prd,/실제 태블릿 3~5대/);
   assert.match(prd,/미완료/);
   assert.doesNotMatch(prd,/현장 실행 기준선 `95db728`/);

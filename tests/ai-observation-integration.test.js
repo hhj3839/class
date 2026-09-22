@@ -3,14 +3,14 @@ const data=require('../supabase/functions/analyze-class/relationship-data.js');
 const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
 const students=[1,2,3].map(number=>({number,name:`가상${number}`}));
 const rows=['2026-06','2026-07','2026-08'].flatMap(month=>students.map(student=>({id:`${month}-${student.number}`,student_number:student.number,student_name:student.name,survey_month:`${month}-01`,submitted_at:`${month}-15T00:00:00Z`,payload_json:{relationships:students.filter(other=>other.number!==student.number).flatMap(other=>[{targetNumber:other.number,score:1},{targetNumber:other.number,score:5}])}})));
-async function harness(type,{cached=null,authorized=true,force=false,roster=students,month='2026-07'}={}){
+async function harness(type,{cached=null,authorized=true,force=false,roster=students,responseRows=rows,month='2026-07'}={}){
   let handler,requestBody,saved;const calls=[];
   const fetch=async(url,options={})=>{
     calls.push(url);const body=options.body?JSON.parse(options.body):{};
     if(url.endsWith('/auth/v1/user'))return Response.json(authorized?{id:'fixture'}:{},{status:authorized?200:401});
     if(url.includes('/rpc/teacher_get_cached_'))return Response.json(cached?[cached]:[]);
     if(url.includes('/rpc/teacher_begin_'))return Response.json('run-fixture');
-    if(url.endsWith('/rpc/teacher_get_responses_auth'))return Response.json(rows);
+    if(url.endsWith('/rpc/teacher_get_responses_auth'))return Response.json(responseRows);
     if(url.endsWith('/rpc/teacher_get_class_context_auth'))return Response.json({students:roster});
     if(url.endsWith('/rpc/teacher_complete_ai_analysis_auth')){saved=body;return Response.json(true)}
     if(url==='https://api.openai.com/v1/responses'){
@@ -21,7 +21,7 @@ async function harness(type,{cached=null,authorized=true,force=false,roster=stud
     throw new Error(`Unexpected request in mock: ${url}`);
   };
   const {redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');
-  vm.runInNewContext(source,{IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
+  vm.runInNewContext(source,{IeumRelationshipChanges:require('../relationship-changes.js'),DOMException,IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/analyze',{method:'POST',headers:{Authorization:'Bearer test-only','Content-Type':'application/json'},body:JSON.stringify({classId:'fixture',month,analysisType:type,force})}));
   return{status:response.status,result:await response.json(),requestBody,saved,calls};
 }
@@ -51,7 +51,12 @@ for(const type of ['class','relationship'])test(`${type} API 경로가 정규화
   assert.match(result.requestBody.instructions,/직접 도움 요청이나 폭력 서술의 확인 필요성을 낮추지 않습니다/);
   assert.equal(result.saved.p_result._analysis_version,result.result.meta.analysisVersion);
   if(type==='class')assert.equal(input.responses[0].received_relationships.average,5);
-  else assert.equal(input.selected_month_students[0].received_average,5);
+  else {
+    assert.equal(input.selected_month_students[0].received_average,5);
+    assert.equal(input.comparable_changes.comparable_pair_count,0);
+    assert.equal(input.comparable_changes.deferred_identity_count,3);
+    assert.ok(!input.coaching_signals.some(signal=>signal.basis==='새 상호 연결이 나타남'));
+  }
 });
 test('과거 캐시는 새 버전으로 위장하지 않고 유료 호출 없이 반환한다',async()=>{
   const result=await harness('relationship',{cached:{id:'old',model:'old-model',result_json:{insights:[]}}});
@@ -63,4 +68,25 @@ test('현재 버전 캐시는 저장된 버전을 유지하고 다시 호출하�
 });
 test('인증 실패 시 응답 데이터나 OpenAI를 호출하지 않는다',async()=>{
   const result=await harness('class',{authorized:false});assert.equal(result.status,401);assert.equal(result.calls.length,1);assert.equal(result.saved,undefined);
+});
+
+test('관계 AI 새 연결은 동일 학생의 직전 달 네 방향 관측으로 확인한다',async()=>{
+  const roster=students.map(s=>({...s,student_id:`s${s.number}`}));
+  const responseRows=rows.map(row=>({...row,student_id:`s${row.student_number}`,payload_json:{relationships:row.payload_json.relationships.map(item=>({...item,score:row.survey_month.startsWith('2026-06')?2:5}))}}));
+  const result=await harness('relationship',{force:true,roster,responseRows});
+  assert.equal(result.status,200);
+  const input=JSON.parse(result.requestBody.input);
+  assert.equal(input.comparable_changes.comparable_pair_count,3);
+  assert.equal(input.comparable_changes.new_mutual_count,3);
+  assert.ok(input.coaching_signals.some(signal=>signal.basis==='새 상호 연결이 나타남'));
+});
+
+test('관계 AI는 직전 달이 비었으면 과거 달로 건너뛰지 않는다',async()=>{
+  const responseRows=rows.filter(row=>!row.survey_month.startsWith('2026-07'));
+  const result=await harness('relationship',{force:true,responseRows,month:'2026-08'});
+  assert.equal(result.status,200);
+  const input=JSON.parse(result.requestBody.input);
+  assert.equal(input.previous_month,'2026-07');assert.equal(input.previous_month_summary,null);
+  assert.equal(input.comparable_changes.new_mutual_count,0);
+  assert.ok(!input.coaching_signals.some(signal=>signal.basis==='새 상호 연결이 나타남'));
 });
