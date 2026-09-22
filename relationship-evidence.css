@@ -10,4 +10,12 @@
 .relationship-evidence th,.relationship-evidence td{padding:12px;border-bottom:1px solid #e4ddef;font-size:14px;vertical-align:top}
 .relationship-evidence caption{text-align:left;padding:8px 0;color:#655c70}
 #relationTabs{flex-wrap:wrap;max-width:100%}
+.relationship-brief{margin:16px 0;min-width:0}
+.relationship-brief-scope,.relationship-brief-note{font-size:13px;color:#655c70;line-height:1.6;overflow-wrap:anywhere}
+.relationship-brief-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.relationship-brief-grid article{background:#f5f0fc;border:1px solid #e4ddef;border-radius:12px;padding:16px;min-width:0}
+.relationship-brief-grid h4{font-size:14px;line-height:1.5;margin:0 0 10px}
+.relationship-brief-grid p{font-size:14px;line-height:1.7;margin:0;overflow-wrap:anywhere}
+.relationship-change-card>summary,.student-other-changes>summary{cursor:pointer;font-weight:600;color:#5b4775}
+@media(max-width:800px){.relationship-brief-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.relationship-evidence{padding:16px}.relationship-evidence details{padding:10px}}

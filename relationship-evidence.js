@@ -18,5 +18,20 @@
     if(!pair.commonMonths.length)return '서로 다른 시기의 응답 · 같은 달 상호 관측 없음';
     return `함께 응답한 ${pair.commonMonths.length}개월 중 서로 4점 이상 ${pair.positiveMonths.length}개월`;
   }
-  return{build,groups,description,pairDescription};
+  function overview(quality,comparison,number){
+    const pairs=quality.pairs.filter(pair=>!number||pair.a===number||pair.b===number),unit=number?'명':'쌍';
+    const observed=pairs.filter(pair=>pair.commonMonths.length).length,positive=pairs.filter(pair=>pair.positiveMonths.length).length;
+    const summary=number?comparison?.byStudent.get(number):comparison?.total;
+    const confirmed=observed?`양방향 관측 ${observed}${unit} 중 같은 달 서로 4점 이상인 관계 ${positive}${unit}`:'같은 달 양방향 응답이 없어 연결 해석을 보류합니다.';
+    let change='직전 달 자료가 없어 비교를 보류합니다.';
+    if(comparison?.hasPrevious&&summary)change=summary.comparable?
+      `비교 가능한 ${summary.comparable}${unit} · 새 기준 충족 ${summary.new.length} · 유지 ${summary.continued.length} · 기준 미충족 ${summary.below.length}`:
+      '두 달 모두 응답·학생 식별이 확인된 관계가 없어 비교를 보류합니다.';
+    const gaps=pairs.length-observed;
+    const deferred=summary?summary.missing.length+summary.identity.length+summary.enrollment.length:0;
+    const needs=[!pairs.length?'비교할 학생 관계 자료가 없습니다.':gaps?`같은 달 양방향 응답 미확인 ${gaps}${unit}`:'모든 비교 대상의 같은 달 양방향 응답이 있습니다.',
+      deferred?`전월 비교 보류 ${deferred}${unit} (응답·학생 식별·전출 기간)`:''];
+    return{confirmed,change,needs:needs.filter(Boolean).join(' · ')};
+  }
+  return{build,groups,description,pairDescription,overview};
 });
