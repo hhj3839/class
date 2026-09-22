@@ -1,4 +1,5 @@
 import '../analyze-class/relationship-data.js';
+import '../../../relationship-changes.js';
 import { coachingApiError, coachingValidationError } from './api-errors.mjs';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
 import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, urgentEvidence, instructions, VERSION, VALIDATION_VERSION, MODEL } from './coaching.mjs';
@@ -18,7 +19,7 @@ Deno.serve(async(request:Request)=>{
     rpc=async(name:string,payload:any)=>{const response=await fetch(`${url}/rest/v1/rpc/${name}`,{method:'POST',headers:{apikey:anon,Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.message||'담당 학급 권한을 확인해 주세요.');return data};
     const quotaStamp=()=>({quotaMonth:new Date(Date.now()+9*60*60*1000).toISOString().slice(0,7),quotaCheckedAt:Date.now()});
     let quota=quotaStamp();
-    const args={p_class_id:classId,p_student_id:body.studentId},context=await rpc('teacher_get_student_coaching_context_auth',args),evidence=buildEvidence(context,(globalThis as any).IeumRelationshipData);
+    const args={p_class_id:classId,p_student_id:body.studentId},context=await rpc('teacher_get_student_coaching_context_auth',args),evidence=buildEvidence(context,(globalThis as any).IeumRelationshipData,(globalThis as any).IeumRelationshipChanges.compare);
     const safetyPriority=urgentEvidence(evidence.sources).length>0;
     const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.validationVersion!==VALIDATION_VERSION||typeof existing.result_json?.version!=='string');
     if(existing&&!stale){try{existing.result_json={...validateCard(existing.result_json,evidence.sources),version:existing.result_json.version}}catch{stale=true}}

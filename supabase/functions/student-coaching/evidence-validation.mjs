@@ -13,6 +13,7 @@ const fieldRules=[
 ];
 const written=/(?:적었|적어\s*주|썼|써\s*주|쓴\s)/;
 const scoreValues=source=>{
+ if(source.field==='relationship_context')return [4]; // Explicit mutual-score threshold, never a student's average.
  if(source.field?.startsWith('selfRatings.'))return [Number(String(source.value).match(/^(\d+(?:\.\d+)?)점/)?.[1])];
  if(source.field==='relationships')return [Number(String(source.value).match(/평균\s+(\d+(?:\.\d+)?)/)?.[1])];
  return [];
