@@ -1,0 +1,5 @@
+.survey-month-settings{padding:16px;border:1px solid #ded4ef;border-radius:12px;background:#faf7ff;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.survey-month-settings label{font-weight:700}
+.survey-month-settings input{max-width:100%;min-width:0;padding:9px;border:1px solid #d7c9ea;border-radius:8px;background:white}
+.survey-month-settings p{flex-basis:100%;margin:0;overflow-wrap:anywhere}
+.guest-mode .survey-month-settings{display:none}

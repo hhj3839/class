@@ -18,7 +18,7 @@
     <header class="student-header"><a href="index.html" class="student-logo"><span>이음</span><strong>우리반 이음</strong></a><small id="classLabel">월간 학교생활 돌아보기</small></header>
 
     <section class="student-card login-card" id="loginCard">
-      <p class="kicker">학생 참여</p><h1>이번 달 학교생활을 돌아봐요</h1>
+      <p class="kicker">학생 참여</p><h1 id="surveyTitle">설문 대상 월을 확인하고 있어요</h1><p id="surveyMonthNotice" role="status"></p>
       <p>내 이름을 선택하세요. 다른 친구의 응답은 볼 수 없어요.</p>
       <label class="field"><span>내 이름</span><select id="studentSelect"><option value="">명단을 불러오는 중이에요…</option></select></label>
       <button class="primary" id="verifyStudent">설문 시작하기</button><p class="message" id="loginMessage" role="status"></p>
@@ -26,7 +26,7 @@
     </section>
 
     <form class="survey-form" id="surveyForm" hidden>
-      <div class="survey-welcome"><p class="kicker" id="studentGreeting">안녕하세요</p><h1>한 달 동안 나의 학교생활 돌아보기</h1><p>점수와 함께 그렇게 생각한 이유를 적어 주세요.</p></div>
+      <div class="survey-welcome"><p class="kicker" id="studentGreeting">안녕하세요</p><h1 id="surveyFormTitle">한 달 동안 나의 학교생활 돌아보기</h1><p>위에 표시된 달을 돌아보며, 점수와 함께 그렇게 생각한 이유를 적어 주세요.</p></div>
       <section class="student-card"><h2>1. 나의 학교생활</h2><div id="selfRatings"></div></section>
       <section class="student-card"><h2>■ 한 달 동안 우리 반 학교생활모습 돌아보기</h2>
         <div class="field"><span>1. 이번 달에 친구들을 차별하지 않고 친절한 말과 행동으로 잘 대해 주며 존중하고 있는 친구들은 누구입니까?</span><div class="peer-name-options" id="kindStudents" aria-label="친절하고 존중하는 친구 선택"></div><label><span class="detail-prompt">직접 보거나 겪은 일을 자세히 적어 주세요.</span><textarea id="kindDetail" placeholder="어떤 말이나 행동이 좋았는지 적어 주세요."></textarea></label></div>
@@ -47,6 +47,6 @@
     <section class="student-card complete-card" id="completeCard" hidden><div class="complete-icon">✓</div><h1>응답을 제출했어요</h1><p>선생님이 내용을 확인하고 필요한 도움을 함께 생각할 거예요.</p><a href="index.html">우리반 이음 홈으로</a></section>
   </main>
   <script src="supabase.js?v=20260720-4"></script>
-  <script src="student.js?v=20260722-2"></script>
+  <script src="student.js?v=20261005-1"></script>
 </body>
 </html>
