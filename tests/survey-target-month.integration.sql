@@ -1,0 +1,32 @@
+begin;
+set local lock_timeout='5s';
+do $$
+declare owner_id uuid; k text:='month-check-'||gen_random_uuid(); tok uuid:=gen_random_uuid(); sid uuid:=gen_random_uuid(); sub uuid:=gen_random_uuid(); first_id uuid; again uuid; current_m date:=date_trunc('month',now() at time zone 'Asia/Seoul')::date; previous_m date; denied boolean;
+begin
+ select teacher_id into owner_id from public.classes where class_id='demo-aa891ab949014621';
+ if owner_id is null then raise exception 'Test owner missing'; end if;
+ previous_m:=(current_m-interval '1 month')::date;
+ insert into public.classes(class_id,teacher_secret_hash,teacher_id,teacher_name,participation_token) values(k,'unused-test-hash',owner_id,'월 지정 시험',tok);
+ insert into public.students(class_id,student_id,student_number,student_name) values(k,sid,1,'가상 학생');
+ perform set_config('request.jwt.claim.sub',owner_id::text,true);
+ if public.get_survey_month_by_token(tok)->>'month'<>to_char(current_m,'YYYY-MM') then raise exception 'Default month mismatch'; end if;
+ perform public.teacher_set_survey_month_auth(k,previous_m);
+ if public.get_survey_month_by_token(tok)->>'month'<>to_char(previous_m,'YYYY-MM') then raise exception 'Selected month mismatch'; end if;
+ first_id:=public.submit_response_by_token(tok,1,'가상 학생',jsonb_build_object('submissionId',sub,'surveyMonth',to_char(previous_m,'YYYY-MM')));
+ if not exists(select 1 from public.survey_responses where id=first_id and survey_month=previous_m and date_trunc('month',submitted_at at time zone 'Asia/Seoul')::date=current_m) then raise exception 'Target month/submission time were mixed'; end if;
+ perform public.teacher_set_survey_month_auth(k,current_m);
+ again:=public.submit_response_by_token(tok,1,'가상 학생',jsonb_build_object('submissionId',sub,'surveyMonth',to_char(previous_m,'YYYY-MM')));
+ if again<>first_id then raise exception 'Retry duplicated'; end if;
+ denied:=false;
+ begin perform public.submit_response_by_token(tok,1,'가상 학생',jsonb_build_object('submissionId',gen_random_uuid(),'surveyMonth',to_char(previous_m,'YYYY-MM'))); exception when others then if sqlerrm not like '%대상 월을 변경%' then raise; end if; denied:=true; end;
+ if not denied then raise exception 'Stale/forged month accepted'; end if;
+ perform public.submit_response_by_token(tok,1,'가상 학생',jsonb_build_object('submissionId',gen_random_uuid(),'surveyMonth',to_char(current_m,'YYYY-MM')));
+ if (select count(distinct survey_month) from public.survey_responses where class_id=k)<>2 then raise exception 'Two months not retained'; end if;
+ perform public.teacher_set_survey_month_auth(k,null);
+ if not (public.teacher_get_survey_month_auth(k)->>'automatic')::boolean then raise exception 'Auto mode failed'; end if;
+ perform set_config('request.jwt.claim.sub',gen_random_uuid()::text,true);
+ denied:=false;begin perform public.teacher_set_survey_month_auth(k,previous_m);exception when others then if sqlerrm not like '%권한%' then raise; end if;denied:=true;end;
+ if not denied then raise exception 'Foreign teacher allowed'; end if;
+ if has_function_privilege('anon','public.teacher_set_survey_month_auth(text,date)','EXECUTE') then raise exception 'Anon teacher write grant'; end if;
+end $$;
+rollback;
