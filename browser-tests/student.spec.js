@@ -7,6 +7,7 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
     const url=route.request().url();let body=[];
     if(url.includes('/auth/v1/token'))body={access_token:'test-only',refresh_token:'test-only',expires_in:3600,user:{id:'fixture',email:'fixture@example.invalid'}};
     if(url.includes('teacher_get_my_classes'))body=[{class_id:'fixture'}];
+    if(url.includes('teacher_get_responses_auth'))body=[{id:'voice-fixture',student_number:1,student_name:'테스트가',survey_month:'2026-09-01',submitted_at:'2026-09-10T00:00:00Z',payload_json:{studentNumber:1,surveyMonth:'2026-09',studentState:{worryDetail:'공부가 어려워요',teacherWish:'없음',parentWish:'함께 놀아주세요'},selfRatings:{},relationships:[]}}];
     if(url.includes('teacher_get_class_context_auth'))body={classId:'fixture',schoolYear:2026,grade:3,classNumber:1,teacherName:'가상 교사',students:[{number:1,name:'테스트가',student_id:'a'},{number:2,name:'테스트나',student_id:'b'}]};
     await route.fulfill({status:200,json:body});
   });
@@ -22,6 +23,10 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   await page.locator('[data-view="student-detail"]').click();
   await expect(page.locator('#studentTabSummary')).toBeDisabled();
   await page.locator('#studentDetailSelect').selectOption('1');
+  await expect(page.locator('#studentPanelSummary .student-voice-brief')).toContainText('공부가 어려워요');
+  await expect(page.locator('#studentPanelSummary .student-voice-brief')).toContainText('함께 놀아주세요');
+  await expect(page.locator('#studentPanelSummary .student-voice-brief')).not.toContainText('선생님께 듣고 싶은 말로');
+  await expect(page.locator('#studentPanelSummary .relationship-brief')).toHaveCount(0);
   await page.locator('#studentTabTrend').click();
   await expect(page.locator('#studentPanelTrend')).toBeVisible();
   await expect(page.locator('.student-year-point')).toHaveCount(12);
