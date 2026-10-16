@@ -27,7 +27,7 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   await expect(page.locator('#studentPanelSummary .student-voice-brief')).toContainText('함께 놀아주세요');
   await expect(page.locator('#studentPanelSummary .student-voice-brief')).not.toContainText('선생님께 듣고 싶은 말로');
   await expect(page.locator('#studentPanelSummary .relationship-brief')).toHaveCount(0);
-  await expect(page.locator('.student-voice-brief')).toHaveCSS('border-radius',width<=600?'20px':'24px');
+  await expect(page.locator('.student-voice-brief')).toHaveCSS('border-radius','12px');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   await page.locator('#studentPanelSummary').screenshot({path:info.outputPath('pastel-overview.png')});
   await page.locator('#studentTabTrend').click();

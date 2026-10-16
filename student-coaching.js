@@ -71,7 +71,7 @@ document.addEventListener('click',async event=>{
   if(sourceButton){const source=state?.data?.sources.find(source=>source.id===sourceButton.dataset.coachingSource);if(!source)return;const container=$('#studentCoachingSource');container.replaceChildren();const heading=document.createElement('h3'),meta=document.createElement('p'),value=document.createElement('p');heading.textContent=source.label;meta.textContent=`${monthLabel(source.month)} · ${source.type}${source.inputKind?' · '+source.inputKind:''}${source.safetyContext?' · '+Object.values(source.safetyContext).join(' · '):''}`;value.textContent=source.displayValue||source.value;value.className='coaching-original';container.append(heading,meta,value);$('#studentCoachingEvidence').showModal();return}
   if(event.target.closest('[data-coaching-reload]')){loadStudentCoaching(true);return}
   const generate=event.target.closest('[data-coaching-generate]'),save=event.target.closest('[data-coaching-feedback]'),remove=event.target.closest('[data-coaching-delete]');if(!generate&&!save&&!remove)return;if(!state?.data||state.generating||state.loading||state.saving)return;
-  if(remove&&!confirm('이 코칭 카드와 카드의 적용 결과를 삭제할까요? 학생 설문은 유지됩니다.'))return;
+  if(remove&&!await uiConfirm('코칭 카드 및 적용 결과 삭제\n학생 설문 유지'))return;
   const epoch=studentCoachingEpoch,studentId=key.slice(key.lastIndexOf(':')+1),classId=classSettings.classId,status=$('#studentCoachingOutcome')?.value,note=$('#studentCoachingNote')?.value||'';
   studentCoachingState.set(key,{...state,generating:!!generate,saving:!generate,error:''});renderStudentCoachingCard();
   try{

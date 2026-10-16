@@ -223,7 +223,7 @@ test('학생을 바꿔도 현재 탭을 유지하고 응답이 없어도 지원 
   assert.match(html,/data-student-detail-tab="trend"/);
   assert.match(html,/data-student-detail-tab="responses"/);
   assert.match(emptyStudent,/studentYearTimelineHTML/);
-  assert.match(emptyStudent,/아직 제출된 설문이 없습니다/);
+  assert.match(emptyStudent,/제출된 설문 없음/);
 });
 
 test('긍정적인 친구 언급은 긴 학생 이름에 포함된 짧은 이름을 제외한다',()=>{
