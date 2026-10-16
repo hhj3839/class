@@ -65,7 +65,7 @@ test('관계 화면은 교사가 요청할 때 저장 결과 또는 새 AI 관�
   assert.match(html,/id="relationshipAnalysisMonth"/);
   assert.match(app,/relationship-ai-head/);
   assert.match(app,/<h3>AI 관계 코칭<\/h3><div class="ai-review-actions"><span class="confidence"/);
-  assert.match(app,/id="runRelationshipAi">저장된 결과 불러오기/);
+  assert.match(app,/id="runRelationshipAi">저장 결과 조회/);
   assert.match(app,/id="rerunRelationshipAi">AI 새 분석/);
   assert.match(app,/마지막 분석 \$\{formatAnalysisTimestamp\(meta\.generatedAt\)\}/);
   assert.match(app,/analysisType:'relationship'/);

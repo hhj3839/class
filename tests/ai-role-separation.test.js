@@ -8,7 +8,7 @@ const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 
 test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한다',()=>{
   assert.match(html,/data-analysis-tab="patterns"[^>]*>우리 반 응답 흐름<\/button>/);
-  assert.match(html,/id="runPatternsAi"[^>]*>저장된 결과 불러오기/);
+  assert.match(html,/id="runPatternsAi"[^>]*>저장 결과 조회/);
   assert.match(html,/id="rerunPatternsAi"[^>]*>AI 새 분석/);
   assert.match(html,/id="patternsAiMeta"/);
   assert.match(html,/id="classResponseFlowMetrics"/);
