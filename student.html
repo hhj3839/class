@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="smile.css?v=20260719-2" />
   <link rel="stylesheet" href="lavender-theme.css?v=20260828-2" />
   <link rel="stylesheet" href="education-ui.css?v=20261011-1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="minimal-ui.css?v=20261016-1">
 </head>
 <body class="education-ui student-ui">
   <a class="skip-link" href="#studentMain">설문 본문으로 바로가기</a>
@@ -19,8 +21,8 @@
     <header class="student-header"><a href="index.html" class="student-logo"><span>이음</span><strong>우리반 이음</strong></a><small id="classLabel">월간 학교생활 돌아보기</small></header>
 
     <section class="student-card login-card" id="loginCard">
-      <p class="kicker">학생 참여</p><h1 id="surveyTitle">설문 대상 월을 확인하고 있어요</h1><p id="surveyMonthNotice" role="status"></p>
-      <p>내 이름을 선택하세요. 다른 친구의 응답은 볼 수 없어요.</p>
+      <p class="kicker">학생 참여</p><h1 id="surveyTitle">설문 대상 월 확인 중</h1><p id="surveyMonthNotice" role="status"></p>
+      <p>본인 이름 선택 · 다른 학생 응답 비공개</p>
       <label class="field"><span>내 이름</span><select id="studentSelect"><option value="">명단을 불러오는 중이에요…</option></select></label>
       <button class="primary" id="verifyStudent">설문 시작하기</button><p class="message" id="loginMessage" role="status"></p>
       <div class="safety-note"><strong>꼭 기억해요</strong><ul><li>친구를 평가하거나 벌주기 위한 설문이 아니에요.</li><li>직접 겪은 일, 본 일, 들은 일을 구분해 주세요.</li><li>급한 도움이 필요하면 설문을 기다리지 말고 바로 선생님께 알려 주세요.</li></ul></div>
@@ -32,22 +34,22 @@
       <section class="student-card"><h2>■ 한 달 동안 우리 반 학교생활모습 돌아보기</h2>
         <div class="field"><span>1. 이번 달에 친구들을 차별하지 않고 친절한 말과 행동으로 잘 대해 주며 존중하고 있는 친구들은 누구입니까?</span><div class="peer-name-options" id="kindStudents" aria-label="친절하고 존중하는 친구 선택"></div><label><span class="detail-prompt">직접 보거나 겪은 일을 자세히 적어 주세요.</span><textarea id="kindDetail" placeholder="어떤 말이나 행동이 좋았는지 적어 주세요."></textarea></label></div>
         <div class="field"><span>2. 지난 학년이나 지난달과 비교해 말과 행동이 좋아졌다고 생각하는 친구는 누구입니까?</span><div class="peer-name-options" id="growthStudents" aria-label="긍정적으로 변화한 친구 선택"></div><label><span class="detail-prompt">어떻게 좋아졌는지 자세히 적어 주세요.</span><textarea id="growthDetail" placeholder="달라진 말이나 행동을 적어 주세요."></textarea></label></div>
-        <label class="field sensitive"><span>3. 아직도 다른 친구를 놀리는 말 또는 비꼬는 말, 따돌리는 말 등을 해서 다른 친구에게 상처를 주거나 폭력적인 말, 폭력적인 행동으로 다른 친구들을 힘들게 하는 친구는 누구입니까? (보거나 겪은 일, 들은 일을 자세하게 써 보세요. 그리고 그 친구에게 하고 싶은 말도 써 보세요.)</span><textarea id="hurtDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
+        <label class="field sensitive"><span>3. 아직도 다른 친구를 놀리는 말 또는 비꼬는 말, 따돌리는 말 등을 해서 다른 친구에게 상처를 주거나 폭력적인 말, 폭력적인 행동으로 다른 친구들을 힘들게 하는 친구는 누구입니까? (보거나 겪은 일, 들은 일을 자세하게 써 보세요. 그리고 그 친구에게 하고 싶은 말도 써 보세요.)</span><textarea id="hurtDetail" placeholder="응답 입력"></textarea></label>
         <div class="context-grid"><label class="field"><span>이 일을 어떻게 알게 되었나요?</span><select id="sourceType"><option>해당 없음</option><option>직접 경험</option><option>직접 목격</option><option>전해 들음</option></select></label><label class="field"><span>얼마나 있었나요?</span><select id="frequency"><option>해당 없음</option><option>한 번</option><option>2~3번</option><option>4번 이상</option></select></label><label class="check-field"><input type="checkbox" id="ongoing"> 지금도 계속되고 있어요</label></div>
-        <label class="field"><span>4. 우리 반에 도움이 필요하다고 생각하는 친구는 누구인지 까닭과 함께 써 보세요. 그리고 그 친구에게 하고 싶은 말도 적어 보세요.</span><textarea id="helpDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
-        <label class="field"><span>5. 요즘 학교생활을 하는 데 고민이 있다면 무엇인지 궁금해요.(친구, 공부, 성적, 등하교길 등)</span><textarea id="worryDetail" placeholder="말하고 싶은 만큼 자유롭게 적어 주세요."></textarea></label>
-        <label class="field"><span>6. 선생님께 듣고 싶은 말은 무엇인가요?</span><textarea id="teacherWish" placeholder="자유롭게 적어 주세요."></textarea></label>
-        <label class="field"><span>7. 부모님께 바라는 점이나 부탁하고 싶은 말은 무엇인가요?</span><textarea id="parentWish" placeholder="자유롭게 적어 주세요."></textarea></label>
+        <label class="field"><span>4. 우리 반에 도움이 필요하다고 생각하는 친구는 누구인지 까닭과 함께 써 보세요. 그리고 그 친구에게 하고 싶은 말도 적어 보세요.</span><textarea id="helpDetail" placeholder="응답 입력"></textarea></label>
+        <label class="field"><span>5. 요즘 학교생활을 하는 데 고민이 있다면 무엇인지 궁금해요.(친구, 공부, 성적, 등하교길 등)</span><textarea id="worryDetail" placeholder="말하고 싶은 만큼 응답 입력"></textarea></label>
+        <label class="field"><span>6. 선생님께 듣고 싶은 말은 무엇인가요?</span><textarea id="teacherWish" placeholder="응답 입력"></textarea></label>
+        <label class="field"><span>7. 부모님께 바라는 점이나 부탁하고 싶은 말은 무엇인가요?</span><textarea id="parentWish" placeholder="응답 입력"></textarea></label>
       </section>
-      <section class="student-card"><h2>8. 이번 달 나의 교우관계 표시해보기 (내 이름에는 ☺)</h2><p class="help-text">본인 이름에는 스마일 아이콘을 선택하고, 각 친구와 지내며 느낀 관계를 표시해 주세요.</p><div class="relationship-list" id="relationshipList"></div></section>
-      <section class="student-card"><label class="field"><span>9. 지금, 우리반 친구들 중에 속상한 마음이 남아있는 친구가 있나요? 무슨 일이 있었는지, 그 친구가 어떻게 노력을 하면 관계가 더 나아질 수 있겠는지 그 친구에게 바라는 점을 적어주세요!</span><textarea id="unresolvedDetail" placeholder="자유롭게 적어 주세요."></textarea></label>
-        <fieldset class="help-now"><legend>지금 선생님의 도움이 필요한가요?</legend><label><input type="radio" name="helpNow" value="괜찮음" checked> 지금은 괜찮아요</label><label><input type="radio" name="helpNow" value="이번 주"> 이번 주에 이야기하고 싶어요</label><label><input type="radio" name="helpNow" value="즉시"> 바로 도와주세요</label></fieldset>
+      <section class="student-card"><h2>8. 이번 달 나의 교우관계 표시해보기 (본인 표시)</h2><p class="help-text">본인 표시 및 친구별 관계 점수 선택</p><div class="relationship-list" id="relationshipList"></div></section>
+      <section class="student-card"><label class="field"><span>9. 지금, 우리반 친구들 중에 속상한 마음이 남아있는 친구가 있나요? 무슨 일이 있었는지, 그 친구가 어떻게 노력을 하면 관계가 더 나아질 수 있겠는지 그 친구에게 바라는 점을 적어주세요!</span><textarea id="unresolvedDetail" placeholder="응답 입력"></textarea></label>
+        <fieldset class="help-now"><legend>지금 선생님의 도움이 필요한가요?</legend><label><input type="radio" name="helpNow" value="괜찮음" checked> 현재 도움 불필요</label><label><input type="radio" name="helpNow" value="이번 주"> 이번 주 대화 희망</label><label><input type="radio" name="helpNow" value="즉시"> 즉시 도움 요청</label></fieldset>
       </section>
-      <div class="submit-area"><p class="draft-status" id="draftStatus" role="status">작성 내용은 이 탭에만 임시 저장되며 제출 후 즉시 삭제됩니다.</p><label class="check-field"><input type="checkbox" id="confirmAnswer" required> 사실과 생각을 구분해 솔직하게 작성했습니다.</label><button class="primary" type="submit" id="submitSurvey">응답 제출하기</button><p class="message" id="submitMessage" role="status"></p></div>
+      <div class="submit-area"><p class="draft-status" id="draftStatus" role="status">작성 내용은 이 탭에만 임시 저장되며 제출 후 즉시 삭제됩니다.</p><label class="check-field"><input type="checkbox" id="confirmAnswer" required> 사실·생각 구분 및 응답 확인</label><button class="primary" type="submit" id="submitSurvey">응답 제출</button><p class="message" id="submitMessage" role="status"></p></div>
     </form>
-    <section class="student-card complete-card" id="completeCard" hidden><div class="complete-icon">✓</div><h1>응답을 제출했어요</h1><p>선생님이 내용을 확인하고 필요한 도움을 함께 생각할 거예요.</p><a href="index.html">우리반 이음 홈으로</a></section>
+    <section class="student-card complete-card" id="completeCard" hidden><div class="complete-icon">✓</div><h1>응답 제출 완료</h1><p>담임 교사의 응답 확인 및 지원</p><a href="index.html">우리반 이음 홈</a></section>
   </main>
   <script src="supabase.js?v=20260720-4"></script>
-  <script src="student.js?v=20261005-1"></script>
+  <script src="student.js?v=20261016-1"></script>
 </body>
 </html>

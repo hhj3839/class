@@ -1,0 +1,50 @@
+/* Product-wide minimal UI; student content and semantic status colors remain intact. */
+.education-ui{--ink:#252730;--muted:#666975;--bg:#f7f7f8;--line:#dedee4;--shadow:none;--blue:#6950a1;--blue-dark:#503b80;--blue-soft:#f2eff8;background:#f7f7f8;color:var(--ink);font-family:Pretendard,'Malgun Gothic',sans-serif;font-variant-numeric:tabular-nums}
+.education-ui *{word-break:keep-all}
+.education-ui :is(h1,h2,h3,h4,button,input,textarea,select){font-family:inherit}
+.education-ui :is(h1,h2,h3){font-weight:700;letter-spacing:-.035em}
+.education-ui :is(button,[role=tab],summary,.nav-item){user-select:none;-webkit-user-select:none}
+.education-ui :is(button,[role=tab],.button-link){white-space:nowrap}
+.education-ui :is(button,a,input,select,textarea,summary):focus{outline:none}
+.education-ui :is(button,a,input,select,textarea,summary):focus-visible{outline:none;box-shadow:0 0 0 3px #d6c8ed}
+.education-ui :is(.panel,.stat-card,.page-intro,.auth-gate-card,.student-card,.survey-welcome,.submit-area,.analysis-card,.student-navigation){box-shadow:none;background-image:none;border-radius:12px}
+.education-ui :is(.page-intro,.auth-gate,.auth-gate-card,.survey-welcome,.login-card,.home-participation-card){background-image:none;background-color:#fff}
+.education-ui :is(.page-intro,.auth-gate-card)::before,.education-ui :is(.page-intro,.auth-gate-card)::after{display:none}
+.teacher-ui .page-intro{border:0;border-radius:0;border-bottom:1px solid var(--line);min-height:100px;padding:10px 0 24px;margin-bottom:24px;background:transparent}
+.teacher-ui .page-intro h2{font-size:30px;color:var(--ink)}
+.teacher-ui .page-intro .eyebrow{background:none;padding:0;color:var(--muted)}
+.teacher-ui .sidebar{background:#fff;border-color:var(--line)}
+.teacher-ui .brand-mark,.student-ui .student-logo span{border-radius:10px;background:#f0edf7;color:var(--blue)}
+.teacher-ui .nav-item{border-radius:8px;box-shadow:none;min-height:46px;padding:10px 14px}
+.teacher-ui .nav-item.active{background:#f0edf7;border-color:transparent;box-shadow:none}
+.teacher-ui .nav-item>span,.teacher-ui .privacy-icon{display:none}
+.teacher-ui .privacy-card{background:#f7f7f8;border-color:var(--line);color:var(--ink)}
+.education-ui :is(.primary-button,.secondary-button,.primary,.icon-button,.evidence-button){border-radius:8px;box-shadow:none}
+.education-ui :is(.survey-admin-tabs,.analysis-view-tabs,.relation-view-tabs,.settings-tabs,.student-detail-tabs){border-radius:10px;background:#f0f0f3;border-color:#e0e0e6;overflow-x:auto;max-width:100%}
+.education-ui [role=tab]{border-radius:7px;flex-shrink:0}
+.education-ui [role=tab][aria-selected=true]{box-shadow:none;color:var(--blue)}
+.education-ui :is(.notice.safe,.safety-note,.class-reading-coaching){background:#f5f4f8;border-color:#e1ddeb;color:#443b57}
+.education-ui :is(.notice>span,.stat-head>i,.complete-icon){display:none}
+.teacher-ui .auth-gate{background:#f7f7f8}
+.teacher-ui .auth-gate-card{padding:36px;border-radius:14px}
+.student-ui :is(.login-card,.survey-welcome){padding:28px;background-image:none;color:var(--ink)}
+.education-ui :is(input:not([type=radio]):not([type=checkbox]),select,textarea){border-radius:8px}
+.student-ui .student-card h2{border-bottom:1px solid var(--line);color:var(--ink)}
+.student-ui .help-now{background:#f7f7f8;border-color:var(--line);border-radius:10px}
+.student-ui .help-now legend{color:var(--ink)}
+.student-ui .rating-options label{border-radius:8px;background:#fafafa}
+.student-ui .rating-options label:has(input:checked){box-shadow:none;background:#f0edf7}
+.student-ui .self-smile{font-size:13px!important;min-width:52px;border-radius:8px;background:#f4f2f8}
+.education-ui #studentPanelSummary :is(.student-voice-brief,.student-current-snapshot){border-color:var(--line);background:#fff;border-radius:12px;box-shadow:none}
+.education-ui #studentPanelSummary .panel-head>div{padding-left:0}
+.education-ui #studentPanelSummary .panel-head>div::before{display:none}
+.education-ui #studentPanelSummary .student-voice-brief>p{background:#fafafa;border-color:var(--line);border-radius:8px}
+.education-ui #studentPanelSummary h3{font-family:inherit;font-size:21px;color:var(--ink)}
+.education-ui th{background:#f3f3f5;color:var(--ink)}
+.ui-confirm-dialog{width:min(460px,calc(100% - 32px));padding:24px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:#fff}
+.ui-confirm-dialog::backdrop{background:#14141f66}
+.ui-confirm-dialog h2{font-size:20px;margin:0 0 14px}
+.ui-confirm-dialog p{white-space:pre-line;font-size:15px;line-height:1.7}
+.ui-confirm-dialog textarea{width:100%;border:1px solid var(--line);padding:12px}
+.ui-confirm-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:18px 0 0}
+@media(max-width:600px){.teacher-ui .page-intro{padding:6px 0 18px}.teacher-ui .page-intro h2{font-size:26px}.education-ui .student-detail-tabs{display:flex;flex-wrap:nowrap}.student-ui :is(.login-card,.survey-welcome){padding:22px 16px}.education-ui #studentPanelSummary :is(.student-voice-brief,.student-current-snapshot){border-radius:12px}}

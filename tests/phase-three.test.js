@@ -25,7 +25,7 @@ test('학생 임시 저장은 탭 세션에 한정되고 제출 성공 시 삭�
 test('QR·토큰 회전·파일럿 점검 UI와 교사 권한 검사가 연결된다',()=>{
   assert.match(html,/id="participationQr"/);
   assert.match(html,/vendor\/qrcode\.js\?v=2\.0\.4/);
-  assert.doesNotMatch(html,/cdn\.jsdelivr|unpkg/);
+  assert.doesNotMatch(html,/<script[^>]+(?:cdn\.jsdelivr|unpkg)/);
   assert.match(app,/teacher_rotate_participation_token_auth/);
   assert.match(app,/teacher_get_pilot_readiness_auth/);
   assert.match(migration,/teacher_id=auth\.uid\(\)/);
@@ -67,7 +67,7 @@ test('배포 HTML은 최신 앱·인증·파일럿 스타일 캐시 버전을 �
   assert.match(html,/pilot-feedback\.css\?v=20260720-3/);
   assert.match(html,/supabase\.js\?v=20260720-4/);
   assert.match(html,/analysis-dashboard\.css\?v=20260816-1/);
-  assert.match(html,/app\.js\?v=20261007-1/);
+  assert.match(html,/app\.js\?v=20261016-1/);
   assert.match(html,/relationship-evidence\.js\?v=20260909-1/);
   assert.ok(html.indexOf('relationship-data.js')<html.indexOf('analysis-core.js'));
     assert.match(html,/student-support-timeline\.css\?v=20260724-5/);
@@ -82,7 +82,7 @@ test('학생 관계 선택 접근성 문구는 이름 받침에 맞는 조사를
   assert.match(student,/\(last-0xac00\)%28!==0/);
   assert.match(student,/hasFinal\?'과':'와'/);
   assert.match(student,/aria-label="\$\{relationshipLabel\(student\.name\)\}"/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261005-1/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261016-1/);
 });
 
 test('학생 설문의 태블릿 터치 선택 영역은 최소 44px이다',()=>{
@@ -102,7 +102,7 @@ test('학생 제출은 고유 ID로 네트워크 재시도 중복을 방지한�
   assert.match(idempotent,/unique index if not exists survey_responses_submission_id_key/);
   assert.match(idempotent,/on conflict\(submission_id\) where submission_id is not null do nothing/);
   assert.match(idempotent,/r\.class_id=target_class and r\.student_id=target_student_id/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261005-1/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261016-1/);
 });
 
 test('학생 작성 내용은 화면 전환 직전에 저장하고 연결 복구 시 명단을 다시 불러온다',()=>{

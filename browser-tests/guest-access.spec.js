@@ -8,7 +8,7 @@ for(const width of [360,1440])test(`가상 학급 진입과 종료 ${width}px`,a
   if(body.name==='teacher_get_class_context_auth')data={classId:'demo-aa891ab949014621',schoolYear:2026,grade:5,classNumber:99,teacherName:'가상 학급',students:[{number:1,name:'가상학생',studentId:'11111111-1111-1111-1111-111111111111'}]};
   await route.fulfill({status:200,json:data});
  });
- await page.goto('./');await page.getByRole('button',{name:'가상 학급 둘러보기'}).click();
+ await page.goto('./');await page.getByRole('button',{name:'가상 학급 체험'}).click();
  await expect(page.locator('#teacherApp')).toBeVisible();await expect(page.locator('#guestBanner')).toContainText('10/10회');
  await expect(page.locator('[data-view="settings"]')).toBeHidden();
  expect(requests.every(url=>url.endsWith('/functions/v1/guest-lab'))).toBe(true);

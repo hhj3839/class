@@ -18,7 +18,7 @@ test('설문 관리는 학생 설문 링크와 제출 현황만 탭으로 구분
   assert.doesNotMatch(html,/data-survey-admin-tab="correction"/);
   assert.match(html,/id="responseCorrectionPanel"[^>]*hidden[^>]*aria-hidden="true"/);
   assert.match(html,/학생 설문 접속/);
-  assert.match(html,/새 설문 링크 만들기/);
+  assert.match(html,/설문 링크 재발급/);
   assert.match(html,/제출 현황 새로고침/);
   assert.match(app,/panels=\{link:\$\('#surveyLinkPanel'\),status:\$\('#surveyStatusPanel'\)\}/);
 });
@@ -171,7 +171,7 @@ test('AI 학생 카드는 담임 참고·교실에서 살펴볼 점·학생 코�
 });
 
 test('학생 상세와 관계 분석은 안전한 초기 화면을 사용한다',()=>{
-  assert.match(app,/<option value="">학생을 선택해 주세요<\/option>/);
+  assert.match(app,/<option value="">학생 선택<\/option>/);
   assert.match(app,/setRelationshipTab\('example'\)/);
   assert.match(html,/>월별 관계 지도<\/button>/);
   assert.doesNotMatch(html,/추정 집단|양극화 후보|표준편차|강한 상호 연결/);
