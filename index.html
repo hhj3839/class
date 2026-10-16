@@ -21,10 +21,8 @@
   <link rel="stylesheet" href="student-report-pdf.css?v=20260912-2" />
   <link rel="stylesheet" href="guest-access.css?v=20260915-1" />
   <link rel="stylesheet" href="survey-target-month.css?v=20261005-1">
-  <link rel="stylesheet" href="student-overview-pastel.css?v=20261011-1">
-  <link rel="stylesheet" href="education-ui.css?v=20261011-1">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="minimal-ui.css?v=20261016-1">
+  <link rel="stylesheet" href="design-system.css?v=20261016-2">
 </head>
 <body class="education-ui teacher-ui">
   <a class="skip-link" href="#teacherMain">교사 화면 본문으로 바로가기</a>
@@ -64,14 +62,14 @@
           <article class="stat-card home-participation-card"><div class="stat-head"><span>이번 달 설문 참여</span><i class="blue">↗</i></div><div class="home-participation-row"><strong id="homeParticipation">24 <small>/ 28명</small></strong><p id="homeParticipationText">86% 참여 · 미제출 4명</p></div><div class="progress large"><span id="homeParticipationBar" style="width:86%"></span></div></article>
           <div class="home-priority-grid" aria-label="이번 달 확인할 학생">
             <article class="stat-card home-priority-card urgent"><div class="stat-head"><span>바로 확인할 학생</span><i class="red">!</i></div><strong id="homeUrgent">0 <small>명</small></strong><div class="home-student-links" id="homeUrgentStudents" aria-label="바로 확인할 학생 목록"></div><p class="red-text">바로 도움을 요청한 응답</p></article>
-            <article class="stat-card home-priority-card watch"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><div class="home-student-links" id="homeWeekStudents" aria-label="살펴볼 학생 목록"></div><p>응답과 실제 상황을 함께 확인해 주세요.</p></article>
+            <article class="stat-card home-priority-card watch"><div class="stat-head"><span>살펴볼 학생</span><i class="orange">◷</i></div><strong id="homeWeek">0 <small>명</small></strong><div class="home-student-links" id="homeWeekStudents" aria-label="살펴볼 학생 목록"></div><p>응답·실제 상황 대조 필요</p></article>
           </div>
         </div>
         <div class="dashboard-grid home-trend-grid">
           <div class="panel" id="classTrendPanel">
             <div class="panel-head"><div><p class="eyebrow">최근 6개월 · 제출한 설문 기준</p><h2>우리 반 월별 변화</h2></div><div class="home-trend-meta"><span class="home-positive-summary">친절·성장 응답 <strong id="homePositive">0 <small>건</small></strong></span><span class="confidence" id="classTrendConfidence">설문 응답 확인 중</span></div></div>
             <div class="trend-chart" id="classTrendChart" aria-label="월별 학급 자기평가 평균 추세"></div>
-            <div class="insight" id="classTrendInsight"><span>ⓘ</span><p>월별 응답을 불러오면 실제 변화가 표시됩니다.</p></div>
+            <div class="insight" id="classTrendInsight"><span>ⓘ</span><p>월별 응답 조회 대기</p></div>
           </div>
         </div>
         <section class="panel signal-review-panel" aria-labelledby="signalReviewTitle" hidden>
@@ -100,8 +98,8 @@
       <section class="view" id="view-analysis">
         <div class="page-intro"><div><p class="eyebrow">설문 응답을 바탕으로 살펴보기</p><h2>학급 분석</h2></div></div>
         <div class="analysis-toolbar"><div class="analysis-view-tabs" role="tablist" aria-label="학급 분석 화면 선택"><button class="active" type="button" data-analysis-tab="patterns" role="tab" aria-selected="true">우리 반 응답 흐름</button><button type="button" data-analysis-tab="ai" role="tab" aria-selected="false">AI 학생 지원</button></div><div class="analysis-toolbar-actions"><label class="student-picker analysis-month-picker"><select id="analysisMonth" aria-label="분석 결과를 살펴볼 달"></select></label><button class="secondary-button" type="button" id="printReport">분석 결과 PDF 저장</button></div></div>
-        <div id="analysisAiPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 학생 지원</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunAiAnalysis" type="button">AI 새 분석</button></div></div><div id="aiAnalysisContent"><p class="muted">응답을 불러오면 AI 분석 결과가 자동으로 표시됩니다.</p></div></section></div>
-        <div id="analysisPatternsPanel" role="tabpanel"><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 반 응답 흐름</h3></div><div class="ai-review-actions"><span class="confidence" id="patternsAiMeta">마지막 분석 확인 중</span><button class="text-button" id="runPatternsAi" type="button">저장된 결과 불러오기</button><button class="text-button" id="rerunPatternsAi" type="button">AI 새 분석</button></div></div><div id="classResponseFlowMetrics" class="class-response-metrics"></div><div id="classObservationPatterns"><p class="muted">AI 분석 결과를 불러오면 학급 응답 흐름이 표시됩니다.</p></div></section></div>
+        <div id="analysisAiPanel" role="tabpanel" hidden><section class="panel ai-analysis-panel" id="aiAnalysisPanel"><div class="panel-head"><div><h3>AI 학생 지원</h3></div><div class="ai-review-actions"><span class="confidence" id="aiAnalysisMeta">마지막 분석 확인 중</span><button class="text-button" id="runAiAnalysis" type="button">저장 결과 조회</button><button class="text-button" id="rerunAiAnalysis" type="button">AI 새 분석</button></div></div><div id="aiAnalysisContent"><p class="muted">저장된 AI 분석 조회 대기</p></div></section></div>
+        <div id="analysisPatternsPanel" role="tabpanel"><section class="panel ai-analysis-panel"><div class="panel-head"><div><h3>우리 반 응답 흐름</h3></div><div class="ai-review-actions"><span class="confidence" id="patternsAiMeta">마지막 분석 확인 중</span><button class="text-button" id="runPatternsAi" type="button">저장 결과 조회</button><button class="text-button" id="rerunPatternsAi" type="button">AI 새 분석</button></div></div><div id="classResponseFlowMetrics" class="class-response-metrics"></div><div id="classObservationPatterns"><p class="muted">학급 응답 흐름 조회 대기</p></div></section></div>
       </section>
 
       <section class="view" id="view-student-detail">
@@ -132,7 +130,7 @@
         <div id="relationAiPanel" role="tabpanel" hidden><div id="relationshipActions"></div></div>
         <div class="relation-grid" id="relationPreview" hidden>
           <div class="panel network-panel"><div class="panel-head"><h3>우리 반 관계 지도 미리보기</h3><button class="text-button" id="toggleNames">이름 표시</button></div><div class="network" id="network" aria-label="학생 관계 지도 예시"><svg viewBox="0 0 600 340" role="img"><g class="links"><line x1="130" y1="100" x2="230" y2="70"/><line x1="130" y1="100" x2="210" y2="175"/><line x1="230" y1="70" x2="210" y2="175"/><line x1="380" y1="90" x2="480" y2="130"/><line x1="380" y1="90" x2="400" y2="210"/><line x1="480" y1="130" x2="400" y2="210"/><line class="bridge" x1="230" y1="70" x2="380" y2="90"/><line class="weak" x1="210" y1="175" x2="320" y2="280"/><line class="weak" x1="400" y1="210" x2="320" y2="280"/></g><g class="nodes"><g transform="translate(130 100)"><circle r="28"/><text>A</text><title>학생A</title></g><g transform="translate(230 70)"><circle r="28"/><text>B</text><title>학생B</title></g><g transform="translate(210 175)"><circle r="28"/><text>C</text><title>학생C</title></g><g class="group-two" transform="translate(380 90)"><circle r="28"/><text>D</text><title>학생D</title></g><g class="group-two" transform="translate(480 130)"><circle r="28"/><text>E</text><title>학생E</title></g><g class="group-two" transform="translate(400 210)"><circle r="28"/><text>F</text><title>학생F</title></g><g class="neutral" transform="translate(320 280)"><circle r="28"/><text>G</text><title>학생G</title></g></g></svg><div class="legend"><span><i class="dot one"></i>서로 높은 점수를 주고받은 학생들</span><span><i class="dot two"></i>또 다른 학생 묶음</span><span><i class="line"></i>서로 4~5점을 준 관계</span></div></div><p class="muted">친구 관계 응답을 바탕으로 담임이 살펴볼 관계를 표시한 예시입니다.</p></div>
-          <div class="relation-notes"><div class="panel"><span class="tag orange-tag">응답 차이 확인</span><h3>친구에 따라 받은 응답 차이가 큰 경우</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span></div><p>학생을 평가하거나 단정하지 말고, 모둠·놀이 상황별 반응을 확인해 주세요.</p></div></div>
+          <div class="relation-notes"><div class="panel"><span class="tag orange-tag">응답 차이 확인</span><h3>친구에 따라 받은 응답 차이가 큰 경우</h3><div class="metric-row"><span><b>38%</b>1~2점</span><span><b>42%</b>4~5점</span></div><p>학생 평가·단정 금지 · 모둠·놀이 상황별 반응 확인 필요</p></div></div>
         </div>
       </section>
 
@@ -201,10 +199,10 @@
   <script src="relationship-changes.js?v=20260909-2"></script>
   <script src="student-calendar.js?v=20260912-1"></script>
   <dialog id="studentCoachingEvidence" aria-labelledby="studentCoachingEvidenceTitle"><div class="dialog-head"><h2 id="studentCoachingEvidenceTitle">코칭 제안의 근거</h2><button class="icon-button" type="button" data-close aria-label="닫기">×</button></div><div id="studentCoachingSource"></div></dialog>
-  <script src="student-coaching.js?v=20261016-1"></script>
+  <script src="student-coaching.js?v=20261016-2"></script>
   <script src="student-coaching-pdf.js?v=20260912-3"></script>
   <script src="student-comparison-report.js?v=20260912-1"></script>
-  <script src="app.js?v=20261016-1"></script>
+  <script src="app.js?v=20261016-2"></script>
   <script src="safety-signals.js?v=20260912-1"></script>
   <script src="student-support-timeline.js?v=20260912-1"></script>
   <script src="student-priority.js?v=20260912-1"></script>
