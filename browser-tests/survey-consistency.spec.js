@@ -27,7 +27,8 @@ for(const width of [360,1440])test(`제출 집계·분석 제외·월 선택 동
  await expect(page.locator('#teacherApp')).toBeVisible();
  await expect(page.locator('#analysisMonth option[value="2026-10"]')).toHaveCount(1);
  await navigate('survey');await page.locator('[data-survey-admin-tab="status"]').click();
- await expect(page.locator('#surveyMonth')).toHaveValue('2026-09');
+ await expect(page.locator('#surveyMonth')).toHaveValue('2026-10');
+ await page.locator('#surveyMonth').selectOption('2026-09');
  await expect(page.locator('#surveyParticipation')).toHaveText('2 / 2명');
  await expect(page.locator('#monthlySurveyAccordion summary').filter({hasText:'2026년 9월'})).toContainText('2/2명');
  await page.locator('#refreshResponses').click();

@@ -1,6 +1,37 @@
 let signals=[];
 let allResponses=[];
 let selectedAnalysisMonth='';
+let teacherContextEpoch = 0;
+let responseRefreshVersion = 0;
+
+function selectAnalysisMonth(month, render = true) {
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return false;
+  selectedAnalysisMonth = month;
+  ['#analysisMonth', '#surveyMonth'].forEach(id => {
+    const selector = $(id);
+    if (selector) selector.value = month;
+  });
+  if (render) applyAnalysisMonth();
+  return true;
+}
+
+function captureTeacherContext() {
+  const epoch = teacherContextEpoch;
+  const classId = classSettings.classId;
+  const teacherId = getTeacherSession()?.user?.id;
+  return () => epoch === teacherContextEpoch &&
+    classId === classSettings.classId && !!getTeacherSession() &&
+    teacherId === getTeacherSession()?.user?.id;
+}
+
+function resetViewSelection() {
+  teacherContextEpoch += 1;
+  responseRefreshVersion += 1;
+  selectAnalysisMonth(new Date().toISOString().slice(0, 7), false);
+  const select = $('#studentDetailSelect');
+  if (select) select.value = '';
+  activeStudentDetailTab = 'summary';
+}
 const defaultSettings={teacherName:'',schoolYear:new Date().getFullYear(),grade:1,classNumber:1,classId:'',teacherSecret:'',students:[]};
 let classSettings=loadClassSettings();
 let signalReviews=[];
@@ -23,7 +54,19 @@ function latestByStudent(responses,month){const latest=new Map();responses.filte
 function quoted(value,max=180){const text=String(value||'').trim();return text?`“${text.length>max?`${text.slice(0,max)}…`:text}”`:''}
 function signalTag(type){return type==='urgent'?'즉시 확인':'지속 관찰'}
 function standardDeviation(values){if(!values.length)return 0;const average=values.reduce((sum,value)=>sum+value,0)/values.length;return Math.sqrt(values.reduce((sum,value)=>sum+(value-average)**2,0)/values.length)}
-function updateMonthSelector(){const months=[...new Set(allResponses.map(monthOf).filter(month=>/^\d{4}-\d{2}$/.test(month)))].sort().reverse();if(!months.length)months.push(new Date().toISOString().slice(0,7));if(!months.includes(selectedAnalysisMonth))selectedAnalysisMonth=months[0];const options=months.map(month=>`<option value="${month}" ${month===selectedAnalysisMonth?'selected':''}>${monthLabel(month)}</option>`).join('');['#analysisMonth','#surveyMonth'].forEach(id=>{const selector=$(id);if(selector)selector.innerHTML=options})}
+function updateMonthSelector() {
+  const months = [...new Set(allResponses.map(monthOf).filter(
+    month => /^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+  ))].sort().reverse();
+  if (!months.length) months.push(new Date().toISOString().slice(0, 7));
+  const month = months.includes(selectedAnalysisMonth) ? selectedAnalysisMonth : months[0];
+  const options = months.map(value => `<option value="${value}">${monthLabel(value)}</option>`).join('');
+  ['#analysisMonth', '#surveyMonth'].forEach(id => {
+    const selector = $(id);
+    if (selector) selector.innerHTML = options;
+  });
+  selectAnalysisMonth(month, false);
+}
 function analyzeResponses(responses,month){
   const current=latestByStudent(responses,month);const previous=latestByStudent(responses,previousMonth(month));const found=[];let id=1;
   const add=(type,item,title,summary,evidence,hypotheses,observation)=>found.push({id:id++,type,tag:signalTag(type),name:item?.student_name||payloadOf(item).studentName||'학생',studentNumber:Number(item?.student_number||payloadOf(item).studentNumber)||null,studentId:item?.student_id||null,sourceResponseId:item?.id||null,submittedAt:item?.submitted_at||payloadOf(item).submittedAt||null,title,summary,evidence:evidence.filter(Boolean),hypotheses,observation});
@@ -84,10 +127,15 @@ async function refreshResponses(showNotice = true) {
     return;
   }
 
+  const isCurrentContext = captureTeacherContext();
+  const version = ++responseRefreshVersion;
+  const isCurrent = () => isCurrentContext() && version === responseRefreshVersion;
   try {
-    allResponses = (await teacherRpc('teacher_get_responses_auth', {
+    const rows = await teacherRpc('teacher_get_responses_auth', {
       p_class_id: classSettings.classId
-    })).map(row => {
+    });
+    if (!isCurrent()) return;
+    allResponses = rows.map(row => {
       const student = row.student_id && classSettings.students.find(
         item => item.studentId === row.student_id
       );
@@ -97,11 +145,12 @@ async function refreshResponses(showNotice = true) {
     });
 
     await Promise.all([refreshGovernance(), refreshSignalReviews()]);
+    if (!isCurrent()) return;
     updateMonthSelector();
     applyAnalysisMonth();
     if (showNotice) showToast('로그인 계정의 학생 설문 응답을 불러왔습니다.');
   } catch (error) {
-    showToast(`자료를 불러오지 못했습니다: ${error.message}`);
+    if (isCurrent()) showToast(`자료를 불러오지 못했습니다: ${error.message}`);
   }
 }
 function showToast(message){const el=$('#toast');el.textContent=String(message).replaceAll('AI 관찰 보조','AI 분석');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}
@@ -109,7 +158,11 @@ function handleAuthCallbackNotice(){const query=new URLSearchParams(location.sea
 const signalReviewStatuses={unreviewed:'확인 전',conversation_planned:'대화 예정',fact_checking:'사실 확인 중',support_connected:'지원 연결',no_issue:'특이사항 없음',closed:'종결'};
 function signalKey(signal){return [selectedAnalysisMonth,signal.sourceResponseId||signal.submittedAt||'derived',signal.studentNumber||0,signal.type,signal.title].join('|')}
 function signalReviewFor(signal){return signalReviews.find(item=>item.signal_key===signalKey(signal))}
-async function refreshSignalReviews(){signalReviews=await teacherRpc('teacher_get_signal_reviews_auth',{p_class_id:classSettings.classId})||[]}
+async function refreshSignalReviews() {
+  const isCurrent = captureTeacherContext();
+  const reviews = await teacherRpc('teacher_get_signal_reviews_auth', {p_class_id: classSettings.classId});
+  if (isCurrent()) signalReviews = reviews || [];
+}
 function renderSignalInbox(){const inbox=$('#signalReviewInbox');if(!inbox)return;const relevant=signals.filter(signal=>signal.type==='urgent'||signal.type==='week');const resolved=new Set(['support_connected','no_issue','closed']),today=new Date().toISOString().slice(0,10);const statusOf=signal=>signalReviewFor(signal)?.status||'unreviewed';const open=relevant.filter(signal=>!resolved.has(statusOf(signal))),overdue=open.filter(signal=>{const date=signalReviewFor(signal)?.follow_up_date;return date&&date<today});$('#signalReviewCount').textContent=`${open.length}건 확인 필요 · 전체 ${relevant.length}건`;$('#signalReviewUnreviewed').textContent=relevant.filter(signal=>statusOf(signal)==='unreviewed').length;$('#signalReviewInProgress').textContent=relevant.filter(signal=>['conversation_planned','fact_checking'].includes(statusOf(signal))).length;$('#signalReviewOverdue').textContent=overdue.length;$$('[data-signal-review-filter]').forEach(button=>button.classList.toggle('active',button.dataset.signalReviewFilter===signalReviewFilter));const visible=relevant.filter(signal=>signalReviewFilter==='all'||(signalReviewFilter==='open'&&!resolved.has(statusOf(signal)))||(signalReviewFilter==='done'&&resolved.has(statusOf(signal)))).sort((a,b)=>{const aReview=signalReviewFor(a)||{},bReview=signalReviewFor(b)||{};const aOverdue=aReview.follow_up_date&&aReview.follow_up_date<today,bOverdue=bReview.follow_up_date&&bReview.follow_up_date<today;return Number(bOverdue)-Number(aOverdue)||Number(b.type==='urgent')-Number(a.type==='urgent')});if(!visible.length){inbox.innerHTML=`<div class="signal-review-empty"><strong>${relevant.length?'선택한 상태의 신호가 없습니다.':'현재 확인할 안전 신호가 없습니다.'}</strong><p>${relevant.length?'다른 상태 필터를 선택해 주세요.':'선택한 달의 응답에서 담임 확인이 필요한 내용이 생기면 이곳에 표시됩니다.'}</p></div>`;return}inbox.innerHTML=visible.map(signal=>{const review=signalReviewFor(signal)||{},status=review.status||'unreviewed',isOverdue=review.follow_up_date&&review.follow_up_date<today&&!resolved.has(status);return`<article class="signal-review-card ${status==='unreviewed'?'unreviewed':''} ${isOverdue?'overdue':''}" data-signal-key="${escapeHTML(signalKey(signal))}"><header><div><span class="tag ${signal.type}">${escapeHTML(signal.tag)}</span><strong>${escapeHTML(signal.name)}</strong>${isOverdue?'<span class="tag urgent">기한 경과</span>':''}</div><small>${escapeHTML(monthLabel(selectedAnalysisMonth))}</small></header><h3>${escapeHTML(signal.title)}</h3><p>${escapeHTML(signal.summary)}</p><button class="evidence-button signal-source-button" type="button" data-review-evidence="${signal.id}">연결된 근거 확인</button><div class="signal-review-controls"><label><span>확인 상태</span><select data-signal-review-status>${Object.entries(signalReviewStatuses).map(([value,label])=>`<option value="${value}" ${value===status?'selected':''}>${label}</option>`).join('')}</select></label><label><span>후속 확인일</span><input type="date" data-signal-review-date value="${escapeHTML(review.follow_up_date||'')}"></label><label class="signal-review-note"><span>교사 메모</span><input data-signal-review-note maxlength="300" value="${escapeHTML(review.note||'')}" placeholder="확인할 장면이나 다음 조치"></label><button class="primary-button" type="button" data-save-signal-review="${signal.id}">상태 저장</button></div></article>`}).join('')}
 function homeStudentLinks(numbers,kind){const rows=[...numbers].map(number=>classSettings.students.find(student=>Number(student.number)===Number(number))).filter(Boolean).sort((a,b)=>Number(a.number)-Number(b.number));return rows.length?rows.map(student=>`<button type="button" class="home-student-link ${kind}" data-open-student="${Number(student.number)}" aria-label="${escapeHTML(student.name)} 학생 살펴보기">${escapeHTML(student.name)}</button>`).join(''):'<span class="home-student-empty">해당 학생 없음</span>'}
 function renderHomeSignals(){const urgentStudents=new Set(signals.filter(signal=>signal.type==='urgent'&&signal.studentNumber).map(signal=>Number(signal.studentNumber)));const observationStudents=new Set(signals.filter(signal=>signal.type!=='urgent'&&signal.studentNumber).map(signal=>Number(signal.studentNumber)));urgentStudents.forEach(number=>observationStudents.delete(number));const latest=latestByStudent(allResponses,selectedAnalysisMonth);const positive=[...latest.values()].filter(item=>{const peer=payloadOf(item).peerObservations||{};return peer.kind?.detail||peer.growth?.detail}).length;$('#homeUrgent').innerHTML=`${urgentStudents.size} <small>명</small>`;$('#homeWeek').innerHTML=`${observationStudents.size} <small>명</small>`;$('#homeUrgentStudents').innerHTML=homeStudentLinks(urgentStudents,'urgent');$('#homeWeekStudents').innerHTML=homeStudentLinks(observationStudents,'watch');$('#homePositive').innerHTML=`${positive} <small>건</small>`;renderSignalInbox()}
@@ -147,7 +200,25 @@ function renderStudents(){renderResponses([])}
 function studentMonthlyResponses(studentNumber){const months=[...new Set(allResponses.map(monthOf).filter(month=>/^\d{4}-\d{2}$/.test(month)))].sort();return months.map(month=>({month,item:latestByStudent(allResponses,month).get(Number(studentNumber))})).filter(row=>row.item)}
 function updateStudentStepButtons(){const students=studentDetailRoster(),select=$('#studentDetailSelect'),selected=Number(select?.value),index=students.findIndex(student=>Number(student.number)===selected),previous=$('#previousStudent'),next=$('#nextStudent'),position=$('#studentSelectionPosition');if(previous)previous.disabled=index<=0;if(next)next.disabled=index<0||index>=students.length-1;if(position)position.textContent=index<0?'학생 선택':`${index+1} / ${students.length}명 · ${students[index].number}번 ${students[index].name}`}
 function renderStudentDetailSelector(){const students=studentDetailRoster(),select=$('#studentDetailSelect');if(!select)return;const previous=Number(select.value),selected=students.some(student=>Number(student.number)===previous)?previous:0;select.innerHTML='<option value="">학생 선택</option>'+students.map(student=>`<option value="${Number(student.number)}" ${Number(student.number)===selected?'selected':''}>${Number(student.number)}번 ${escapeHTML(student.name)}${IeumEnrollment.transferDate(student)?` (전출 · ${escapeHTML(IeumEnrollment.transferDate(student))})`:' 학생'}</option>`).join('');const printButton=$('#printStudentReport');if(printButton)printButton.disabled=!selected;$$('[data-student-detail-tab]').forEach(button=>button.disabled=!selected);updateStudentStepButtons()}
-function moveStudentDetail(direction){const students=studentDetailRoster(),select=$('#studentDetailSelect'),index=students.findIndex(student=>Number(student.number)===Number(select?.value)),nextIndex=index+direction;if(!select||index<0||nextIndex<0||nextIndex>=students.length)return;select.value=String(students[nextIndex].number);select.dispatchEvent(new Event('change',{bubbles:true}));select.focus()}
+function selectStudentDetail(number, tab = activeStudentDetailTab) {
+  const select = $('#studentDetailSelect');
+  if (!select) return;
+  const student = studentDetailRoster().find(item => Number(item.number) === Number(number));
+  select.value = student ? String(student.number) : '';
+  activeStudentDetailTab = tab;
+  const printButton = $('#printStudentReport');
+  if (printButton) printButton.disabled = !student;
+  renderStudentDetail();
+}
+
+function moveStudentDetail(direction) {
+  const students = studentDetailRoster(), select = $('#studentDetailSelect');
+  const index = students.findIndex(student => Number(student.number) === Number(select?.value));
+  const nextIndex = index + direction;
+  if (!select || index < 0 || nextIndex < 0 || nextIndex >= students.length) return;
+  selectStudentDetail(students[nextIndex].number);
+  select.focus();
+}
 let activeStudentDetailTab='summary';
 function mentionsStudentName(text,student){const value=String(text||'').trim(),name=String(student?.name||'').trim();if(!name||!value.includes(name))return false;return !classSettings.students.some(other=>Number(other.number)!==Number(student.number)&&String(other.name||'').length>name.length&&String(other.name).includes(name)&&value.includes(other.name))}
 function receivedPositiveMentions(student,month){const mentions=[];latestByStudent(allResponses,month).forEach((item,reporter)=>{if(reporter===Number(student.number))return;const peer=payloadOf(item).peerObservations||{};[['친절·존중',peer.kind],['성장',peer.growth]].forEach(([type,response])=>{const text=String(response?.detail||'').trim(),selected=(response?.studentNumbers||[]).map(Number),matched=selected.length?selected.includes(Number(student.number)):mentionsStudentName(text,student);if(matched)mentions.push({type,text:text||'이름 선택 응답',reporter:item.student_name||payloadOf(item).studentName||`${reporter}번`,structured:selected.length>0})})});return mentions}
@@ -200,11 +271,20 @@ function renderStudentDetail(){
 function setStudentDetailTab(tab){activeStudentDetailTab=tab;$$('[data-student-detail-tab]').forEach(button=>{const active=button.dataset.studentDetailTab===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1});$$('[data-student-detail-panel]').forEach(panel=>panel.hidden=panel.dataset.studentDetailPanel!==tab);if(tab==='coaching')loadStudentCoaching()}
 function openStudentAttentionResponse(month){setStudentDetailTab('responses');const card=document.querySelector(`[data-student-response-month="${CSS.escape(month)}"]`);if(!card)return;card.open=true;const source=card.querySelector('.student-attention-source');source?.classList.add('highlight');source?.focus();source?.scrollIntoView({behavior:'smooth',block:'center'})}
 function renderResponseManagement(){const container=$('#responseManagement');if(!container)return;const rows=allResponses.filter(item=>monthOf(item)===selectedAnalysisMonth);container.innerHTML=rows.length?`<div class="managed-response-list">${rows.map(item=>`<article class="managed-response"><div><strong>${escapeHTML(item.student_name)} · ${new Date(item.submitted_at).toLocaleString('ko-KR')}</strong><p>${item.analysis_excluded?`분석 제외 · ${escapeHTML(item.correction_note||'사유 없음')}`:'분석에 포함됨'}</p></div><div>${item.analysis_excluded?`<button class="secondary-button" data-response-action="restore" data-response-id="${item.id}">분석 복원</button>`:`<button class="secondary-button" data-response-action="exclude" data-response-id="${item.id}">분석 제외</button>`}<button class="danger-button" data-response-action="delete" data-response-id="${item.id}" data-student-name="${escapeHTML(item.student_name)}">소프트 삭제</button></div></article>`).join('')}</div>`:'<p class="muted">선택한 월에 관리할 응답이 없습니다.</p>'}
-async function refreshGovernance(){if(!getTeacherSession())return;const[policies,logs]=await Promise.all([teacherRpc('teacher_get_retention_policy_auth',{p_class_id:classSettings.classId}),teacherRpc('teacher_get_audit_logs_auth',{p_class_id:classSettings.classId,p_limit:50})]);const policy=policies[0];if(policy){$('#retentionMonths').value=String(policy.retention_months);$('#endOfYearAction').value=policy.end_of_year_action}$('#auditLogList').innerHTML=logs.length?logs.map(log=>`<article><strong>${escapeHTML(log.action)}</strong><span>${new Date(log.created_at).toLocaleString('ko-KR')}</span><p>${escapeHTML(log.reason||'사유 없음')} · ${escapeHTML(log.target_type)}</p></article>`).join(''):'<p class="muted">아직 감사 로그가 없습니다.</p>'}
+async function refreshGovernance(){if(!getTeacherSession())return;const isCurrent=captureTeacherContext();const[policies,logs]=await Promise.all([teacherRpc('teacher_get_retention_policy_auth',{p_class_id:classSettings.classId}),teacherRpc('teacher_get_audit_logs_auth',{p_class_id:classSettings.classId,p_limit:50})]);if(!isCurrent())return;const policy=policies[0];if(policy){$('#retentionMonths').value=String(policy.retention_months);$('#endOfYearAction').value=policy.end_of_year_action}$('#auditLogList').innerHTML=logs.length?logs.map(log=>`<article><strong>${escapeHTML(log.action)}</strong><span>${new Date(log.created_at).toLocaleString('ko-KR')}</span><p>${escapeHTML(log.reason||'사유 없음')} · ${escapeHTML(log.target_type)}</p></article>`).join(''):'<p class="muted">아직 감사 로그가 없습니다.</p>'}
 function openEvidence(id){const s=signals.find(x=>x.id===Number(id));if(!s)return;$('#dialogTitle').textContent=`${s.name} · ${s.title}`;$('#dialogContent').innerHTML=`<h3>연결된 근거</h3>${s.evidence.map(e=>`<div class="evidence-box">${escapeHTML(e)}</div>`).join('')}<h3>가능한 해석</h3><div class="hypotheses">${s.hypotheses.map(h=>`<span>${escapeHTML(h)}</span>`).join('')}</div><h3>추천 관찰</h3><p>${escapeHTML(s.observation)}</p><div class="notice warning"><span>!</span><p>가능성에 대한 가설입니다. 원문 검토와 실제 관찰·대화로 확인해 주세요.</p></div>`;$('#evidenceDialog').showModal()}
 function openEvidenceGroup(ids){const items=String(ids).split(',').map(Number).map(id=>signals.find(signal=>signal.id===id)).filter(Boolean);if(!items.length)return;const name=items[0].name;$('#dialogTitle').textContent=`${name} · 통합 근거`;$('#dialogContent').innerHTML=items.map(item=>`<section><span class="tag ${item.type}">${item.tag}</span><h3>▣ 계산·분류 결과</h3><p><strong>${escapeHTML(item.title)}</strong><br>${escapeHTML(item.summary)}</p><h3>“ ” 연결된 학생 응답·계산 근거</h3>${item.evidence.map(e=>`<div class="evidence-box">${escapeHTML(e)}</div>`).join('')}<h3>? 가능한 해석</h3><div class="hypotheses">${item.hypotheses.map(h=>`<span>${escapeHTML(h)}</span>`).join('')}</div><h3>✓ 교사 확인 제안</h3><p>${escapeHTML(item.observation)}</p></section>`).join('<hr>')+`<div class="notice warning"><span>!</span><p>계산 결과와 가능성에 대한 가설입니다. 원문 검토와 실제 관찰·대화로 확인해 주세요.</p></div>`;$('#evidenceDialog').showModal()}
 $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{const view=btn.dataset.view;$$('.nav-item').forEach(x=>x.classList.toggle('active',x===btn));$$('.view').forEach(x=>x.classList.toggle('active',x.id===`view-${view}`));if(view==='settings')renderSettings();if(view==='analysis')ensureAiAnalysis();if(view==='student-detail'){renderStudentDetailSelector();renderStudentDetail()}$('#sidebar').classList.remove('open');window.scrollTo(0,0)}));
-function openStudentDetail(number){if(classSettings.students.some(student=>Number(student.number)===Number(number)&&IeumEnrollment.transferDate(student)))$('#includeTransferredStudents').checked=true;const nav=$('.nav-item[data-view="student-detail"]');if(!nav)return;nav.click();const select=$('#studentDetailSelect');select.value=String(number);setStudentDetailTab('summary');renderStudentDetail();select.focus()}
+function openStudentDetail(number) {
+  if (classSettings.students.some(student => Number(student.number) === Number(number) && IeumEnrollment.transferDate(student))) {
+    $('#includeTransferredStudents').checked = true;
+  }
+  const nav = $('.nav-item[data-view="student-detail"]');
+  if (!nav) return;
+  nav.click();
+  selectStudentDetail(number, 'summary');
+  $('#studentDetailSelect').focus();
+}
 document.addEventListener('click',event=>{const studentLink=event.target.closest('[data-open-student]');if(studentLink)openStudentDetail(Number(studentLink.dataset.openStudent))});
 function setAnalysisTab(tab){$$('[data-analysis-tab]').forEach(button=>{const active=button.dataset.analysisTab===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});$('#analysisAiPanel').hidden=tab!=='ai';$('#analysisPatternsPanel').hidden=tab!=='patterns';if(tab==='ai'||tab==='patterns')ensureAiAnalysis()}
 function setSettingsTab(tab){$$('[data-settings-tab]').forEach(button=>{const active=button.dataset.settingsTab===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1});$('#settingsBasicPanel').hidden=tab!=='basic';$('#settingsYearEndPanel').hidden=tab!=='year-end';$('#settingsPilotPanel').hidden=tab!=='pilot';$('#settingsGovernancePanel').hidden=tab!=='governance';if(tab==='pilot'){refreshPilotReadiness();refreshPilotMetrics()}if(tab==='governance')refreshGovernance()}
@@ -214,7 +294,7 @@ document.addEventListener('keydown',event=>{const current=event.target.closest?.
 document.addEventListener('click',async e=>{const evidenceGroup=e.target.closest('[data-evidence-group]');if(evidenceGroup)openEvidenceGroup(evidenceGroup.dataset.evidenceGroup);else{const evidence=e.target.closest('[data-evidence]');if(evidence)openEvidence(evidence.dataset.evidence)}const closer=e.target.closest('[data-close]');if(closer)closer.closest('dialog').close();const go=e.target.closest('[data-go]');if(go)$(`.nav-item[data-view="${go.dataset.go}"]`).click();const remove=e.target.closest('[data-remove-student]');if(remove){classSettings=collectSettingsForm();classSettings.students.splice(Number(remove.dataset.removeStudent),1);renderSettings();showToast('명단에서 삭제했습니다. 저장 버튼을 눌러 확정하세요.')}});
 $('.filter-tabs')?.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')return;$$('.filter-tabs button').forEach(b=>b.classList.toggle('active',b===e.target));renderAnalysis(e.target.dataset.filter)});
 document.addEventListener('click',event=>{const button=event.target.closest('[data-survey-admin-tab]');if(!button)return;const selectedTab=button.dataset.surveyAdminTab,panels={link:$('#surveyLinkPanel'),status:$('#surveyStatusPanel')};Object.entries(panels).forEach(([name,panel])=>{panel.hidden=name!==selectedTab});$$('[data-survey-admin-tab]').forEach(item=>{const selected=item===button;item.classList.toggle('active',selected);item.setAttribute('aria-selected',String(selected))})});
-document.addEventListener('click',event=>{const monthButton=event.target.closest('[data-select-survey-month]');if(!monthButton)return;selectedAnalysisMonth=monthButton.dataset.selectSurveyMonth;$('#analysisMonth').value=selectedAnalysisMonth;$('#surveyMonth').value=selectedAnalysisMonth;applyAnalysisMonth();showToast(`${monthLabel(selectedAnalysisMonth)} 현황을 선택했습니다.`)});
+document.addEventListener('click',event=>{const monthButton=event.target.closest('[data-select-survey-month]');if(!monthButton)return;if(selectAnalysisMonth(monthButton.dataset.selectSurveyMonth))showToast(`${monthLabel(selectedAnalysisMonth)} 현황을 선택했습니다.`)});
 $('#copyLink').addEventListener('click',event=>{const link=event.currentTarget.dataset.link;if(!link){showToast('먼저 참여 토큰 DB 마이그레이션을 적용해 주세요.');return}navigator.clipboard?.writeText(link);showToast('참여 링크를 복사했습니다.')});
 $('#downloadQr').addEventListener('click',()=>{const image=$('#participationQr img');if(!image){showToast('저장할 QR 코드가 없습니다.');return}const link=document.createElement('a');link.href=image.src;link.download=`우리반이음-${classSettings.grade}-${classSettings.classNumber}-참여QR.png`;link.click()});
 $('#rotateParticipationToken').addEventListener('click',async()=>{if(!await uiConfirm('설문 링크 재발급\n기존 링크 접근 차단 · 새 QR 및 링크 배포 필요'))return;try{const token=await teacherRpc('teacher_rotate_participation_token_auth',{p_class_id:classSettings.classId});classSettings.participationToken=token;renderParticipationLink();showToast('설문 링크 및 QR 재발급 완료')}catch(error){showToast(`설문 링크 재발급 실패: ${error.message}`)}});
@@ -252,12 +332,12 @@ $('#downloadYearEndReport').addEventListener('click',async()=>{const button=$('#
 ['#yearEndClassLabel','#yearEndConfirmation','#yearEndDeletionAccepted'].forEach(id=>$(id).addEventListener(id==='#yearEndDeletionAccepted'?'change':'input',updateYearEndDeleteButton));
 $('#deleteYearEndData').addEventListener('click',async()=>{if(!yearEndCleanupPreview||!await uiConfirm(`${yearEndCleanupPreview.schoolYear}학년도 ${yearEndCleanupPreview.classLabel} 학생 자료 영구 삭제\n복구 불가`))return;const button=$('#deleteYearEndData');button.disabled=true;const oldLabel=button.textContent;button.textContent='영구 삭제 중…';try{const result=await teacherRpc('teacher_delete_year_end_data_auth',{p_class_id:classSettings.classId,p_fingerprint:yearEndCleanupPreview.fingerprint,p_class_label:$('#yearEndClassLabel').value.trim(),p_confirmation:$('#yearEndConfirmation').value.trim()});clearSensitiveState();setSettingsTab('year-end');$('#yearEndResult').innerHTML=`<div class="year-end-complete">${escapeHTML(result.schoolYear)}학년도 ${escapeHTML(result.classLabel)} 자료 정리를 완료했습니다.</div>`;$('#yearEndCleanupStatus').textContent='자료 삭제 완료';showToast('전년도 학급 자료를 삭제하고 개인정보 없는 처리 기록만 남겼습니다.')}catch(error){showToast(`전년도 자료 삭제 실패: ${error.message}`);updateYearEndDeleteButton()}finally{button.textContent=oldLabel}});
 $('#reportForm').addEventListener('submit',async event=>{event.preventDefault();const submit=$('#reportScope').value==='student'?$('#printStudentReport'):$('#printReport');submit.disabled=true;const oldLabel=submit.textContent;submit.textContent='PDF 만드는 중…';try{const scope=$('#reportScope').value,includeNames=$('#reportIncludeNames').checked,includeOriginals=$('#reportIncludeOriginals').checked,selectedNumber=Number($('#reportStudent').value);if(scope==='class'&&currentAiAnalysis?.meta?.month!==selectedAnalysisMonth){aiAutoKey='';await ensureAiAnalysis()}if(scope==='class'&&(!currentAiAnalysis||currentAiAnalysis?.meta?.month!==selectedAnalysisMonth))throw new Error('현재 월의 AI 분석 결과를 먼저 불러와 주세요.');const rows=scope==='student'?allResponses.filter(item=>Number(item.student_number)===selectedNumber):allResponses,student=classSettings.students.find(item=>Number(item.number)===selectedNumber),trend=classMonthlyTrend(rows),title=scope==='student'?`${includeNames?student?.name||'학생':'선택 학생'} 보고서`:`${classSettings.grade}학년 ${classSettings.classNumber}반 학급 보고서`,summary=trend.map(row=>`<tr><td>${escapeHTML(monthLabel(row.month))}</td><td>${row.participants}명</td><td>${row.rate}%</td><td>${row.average?.toFixed(1)||'—'}</td></tr>`).join(''),originals=includeOriginals?rows.filter(item=>!item.analysis_excluded).map(item=>{const payload=payloadOf(item),name=includeNames?item.student_name:`학생-${item.student_number}`;return`<article><h3>${escapeHTML(name)} · ${escapeHTML(monthLabel(monthOf(item)))}</h3><p><b>학교생활 고민</b><br>${escapeHTML(payload.studentState?.worryDetail||'작성 내용 없음')}</p><p><b>도움 요청</b> ${escapeHTML(payload.helpNow||'없음')}</p></article>`}).join(''):'';const coachingSection=scope==='student'?await loadStudentCoachingPdfSection(student,{includeNames,includeOriginals,compact:true}):'';const content=scope==='student'?buildStudentOverviewPdfReport(student,{includeNames,includeOriginals},coachingSection):`<header><h1>${escapeHTML(title)}</h1><p>${scope==='student'?'전체 제출':escapeHTML(monthLabel(selectedAnalysisMonth))} 기준 · ${new Date().toLocaleDateString('ko-KR')}</p></header><p class="pdf-warning">이 보고서는 학생 지원을 위한 참고 자료이며 진단이나 사실 판정이 아닙니다.</p>${buildAiReportSection(scope,selectedNumber,includeNames)}<h2>월별 실제 응답 추세</h2><table><thead><tr><th>월</th><th>참여</th><th>참여율</th><th>자기평가 평균</th></tr></thead><tbody>${summary||'<tr><td colspan="4">아직 월별 응답이 없습니다.</td></tr>'}</tbody></table>${includeOriginals?`<h2>선택된 설문 원문</h2>${originals}`:''}`;await downloadPdfDocument(content,`${title}-${selectedAnalysisMonth}`);if($('#reportDialog').open)$('#reportDialog').close();showToast(scope==='student'?'학생 기록 PDF를 다운로드했습니다.':'학급 AI 분석 PDF를 다운로드했습니다.')}catch(error){showToast(`PDF 저장 실패: ${error.message}`)}finally{submit.disabled=false;submit.textContent=oldLabel}});
-$('#analysisMonth').addEventListener('change',event=>{selectedAnalysisMonth=event.target.value;applyAnalysisMonth()});
-$('#surveyMonth').addEventListener('change',event=>{selectedAnalysisMonth=event.target.value;$('#analysisMonth').value=selectedAnalysisMonth;applyAnalysisMonth()});
-$('#studentDetailSelect').addEventListener('change',event=>{const printButton=$('#printStudentReport');if(printButton)printButton.disabled=!event.target.value;renderStudentDetail()});
+$('#analysisMonth').addEventListener('change',event=>selectAnalysisMonth(event.target.value));
+$('#surveyMonth').addEventListener('change',event=>selectAnalysisMonth(event.target.value));
+$('#studentDetailSelect').addEventListener('change',event=>selectStudentDetail(event.target.value));
 $('#previousStudent').addEventListener('click',()=>moveStudentDetail(-1));
 $('#nextStudent').addEventListener('click',()=>moveStudentDetail(1));
-function clearSensitiveState(){clearStudentCoachingState();clearEnrollmentDialog();$('#includeTransferredStudents').checked=false;allResponses=[];signals=[];signalReviews=[];studentReviewCycles=[];currentAiAnalysis=null;currentAiRun=null;aiAutoKey='';classSettings=loadClassSettings();persistClassSettings();$('#aiAnalysisMeta').textContent='분석 준비 중';$('#aiAnalysisContent').innerHTML='<p class="muted">응답을 불러오면 AI 보조 분석 결과가 자동으로 표시됩니다.</p>';$('#auditLogList').innerHTML='<p class="muted">아직 감사 로그가 없습니다.</p>';$('#pilotChecklist').innerHTML='<p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p>';$('#retentionMonths').value='12';$('#endOfYearAction').value='review';$('.copy-row code').textContent='설문 링크 준비 중';$('#participationQr').replaceChildren();renderClassIdentity();renderSettings();renderStudents();renderStudentDetailSelector();renderStudentDetail();applyAnalysisMonth()}
+function clearSensitiveState(){resetViewSelection();clearStudentCoachingState();clearEnrollmentDialog();$('#includeTransferredStudents').checked=false;allResponses=[];signals=[];signalReviews=[];studentReviewCycles=[];currentAiAnalysis=null;currentAiRun=null;aiAutoKey='';classSettings=loadClassSettings();persistClassSettings();$('#aiAnalysisMeta').textContent='분석 준비 중';$('#aiAnalysisContent').innerHTML='<p class="muted">응답을 불러오면 AI 보조 분석 결과가 자동으로 표시됩니다.</p>';$('#auditLogList').innerHTML='<p class="muted">아직 감사 로그가 없습니다.</p>';$('#pilotChecklist').innerHTML='<p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p>';$('#retentionMonths').value='12';$('#endOfYearAction').value='review';$('.copy-row code').textContent='설문 링크 준비 중';$('#participationQr').replaceChildren();renderClassIdentity();renderSettings();renderStudents();renderStudentDetailSelector();renderStudentDetail();applyAnalysisMonth()}
 const clearSensitiveStateBase=clearSensitiveState;clearSensitiveState=()=>{clearSensitiveStateBase();$('#pilotMetrics').innerHTML='<p class="muted">학급 자료를 불러오면 운영 지표를 계산합니다.</p>';$('#classObservationPatterns').innerHTML='<p class="muted">AI 분석 결과를 불러오면 학급 단위 관찰 패턴이 표시됩니다.</p>'};
 function renderAuthState(){const session=getTeacherSession(),email=session?.user?.email||'';$('#teacherApp').hidden=!session;$('#authGate').hidden=!!session;$('#authStatus').textContent=email||'로그인 필요';$('#authButton').textContent=session?'로그아웃':'교사 로그인'}
 async function loadTeacherContext(){const classes=await teacherRpc('teacher_get_my_classes');if(!classes.length){clearSensitiveState();renderAuthState();$('.nav-item[data-view="settings"]').click();showToast('학급 정보를 입력하고 새 학급을 만들어 주세요. 기존 데이터가 있을 때만 이전 기능을 사용합니다.');return}const classId=classes[0].class_id;if(String(classId).startsWith('demo-')){try{await teacherRpc('teacher_roll_demo_months_forward_auth',{p_class_id:classId})}catch(error){console.warn('데모 월별 자료 자동 최신화를 건너뜁니다.',error)}}const context=await teacherRpc('teacher_get_class_context_auth',{p_class_id:classId});classSettings={...defaultSettings,...context,students:(context?.students||[]).map(student=>({number:Number(student.number),name:student.name,studentId:student.student_id||student.studentId||null,transferredOn:student.transferredOn||student.transferred_on||null}))};renderClassIdentity();renderSettings();renderParticipationLink();renderStudentDetailSelector();await refreshResponses(false);await refreshPilotReadiness()}
@@ -286,7 +366,7 @@ const steps=[`<div class="survey-question"><p class="eyebrow">나의 학교생�
 function renderStep(){ $('#surveyStep').innerHTML=steps[step];$('#stepLabel').textContent=`${step+1} / ${steps.length}`;$('#surveyProgress').style.width=`${(step+1)/steps.length*100}%`;$('#prevStep').style.visibility=step?'visible':'hidden';$('#nextStep').textContent=step===steps.length-1?'제출하기':'다음'}
 $('#openStudentSurvey').addEventListener('click',event=>{event.currentTarget.href=$('#copyLink').dataset.link});
 $('#prevStep').addEventListener('click',()=>{if(step){step--;renderStep()}});$('#nextStep').addEventListener('click',()=>{if(step<steps.length-1){step++;renderStep()}else{$('#studentDialog').close();showToast('미리보기 설문이 제출되었습니다.')}});
-selectedAnalysisMonth=new Date().toISOString().slice(0,7);persistClassSettings();syncSignalNames();renderClassIdentity();updateMonthSelector();renderAnalysisStatus();renderRelationshipsV2();renderRelationshipActions();renderHomeSignals();renderClassTrend();renderAnalysis();renderStudents();renderSettings();renderParticipationLink();renderResponses([]);normalizeParticipationLabel();renderStudentDetailSelector();renderStudentDetail();handleAuthCallbackNotice();renderAuthState();if(getTeacherSession())bootstrapTeacherApp();
+selectAnalysisMonth(new Date().toISOString().slice(0,7),false);persistClassSettings();syncSignalNames();renderClassIdentity();updateMonthSelector();renderAnalysisStatus();renderRelationshipsV2();renderRelationshipActions();renderHomeSignals();renderClassTrend();renderAnalysis();renderStudents();renderSettings();renderParticipationLink();renderResponses([]);normalizeParticipationLabel();renderStudentDetailSelector();renderStudentDetail();handleAuthCallbackNotice();renderAuthState();if(getTeacherSession())bootstrapTeacherApp();
 
 function relationshipMonthSnapshot(month){const rows=allResponses.filter(item=>monthOf(item)===month),cumulative=IeumAnalysisCore.cumulativeScores(rows),students=classSettings.students.map(student=>Number(student.number)),mutual=[];students.forEach((a,index)=>students.slice(index+1).forEach(b=>{const ab=cumulative.scores.get(`${a}:${b}`),ba=cumulative.scores.get(`${b}:${a}`);if(ab>=4&&ba>=4)mutual.push(`${a}:${b}`)}));return{month,participants:cumulative.participants.size,relationResponders:cumulative.relationResponders.size,mutual}}
 function cumulativeCoverage(){const months=[...new Set(allResponses.map(monthOf).filter(month=>/^\d{4}-\d{2}$/.test(month)))];let submitted=0,relationSubmitted=0,opportunities=0;months.forEach(month=>{const latest=latestByStudent(allResponses,month),enrollment=IeumEnrollment.summary(classSettings.students,latest.keys(),month);submitted+=enrollment.submitted.length;opportunities+=enrollment.total;relationSubmitted+=enrollment.submitted.filter(student=>(payloadOf(latest.get(Number(student.number))).relationships||[]).length).length});return{months,participation:opportunities?Math.round(submitted/opportunities*100):0,relations:opportunities?Math.round(relationSubmitted/opportunities*100):0}}

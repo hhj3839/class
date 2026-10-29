@@ -17,8 +17,7 @@ test('우리 반 현황은 바로 확인·살펴볼 학생 이름 영역을 제�
 test('현황의 학생 이름을 누르면 학생별 살펴보기 한눈에 보기로 이동한다',()=>{
   assert.match(app,/function openStudentDetail\(number\)/);
   assert.match(app,/data-view="student-detail"/);
-  assert.match(app,/select\.value=String\(number\)/);
-  assert.match(app,/setStudentDetailTab\('summary'\)/);
+  assert.match(app,/selectStudentDetail\(number, 'summary'\)/);
 });
 
 test('학생 바로가기 버튼은 터치와 키보드 포커스를 구분한다',()=>{
