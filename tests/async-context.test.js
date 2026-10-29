@@ -32,6 +32,8 @@ function harness() {
     loadClassSettings: () => ({classId: '', students: []}),
   });
   vm.runInContext(source.slice(source.indexOf('let teacherContextEpoch'), source.indexOf('const defaultSettings')), context);
+  context.IeumAiAnalysisController = require('../ai-analysis-controller.js');
+  vm.runInContext(source.slice(source.indexOf('const aiAnalysisController ='), source.indexOf('const studentResponseData =')), context);
   for (const name of ['runAiAnalysis', 'ensureAiAnalysis', 'runRelationshipAiAnalysis', 'loadTeacherContext', 'clearSensitiveState']) {
     vm.runInContext(source.split(/\r?\n/).find(line => line.startsWith(`async function ${name}(`) || line.startsWith(`function ${name}(`)), context);
   }
