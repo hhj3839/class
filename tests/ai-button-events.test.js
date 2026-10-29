@@ -7,7 +7,7 @@ for(const id of ['runAiAnalysis','runPatternsAi'])test(`${id}: actual click hand
   context.captureAnalysisRequest=()=>()=>true;
   context.IeumAiAnalysisController=require('../ai-analysis-controller.js');
   Object.assign(context,{relationshipAnalysisMonth:()=>context.selectedAnalysisMonth,monthOf:()=>'',monthLabel:value=>value,escapeHTML:value=>value,renderRelationshipAiAnalysis:()=>{}});
-  vm.runInContext(source.slice(source.indexOf('const aiAnalysisController ='),source.indexOf('const studentResponseData =')),context);
+  vm.runInContext(source.slice(source.indexOf('const aiAnalysisController ='),source.indexOf('const teacherContextLoader =')),context);
   vm.runInContext(source.split(/\r?\n/).find(line=>line.startsWith('async function runAiAnalysis(')),context);
   vm.runInContext(source.split(/\r?\n/).find(line=>line.startsWith(`$('#${id}').addEventListener`)),context);
   await buttons.get('#'+id).click({type:'click',isTrusted:true});
