@@ -50,5 +50,13 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   expect(pair.gap).toBeGreaterThanOrEqual(0);expect(pair.offset).toBeLessThan(3);expect(pair.right).toBeLessThanOrEqual(pair.width);
   await page.locator('#studentTabResponses').click();
   await expect(page.locator('#studentPanelResponses')).toBeVisible();
+  await page.evaluate(() => openStudentDetail(1));
+  await expect(page.locator('#studentDetailSelect')).toHaveValue('1');
+  await expect(page.locator('#studentPanelSummary')).toBeVisible();
+  await expect(page.locator('#printStudentReport')).toBeEnabled();
+  await page.locator('#authButton').click();
+  await expect(page.locator('#teacherApp')).toBeHidden();
+  await expect(page.locator('#studentDetailSelect')).toHaveValue('');
+  await expect(page.locator('#printStudentReport')).toBeDisabled();
   expect(errors).toEqual([]);
 });
