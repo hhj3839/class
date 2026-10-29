@@ -5,7 +5,7 @@ const {create} = require('../survey-management.js');
 const enrollment = require('../enrollment-core.js');
 
 function setup() {
-  const nodes = new Map(), events = [];
+  const nodes = new Map(), events = [], notices = [];
   const document = {
     querySelector(selector) {
       if (!nodes.has(selector)) nodes.set(selector, {
@@ -30,9 +30,9 @@ function setup() {
     escapeHTML: value => String(value).replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
     enrollment, qrcode: () => ({addData() {}, make() {}, createImgTag: () => '<img alt="QR">'}),
     selectAnalysisMonth: month => {state.month = month; return true;},
-    refreshResponses() {}, showToast() {}
+    refreshResponses() {}, showToast(message) {notices.push(message);}
   });
-  return {view, state, nodes, events};
+  return {view, state, nodes, events, document, notices};
 }
 
 test('설문 모듈은 분석 제외·중복 제출을 학생 단위로 집계하고 이름을 이스케이프한다', () => {
@@ -80,4 +80,38 @@ test('설문 모듈은 앱보다 먼저 로드되며 앱 상태는 명시적 접
   const app = fs.readFileSync('app.js', 'utf8');
   assert.match(app, /IeumSurveyManagement\.create/);
   assert.doesNotMatch(app, /function renderResponses\(responses\)\{const month=/);
+});
+
+test('QR 저장은 원본 크기를 유지해 PNG로 인코딩한다', () => {
+  const h = setup(); h.view.bindEvents();
+  h.state.settings = {...h.state.settings, grade: 3, classNumber: 1};
+  const image = {complete: true, naturalWidth: 241, naturalHeight: 241, src: 'data:image/gif;base64,fixture'};
+  h.nodes.set('#participationQr img', image);
+  const drawing = [], canvas = {getContext: () => ({drawImage: (...args) => drawing.push(args)}),
+    toDataURL: type => {assert.equal(type, 'image/png'); return 'data:image/png;base64,fixture';}};
+  let clicks = 0; const link = {click() {clicks++;}};
+  h.document.createElement = tag => tag === 'canvas' ? canvas : link;
+  h.events.find(event => event.selector === '#downloadQr').callback();
+  assert.equal(canvas.width, 241); assert.equal(canvas.height, 241);
+  assert.deepEqual(drawing, [[image, 0, 0]]);
+  assert.equal(link.href, 'data:image/png;base64,fixture');
+  assert.equal(link.download, '우리반이음-3-1-참여QR.png');
+  assert.equal(clicks, 1);
+});
+
+test('QR 미준비와 미존재는 다운로드 없이 안내한다', () => {
+  const h = setup(); h.view.bindEvents();
+  const click = h.events.find(event => event.selector === '#downloadQr').callback;
+  h.nodes.set('#participationQr img', {complete: false, naturalWidth: 0}); click();
+  assert.match(h.notices.at(-1), /QR 준비 중/);
+  h.nodes.set('#participationQr img', null); click();
+  assert.match(h.notices.at(-1), /QR 코드가 없습니다/);
+});
+
+test('PNG 변환 실패는 잘못된 파일을 저장하지 않고 안내한다', () => {
+  const h = setup(); h.view.bindEvents();
+  h.nodes.set('#participationQr img', {complete: true, naturalWidth: 241, naturalHeight: 241});
+  h.document.createElement = () => ({getContext: () => null});
+  h.events.find(event => event.selector === '#downloadQr').callback();
+  assert.match(h.notices.at(-1), /QR 저장 실패/);
 });
