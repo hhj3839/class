@@ -3,6 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 
 const app=fs.readFileSync('app.js','utf8');
+const controller=fs.readFileSync('ai-analysis-controller.js','utf8');
 const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260722170000_relationship_ai_analysis.sql','utf8');
 
@@ -68,15 +69,15 @@ test('관계 화면은 교사가 요청할 때 저장 결과 또는 새 AI 관�
   assert.match(app,/id="runRelationshipAi">저장 결과 조회/);
   assert.match(app,/id="rerunRelationshipAi">AI 새 분석/);
   assert.match(app,/마지막 분석 \$\{formatAnalysisTimestamp\(meta\.generatedAt\)\}/);
-  assert.match(app,/analysisType:'relationship'/);
-  assert.match(app,/month:relationshipAnalysisMonth\(\)/);
+  assert.match(controller,/analysisType:\s*'relationship'/);
+  assert.match(controller,/month:\s*relationshipAnalysisMonth\(\)/);
   assert.match(app,/function renderRelationshipAiAnalysis/);
   assert.match(app,/교실에서 살펴볼 점/);
   assert.match(app,/<summary>분석 근거<\/summary>/);
   assert.match(app,/학급 코칭/);
   assert.doesNotMatch(app,/<strong>학급 운영 방법<\/strong>/);
   assert.match(app,/relationship-insight-heading/);
-  assert.match(app,/안전하게 분석 중…/);
+  assert.match(controller,/안전하게 분석 중…/);
   assert.match(app,/replace\(\/학생\\s\+학생\/g,'학생'\)/);
   assert.match(app,/function relationshipAnalysisHasFormerStudents/);
   assert.match(app,/이전 명단 학생이 포함된 저장 결과입니다/);
