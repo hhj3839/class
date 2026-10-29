@@ -6,6 +6,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const html=read('index.html');
 const app=read('app.js');
+const survey=read('survey-management.js');
 const studentRecordCss=read('student-record.css');
 
 test('설문 관리는 학생 설문 링크와 제출 현황만 탭으로 구분한다',()=>{
@@ -20,7 +21,8 @@ test('설문 관리는 학생 설문 링크와 제출 현황만 탭으로 구분
   assert.match(html,/학생 설문 접속/);
   assert.match(html,/설문 링크 재발급/);
   assert.match(html,/제출 현황 새로고침/);
-  assert.match(app,/panels=\{link:\$\('#surveyLinkPanel'\),status:\$\('#surveyStatusPanel'\)\}/);
+  assert.match(survey,/link:\s*\$\('#surveyLinkPanel'\)/);
+  assert.match(survey,/status:\s*\$\('#surveyStatusPanel'\)/);
 });
 
 test('학급 분석은 전체 현황 없이 응답 흐름·AI 학생 지원·즉시 PDF를 제공한다',()=>{
@@ -104,14 +106,14 @@ test('분석은 월 선택을 탭 옆에 두고 설정은 기본 설정과 학�
 
 test('우리 반 응답 흐름은 기본 탭으로 두고 지난 제출 현황은 기본 접힘으로 표시한다',()=>{
   const aiRender=app.slice(app.indexOf('function renderAiAnalysis'),app.indexOf('async function runAiAnalysis'));
-  const monthlyRender=app.slice(app.indexOf('function renderMonthlySurveyAccordion'),app.indexOf('function applyAnalysisMonth'));
+  const monthlyRender=survey.slice(survey.indexOf('function renderMonthlySurveyAccordion'),survey.indexOf('function normalizeParticipationLabel'));
   assert.match(aiRender,/renderClassObservationPatterns\(patterns\)/);
   assert.doesNotMatch(aiRender,/학급 단위 관찰 패턴 보기/);
   assert.match(app,/function renderClassObservationPatterns\(/);
   assert.doesNotMatch(app.slice(app.indexOf('function renderClassObservationPatterns'),app.indexOf('function renderAiAnalysis')),/<details/);
   assert.match(html,/우리 반 응답 흐름/);
   assert.match(monthlyRender,/지난 설문 제출 현황/);
-  assert.match(monthlyRender,/return`<details><summary>/);
+  assert.match(monthlyRender,/return\s*`<details><summary>/);
   assert.doesNotMatch(monthlyRender,/<details \$\{[^}]*open/);
 });
 
