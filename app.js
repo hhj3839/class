@@ -3,7 +3,6 @@ let allResponses=[];
 let selectedAnalysisMonth='';
 let teacherContextEpoch = 0;
 let responseRefreshVersion = 0;
-let teacherLoadVersion = 0;
 let analysisSelectionVersion = 0;
 const aiRequestVersions = {class: 0, relationship: 0};
 
@@ -84,6 +83,24 @@ const aiAnalysisController = IeumAiAnalysisController.create({
   renderAiAnalysis: result => renderAiAnalysis(result),
   renderRelationshipAiAnalysis: result => renderRelationshipAiAnalysis(result),
   relationshipAnalysisMonth, monthOf, monthLabel, escapeHTML,
+});
+const teacherContextLoader = IeumTeacherContextLoader.create({
+  getTeacherSession: () => getTeacherSession(),
+  captureTeacherContext,
+  teacherRpc: (...args) => teacherRpc(...args),
+  getDefaults: () => defaultSettings,
+  setSettings: value => { classSettings = value; },
+  clearSensitiveState, renderAuthState, showToast,
+  openSettings: () => $('.nav-item[data-view="settings"]').click(),
+  renderContext: () => {
+    renderClassIdentity();
+    renderSettings();
+    renderParticipationLink();
+    renderStudentDetailSelector();
+  },
+  refreshResponses: (...args) => refreshResponses(...args),
+  refreshPilotReadiness: () => refreshPilotReadiness(),
+  warn: (...args) => console.warn(...args),
 });
 const studentResponseData = IeumStudentResponseData.create({
   getSettings: () => classSettings,
@@ -378,8 +395,8 @@ $('#nextStudent').addEventListener('click',()=>moveStudentDetail(1));
 function clearSensitiveState(){resetViewSelection();clearStudentCoachingState();clearEnrollmentDialog();$('#includeTransferredStudents').checked=false;allResponses=[];signals=[];signalReviews=[];studentReviewCycles=[];currentRelationshipAiAnalysis=null;const relationContent=$('#relationshipAiContent');if(relationContent)relationContent.replaceChildren();const relationMeta=$('#relationshipAiMeta');if(relationMeta)relationMeta.textContent='마지막 분석 확인 전';currentAiAnalysis=null;currentAiRun=null;aiAutoKey='';classSettings=loadClassSettings();persistClassSettings();$('#aiAnalysisMeta').textContent='분석 준비 중';$('#aiAnalysisContent').innerHTML='<p class="muted">응답을 불러오면 AI 보조 분석 결과가 자동으로 표시됩니다.</p>';$('#auditLogList').innerHTML='<p class="muted">아직 감사 로그가 없습니다.</p>';$('#pilotChecklist').innerHTML='<p class="muted">학급 자료를 불러오면 준비 상태를 확인합니다.</p>';$('#retentionMonths').value='12';$('#endOfYearAction').value='review';$('.copy-row code').textContent='설문 링크 준비 중';$('#participationQr').replaceChildren();renderClassIdentity();renderSettings();renderStudents();renderStudentDetailSelector();renderStudentDetail();applyAnalysisMonth()}
 const clearSensitiveStateBase=clearSensitiveState;clearSensitiveState=()=>{clearSensitiveStateBase();$('#pilotMetrics').innerHTML='<p class="muted">학급 자료를 불러오면 운영 지표를 계산합니다.</p>';$('#classObservationPatterns').innerHTML='<p class="muted">AI 분석 결과를 불러오면 학급 단위 관찰 패턴이 표시됩니다.</p>'};
 function renderAuthState(){const session=getTeacherSession(),email=session?.user?.email||'';$('#teacherApp').hidden=!session;$('#authGate').hidden=!!session;$('#authStatus').textContent=email||'로그인 필요';$('#authButton').textContent=session?'로그아웃':'교사 로그인'}
-async function loadTeacherContext(){if(!getTeacherSession())return;const valid=captureTeacherContext(),version=++teacherLoadVersion,isCurrent=()=>valid()&&version===teacherLoadVersion;const classes=await teacherRpc('teacher_get_my_classes');if(!isCurrent())return;if(!classes.length){clearSensitiveState();renderAuthState();$('.nav-item[data-view="settings"]').click();showToast('학급 정보를 입력하고 새 학급을 만들어 주세요. 기존 데이터가 있을 때만 이전 기능을 사용합니다.');return}const classId=classes[0].class_id;if(String(classId).startsWith('demo-')){try{await teacherRpc('teacher_roll_demo_months_forward_auth',{p_class_id:classId})}catch(error){if(!isCurrent())return;console.warn('데모 월별 자료 자동 최신화를 건너뜁니다.',error)}}if(!isCurrent())return;const context=await teacherRpc('teacher_get_class_context_auth',{p_class_id:classId});if(!isCurrent())return;classSettings={...defaultSettings,...context,students:(context?.students||[]).map(student=>({number:Number(student.number),name:student.name,studentId:student.student_id||student.studentId||null,transferredOn:student.transferredOn||student.transferred_on||null}))};const loadedContext=captureTeacherContext();renderClassIdentity();renderSettings();renderParticipationLink();renderStudentDetailSelector();await refreshResponses(false);if(loadedContext()&&version===teacherLoadVersion)await refreshPilotReadiness()}
-async function bootstrapTeacherApp(){renderAuthState();try{await loadTeacherContext()}catch(error){if(!getTeacherSession()){clearSensitiveState();renderAuthState()}else showToast(`학급 정보를 불러오지 못했습니다: ${error.message}`)}}
+async function loadTeacherContext(){return teacherContextLoader.loadTeacherContext();}
+async function bootstrapTeacherApp(){return teacherContextLoader.bootstrapTeacherApp();}
 function showAuthError(message=''){const error=$('#authError');error.textContent=message;error.hidden=!message}
 function setAuthMode(mode){authMode=mode;showAuthError();$$('[data-auth-mode]').forEach(button=>button.classList.toggle('active',button.dataset.authMode===mode));const signup=mode==='signup',requestReset=mode==='request-reset',recovery=mode==='recovery';$('#authDialogTitle').textContent=signup?'교사 회원가입':requestReset?'비밀번호 재설정 메일 받기':recovery?'새 비밀번호 설정':'교사 로그인';$('#authSubmitButton').textContent=signup?'회원가입':requestReset?'재설정 메일 보내기':recovery?'비밀번호 변경':'로그인';$('#authEmailLabel').hidden=recovery;$('#authEmail').required=!recovery;$('#authPasswordLabel').hidden=requestReset;$('#authPassword').required=!requestReset;$('#authPasswordConfirmLabel').hidden=!(signup||recovery);$('#authPasswordConfirm').required=signup||recovery;$('#authPassword').autocomplete=signup||recovery?'new-password':'current-password';$('#authRecoveryButton').hidden=mode!=='login';$('#authHelp').textContent=signup?'8자 이상의 비밀번호를 사용하세요. 이메일 확인이 설정된 경우 받은 편지함을 확인해야 합니다.':requestReset?'가입한 이메일로 비밀번호 재설정 링크를 보내드립니다.':recovery?'새 비밀번호는 8자 이상으로 설정해 주세요.':'브라우저 창 종료 시 로그인 정보 삭제'}
 function openAuthDialog(mode='login'){setAuthMode(mode);$('#authDialog').showModal()}

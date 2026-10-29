@@ -34,7 +34,7 @@ test('계정 전환과 학급 없는 계정 진입 시 이전 교사의 민감 �
   assert.match(app,/\$\('#aiAnalysisContent'\)\.innerHTML=/);
   assert.match(app,/\$\('#auditLogList'\)\.innerHTML=/);
   assert.match(app,/\$\('#participationQr'\)\.replaceChildren\(\)/);
-  assert.match(app,/if\(!classes\.length\)\{clearSensitiveState\(\)/);
+  assert.match(read('teacher-context-loader.js'),/if\s*\(!classes\.length\)\s*\{\s*clearSensitiveState\(\)/);
 });
 
 test('소스 기본값에 실제 교사 이름과 운영 학급 ID가 없다',()=>{

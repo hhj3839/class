@@ -49,8 +49,9 @@ test('데모 안내는 생성, 확인, 삭제와 실제 API 사용 주의를 설
 });
 
 test('실험실 계정은 로그인할 때 데모 자료를 현재 달까지 자동 이동한다',()=>{
-  assert.match(app,/startsWith\('demo-'\)/);
-  assert.match(app,/teacher_roll_demo_months_forward_auth/);
+  const loader=fs.readFileSync('teacher-context-loader.js','utf8');
+  assert.match(loader,/startsWith\('demo-'\)/);
+  assert.match(loader,/teacher_roll_demo_months_forward_auth/);
   assert.match(rolling,/p_class_id not like 'demo-%'/);
   assert.match(rolling,/teacher_id=auth\.uid\(\)/);
   assert.match(rolling,/max\(r\.survey_month\)/);
