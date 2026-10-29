@@ -3,7 +3,9 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 
 const detail=fs.readFileSync('student-detail-view.js','utf8');
-const app=fs.readFileSync('app.js','utf8')+'\n'+detail+'\n'+fs.readFileSync('pdf-download.js','utf8');
+const studentData=fs.readFileSync('student-response-data.js','utf8');
+const reports=fs.readFileSync('report-content.js','utf8');
+const app=fs.readFileSync('app.js','utf8')+'\n'+detail+'\n'+fs.readFileSync('pdf-download.js','utf8')+'\n'+studentData+'\n'+reports;
 const html=fs.readFileSync('index.html','utf8');
 const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260720170000_ai_reports_backup.sql','utf8');
@@ -110,7 +112,7 @@ test('AI 분석은 전월 변화와 유형별 근거를 분리한다',()=>{
 
 test('AI 화면과 PDF는 같은 담임용 용어를 직접 사용한다',()=>{
   const visibleAi=app.slice(app.indexOf('function renderAiAnalysis'),app.indexOf('async function runAiAnalysis'));
-  const pdfAi=app.slice(app.indexOf('function buildAiReportSection'),app.indexOf('async function downloadPdfDocument'));
+  const pdfAi=reports.slice(reports.indexOf('function buildAiReportSection'),reports.indexOf('function yearEndReportContent'));
   for(const source of [visibleAi,pdfAi]){
     assert.match(source,/먼저 살펴볼 학생/);
     assert.match(source,/교실에서 살펴볼 점/);
@@ -188,7 +190,7 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(app,/친구 관계 점수 평균 변화/);
   assert.match(app,/긍정적인 친구 언급/);
   assert.match(app,/고마운 학생이나 나아진 학생을 판정한 수치가 아니라/);
-  const insight=app.slice(app.indexOf('function studentResponseInsights'),app.indexOf('function renderStudentDetail'));
+  const insight=studentData.slice(studentData.indexOf('function studentResponseInsights'));
   assert.doesNotMatch(insight,/자기평가 응답|자기평가 점수 변화|학생이 직접 남긴 내용|직접 작성한 내용의 변화/);
   assert.doesNotMatch(app,/응답 요약과 눈에 띄는 변화|응답에서 알 수 있는 점/);
   assert.doesNotMatch(app,/학생별 간단한 자동 분석/);
@@ -209,8 +211,8 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
 });
 
 test('학생 변화 문장은 좋아짐을 단정하지 않고 실제 응답 차이만 표시한다',()=>{
-  const insight=app.slice(app.indexOf('function studentResponseInsights'),app.indexOf('function renderStudentDetail(){'));
-  assert.match(insight,/점 높게':'점 낮게'|점 \$\{\(incoming\.average-previousIncoming\.average\)>0\?'높게':'낮게'\} 응답했습니다/);
+  const insight=studentData.slice(studentData.indexOf('function studentResponseInsights'));
+  assert.match(insight,/'높게'\s*:\s*'낮게'/);
   assert.match(insight,/이번 응답에서 눈에 띄는 변화가 없습니다/);
   assert.doesNotMatch(insight,/좋아졌습니다|문제가 해결되었습니다/);
 });
@@ -229,8 +231,8 @@ test('학생을 바꿔도 현재 탭을 유지하고 응답이 없어도 지원 
 
 test('긍정적인 친구 언급은 긴 학생 이름에 포함된 짧은 이름을 제외한다',()=>{
   assert.match(app,/function mentionsStudentName\(text,student\)/);
-  assert.match(app,/String\(other\.name\)\.includes\(name\)&&value\.includes\(other\.name\)/);
-  assert.match(app,/mentionsStudentName\(text,student\)/);
+  assert.match(studentData,/String\(other\.name\)\.includes\(name\)\s*&&\s*value\.includes\(other\.name\)/);
+  assert.match(studentData,/mentionsStudentName\(text,\s*student\)/);
 });
 
 test('새 긍정 언급은 학생 번호 선택을 우선 사용하고 이전 서술형 응답도 지원한다',()=>{
@@ -241,7 +243,7 @@ test('새 긍정 언급은 학생 번호 선택을 우선 사용하고 이전 �
   assert.match(studentHtml,/id="growthStudents"/);
   assert.match(student,/data-positive-kind/);
   assert.match(student,/studentNumbers/);
-  assert.match(app,/selected\.length\?selected\.includes\(Number\(student\.number\)\):mentionsStudentName/);
+  assert.match(studentData,/selected\.length\s*\?\s*selected\.includes\(Number\(student\.number\)\)\s*:\s*mentionsStudentName/);
 });
 
 test('월별 응답 접힘 제목은 제출일·관계 점수·확인 필요 여부를 보여준다',()=>{
