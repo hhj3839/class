@@ -1,10 +1,10 @@
 # 우리반 이음
 
-최신 구현 범위와 검증 결과는 [2026-09-09 개발 상태](DEVELOPMENT_STATUS_20260909.md), AI 이름 처리의 한계는 [2026-09-08 개발 점검](DEVELOPMENT_STATUS_20260908.md)에 정리했습니다. 아래 DB 적용 순서는 초기 구축 이력이며 최신 설치에서는 전체 migrations를 순서대로 확인해야 합니다.
+최신 구현 범위와 검증 결과는 [2026-10-29 개발 상태](DEVELOPMENT_STATUS_20261029.md), AI 이름 처리의 과거 점검은 [2026-09-08 개발 점검](DEVELOPMENT_STATUS_20260908.md)에 정리했습니다. 아래 DB 적용 순서는 초기 구축 이력이며 최신 설치에서는 전체 migrations를 순서대로 확인해야 합니다. GitHub 배포 성공은 운영 DB 마이그레이션 적용의 증거가 아닙니다.
 
-현재 제품 요구사항은 [PRD v1.2](PRD_v1.2.md), 파일럿 기준 버전과 현장 검증 항목은 [RELEASE_v1.1_RC2.md](RELEASE_v1.1_RC2.md)에서 확인할 수 있습니다. 이전 기준은 [RC1 문서](RELEASE_v1.1_RC1.md)에 보존되어 있습니다.
+현재 제품 요구사항과 기준선은 [PRD v1.2.1](PRD_v1.2.md)에서 확인합니다. [RC2 문서](RELEASE_v1.1_RC2.md)와 [RC1 문서](RELEASE_v1.1_RC1.md)는 과거 이력이며 현재 출시 판정이 아닙니다.
 
-2026년 9월 현장 시험은 [v1.2.1 현장 파일럿 점검표](FIELD_PILOT_v1.2.1.md)를 사용하고, 발견한 문제는 [현장 오류 기록 양식](FIELD_ISSUE_TEMPLATE.md)에 개인정보를 제거한 뒤 기록합니다. 실제 운영 전에는 [학생 설문 참여 안내](STUDENT_SURVEY_GUIDE.md)와 [담임 운영 가이드](TEACHER_QUICK_GUIDE.md)를 함께 확인합니다.
+현장 시험은 [v1.2.1 현장 파일럿 점검표](FIELD_PILOT_v1.2.1.md)를 사용하되 과거 동결 커밋 대신 현행 PRD 기준선을 기록합니다. 발견한 문제는 [현장 오류 기록 양식](FIELD_ISSUE_TEMPLATE.md)에 개인정보를 제거한 뒤 기록합니다. 실제 운영 전에는 [학생 설문 참여 안내](STUDENT_SURVEY_GUIDE.md)와 [담임 운영 가이드](TEACHER_QUICK_GUIDE.md)를 함께 확인합니다.
 
 학교 현장에서는 [운영·장애 대응 절차](SCHOOL_OPERATIONS_RUNBOOK.md)를 준비하고, 실행 결과는 [v1.2.1 현장 시험 결과지](FIELD_PILOT_RESULTS_v1.2.1.md)에 비식별로 기록합니다.
 
