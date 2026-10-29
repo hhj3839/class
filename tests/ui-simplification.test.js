@@ -5,7 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const html=read('index.html');
-const app=read('app.js');
+const app=read('app.js')+'\n'+read('student-detail-view.js');
 const survey=read('survey-management.js');
 const studentRecordCss=read('student-record.css');
 

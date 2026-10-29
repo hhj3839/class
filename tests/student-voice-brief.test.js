@@ -10,7 +10,8 @@ test('정확한 없음 표현만 숨기고 혼합 문장과 모호한 답은 보
  for(const value of ['모르겠어요','딱히 없지만 공부가 걱정돼요'])assert.ok(ctx.studentVoiceBriefHTML({studentState:{worryDetail:value}},'2026-09').includes(value));
 });
 test('한눈에 보기에는 관계 해석 대신 목소리를 표시하고 변화는 변화 탭에 둔다',()=>{
- const summary=app.slice(app.indexOf('  content.innerHTML=`<div id="studentPanelSummary"'),app.indexOf('  renderStudentCoachingShell(student);setStudentDetailTab',app.indexOf('  content.innerHTML=`<div id="studentPanelSummary"')));
- assert.match(summary,/studentVoiceBriefHTML\(latest,latestMonth\)/);assert.doesNotMatch(summary,/relationshipBriefHTML/);
+ const detail=fs.readFileSync('student-detail-view.js','utf8');
+ const summary=detail.slice(detail.lastIndexOf('content.innerHTML ='));
+ assert.match(summary,/studentVoiceBriefHTML\(latest,\s*latestMonth\)/);assert.doesNotMatch(summary,/relationshipBriefHTML/);
  assert.ok(summary.indexOf('${studentInsight}')>summary.indexOf('id="studentPanelTrend"'));
 });

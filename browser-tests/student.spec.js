@@ -54,6 +54,14 @@ for(const width of [360,768,1440])test(`학생 탐색과 한 줄 배치 ${width}
   await expect(page.locator('#studentDetailSelect')).toHaveValue('1');
   await expect(page.locator('#studentPanelSummary')).toBeVisible();
   await expect(page.locator('#printStudentReport')).toBeEnabled();
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#printStudentReport').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/\.pdf$/);
+  const pdfBytes = require('node:fs').readFileSync(await download.path());
+  expect(pdfBytes.subarray(0, 5).toString()).toBe('%PDF-');
+  expect(pdfBytes.length).toBeGreaterThan(1000);
+  await expect(page.locator('.pdf-render-root')).toHaveCount(0);
   await page.locator('#authButton').click();
   await expect(page.locator('#teacherApp')).toBeHidden();
   await expect(page.locator('#studentDetailSelect')).toHaveValue('');

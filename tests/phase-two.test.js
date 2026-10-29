@@ -2,7 +2,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 
-const app=fs.readFileSync('app.js','utf8');
+const detail=fs.readFileSync('student-detail-view.js','utf8');
+const app=fs.readFileSync('app.js','utf8')+'\n'+detail+'\n'+fs.readFileSync('pdf-download.js','utf8');
 const html=fs.readFileSync('index.html','utf8');
 const edge=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260720170000_ai_reports_backup.sql','utf8');
@@ -200,7 +201,7 @@ test('학생 상세는 한눈에 보기에 응답 요약과 전월 변화를 포
   assert.match(html,/>변화 살펴보기<\/button>/);
   assert.match(html,/>월별 응답<\/button>/);
   assert.match(app,/월을 눌러 자세히 보기/);
-  const responseRecords=app.slice(app.indexOf('const timeline='),app.indexOf('const monthHeads='));
+  const responseRecords=detail;
   assert.match(responseRecords,/<details class="student-month-card"/);
   assert.doesNotMatch(responseRecords,/<details class="student-month-card"[^>]*open/);
   assert.match(app,/친구들이 준 관계 점수 평균/);
@@ -218,7 +219,7 @@ test('학생을 바꿔도 현재 탭을 유지하고 응답이 없어도 지원 
   assert.match(app,/let activeStudentDetailTab='summary'/);
   assert.match(app,/function setStudentDetailTab\(tab\)\{activeStudentDetailTab=tab/);
   assert.match(app,/setStudentDetailTab\(activeStudentDetailTab\)/);
-  const emptyStudent=app.slice(app.indexOf('if(!monthly.length)'),app.indexOf('const studentInsight='));
+  const emptyStudent=detail.slice(detail.indexOf('if (!monthly.length)'),detail.indexOf('const studentCurrent'));
   assert.match(html,/data-student-detail-tab="summary"/);
   assert.match(html,/data-student-detail-tab="trend"/);
   assert.match(html,/data-student-detail-tab="responses"/);
