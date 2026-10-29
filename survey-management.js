@@ -224,10 +224,27 @@
           showToast('저장할 QR 코드가 없습니다.');
           return;
         }
-        const link = document.createElement('a');
-        link.href = image.src;
-        link.download = `우리반이음-${classSettings.grade}-${classSettings.classNumber}-참여QR.png`;
-        link.click();
+        if (!image.complete || !image.naturalWidth || !image.naturalHeight) {
+          showToast('QR 준비 중 · 잠시 후 재시도');
+          return;
+        }
+        try {
+          // The QR library supplies GIF data; encode PNG rather than rename it.
+          const canvas = document.createElement('canvas');
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('Canvas unavailable');
+          context.drawImage(image, 0, 0);
+          const png = canvas.toDataURL('image/png');
+          if (!png.startsWith('data:image/png;')) throw new Error('PNG encoding failed');
+          const link = document.createElement('a');
+          link.href = png;
+          link.download = `우리반이음-${classSettings.grade}-${classSettings.classNumber}-참여QR.png`;
+          link.click();
+        } catch (error) {
+          showToast('QR 저장 실패 · 다시 시도');
+        }
       });
       $('#refreshResponses').addEventListener('click', refreshResponses);
       $('#surveyMonth').addEventListener('change', (event) =>
