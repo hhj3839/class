@@ -26,7 +26,9 @@ test('없음·불명확·괜찮음은 어려움과 학급 주제 인원에서 �
  const rows=[row(3,{studentState:{worryDetail:'공부'}}),row(4,{studentState:{worryDetail:'없음'}}),row(5,{studentState:{worryDetail:'모르겠어요'}})];
  const result=groundClassAnalysis({class_patterns:[{pattern:'8명 경청 문제',teacher_check:'말 끼어듦 확인',source_refs:rows.map(r=>`${r.id}|studentState.worryDetail`)}]},rows,'2026-09');
  assert.match(result.class_patterns[0].pattern,/1명/);
- assert.doesNotMatch(JSON.stringify(result),/말 끼어듦|경청 문제|없음|모르겠어요/);
+ assert.doesNotMatch(JSON.stringify(result.class_patterns),/말 끼어듦|경청 문제|없음|모르겠어요/);
+ assert.ok(result.additional_review.additional.some(item=>item.value==='모르겠어요'));
+ assert.ok(!result.additional_review.additional.some(item=>item.value==='없음'));
  assert.match(result.class_patterns[0].teacher_check,/고민/);
  assert.throws(()=>groundClassAnalysis(priority(['r3|helpNow']),[row(3,{helpNow:'괜찮음'})],'2026-09'),/뒷받침/);
 });

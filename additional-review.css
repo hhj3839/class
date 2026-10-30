@@ -1,0 +1,9 @@
+.additional-review{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.additional-review h4{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.additional-review h4 span{font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.additional-review>details{margin:10px 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--white)}
+.additional-review summary{cursor:pointer;user-select:none;font-weight:600;word-break:keep-all}
+.additional-review .source-evidence{padding:14px 0;border-bottom:1px solid var(--line)}
+.additional-review .source-evidence p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+.additional-review .source-evidence small{display:block;color:var(--muted);line-height:1.7}
+.additional-review details details{margin-top:14px;color:var(--muted)}
