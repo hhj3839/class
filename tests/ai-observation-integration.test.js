@@ -21,7 +21,7 @@ async function harness(type,{cached=null,authorized=true,force=false,roster=stud
     throw new Error(`Unexpected request in mock: ${url}`);
   };
   const {redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');
-  vm.runInNewContext(source,{...await import('../supabase/functions/analyze-class/grounding.mjs'),IeumRelationshipChanges:require('../relationship-changes.js'),DOMException,IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
+  vm.runInNewContext(source,{...await import('../supabase/functions/analyze-class/localization.mjs'),...await import('../supabase/functions/analyze-class/grounding.mjs'),IeumRelationshipChanges:require('../relationship-changes.js'),DOMException,IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/analyze',{method:'POST',headers:{Authorization:'Bearer test-only','Content-Type':'application/json'},body:JSON.stringify({classId:'fixture',month,analysisType:type,force})}));
   return{status:response.status,result:await response.json(),requestBody,saved,calls};
 }
