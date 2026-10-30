@@ -3,6 +3,11 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.IeumReportContent = api;
 })(globalThis, function () {
+  function renderSupportDirections(item, show, conciseAiSentence) {
+    return item._parent_support && item.support_directions?.length
+      ? item.support_directions.map(direction => `<div class="parent-support-direction"><h5>${show(direction.title)}</h5><p>${show(direction.check)}</p><p>${show(direction.support)}</p></div>`).join('')
+      : `<p>${show(conciseAiSentence(item.teacher_check, 70))}</p>`;
+  }
   function create({
     getSettings,
     getResponses,
@@ -57,11 +62,10 @@
                   `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(
                     item.evidence || []
                   )
-                    .slice(0, 2)
                     .map((value) => show(cleanAiEvidenceText(value)))
                     .join(
                       '<br>',
-                    )}</p><p><b>교실에서 살펴볼 점</b><br>${show(conciseAiSentence(item.teacher_check, 70))}</p></article>`,
+                    )}</p><section><b>교실에서 살펴볼 점</b>${renderSupportDirections(item, show, conciseAiSentence)}</section></article>`,
               )
               .join('')}`
           : ''
@@ -87,5 +91,5 @@
     }
     return { buildAiReportSection, yearEndReportContent };
   }
-  return { create };
+  return { create, renderSupportDirections };
 });
