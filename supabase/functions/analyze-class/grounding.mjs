@@ -1,14 +1,15 @@
 // Factual display is reconstructed from current survey fields, never from an AI paraphrase.
+import '../../../survey-review.js';
 export const GROUNDING_VERSION='2026.10.30-survey-grounding-v2';
 export async function fingerprintRows(rows,month){
  const canonical=rows.filter(row=>String(row.survey_month).slice(0,7)===month).map(row=>({id:row.id,student:row.student_number,payload:row.payload_json})).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
  const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(canonical)));
  return [...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('');
 }
-const labels={helpNow:'도움 요청', 'studentState.worryDetail':'학교생활 고민','studentState.teacherWish':'선생님께 듣고 싶은 말','unresolved.detail':'아직 속상한 관계','peerObservations.hurt.detail':'상처 행동 관련 서술','peerObservations.needsHelp.detail':'도움이 필요한 친구 관련 서술','peerObservations.kind.detail':'친절한 친구 관련 서술','peerObservations.growth.detail':'변화한 친구 관련 서술'};
+const labels={helpNow:'도움 요청', 'studentState.worryDetail':'학교생활 고민','studentState.teacherWish':'선생님께 듣고 싶은 말','studentState.parentWish':'부모님께 바라는 점','unresolved.detail':'아직 속상한 관계','peerObservations.hurt.detail':'상처 행동 관련 서술','peerObservations.needsHelp.detail':'도움이 필요한 친구 관련 서술','peerObservations.kind.detail':'친절한 친구 관련 서술','peerObservations.growth.detail':'변화한 친구 관련 서술'};
 const choices={'괜찮음':'지금은 괜찮아요','이번 주':'이번 주에 이야기하고 싶어요','즉시':'바로 도와주세요'};
 export const noConcern=value=>/^(없음|없다|없어요|없습니다|해당\s*없음|없|x|×|\-)[.!。\s]*$/i.test(String(value||'').trim());
-const supportFields=new Set(['helpNow','studentState.worryDetail','unresolved.detail','peerObservations.hurt.detail','peerObservations.needsHelp.detail']);
+const supportFields=new Set(['studentState.parentWish','helpNow','studentState.worryDetail','unresolved.detail','peerObservations.hurt.detail','peerObservations.needsHelp.detail']);
 const relationshipFields=new Set(['unresolved.detail','peerObservations.hurt.detail','peerObservations.needsHelp.detail']);
 const hasContent=source=>source.field==='helpNow'
  ? ['이번 주','즉시'].includes(source.value)
@@ -49,10 +50,10 @@ export function groundClassAnalysis(analysis,rows,month){
   if(!Array.isArray(refs)||!refs.length||refs.some(ref=>!index.has(ref)))throw new Error('분석 근거 연결 검증 실패');
   return [...new Set(refs)].map(ref=>index.get(ref));
  };
- const priority=(analysis.priority_students||[]).map(item=>{
+ const priority=(analysis.priority_students||[]).slice(0,3).map(item=>{
   const sources=resolve(item.source_refs);
   if(sources.some(source=>source.student!==item.student))throw new Error('분석 작성 학생과 근거 불일치');
-  const usable=sources.filter(s=>supportFields.has(s.field)&&hasContent(s));
+  const usable=sources.filter(s=>supportFields.has(s.field)&&hasContent(s)&&(s.field!=='studentState.parentWish'||/도와|도움|알려|힘들|무서|어려|걱정|그만|화.*(?:적게|줄)|학원/.test(s.value)));
   if(!usable.length)throw new Error('어려움 판단을 뒷받침하는 응답 없음');
   // Prioritize reviewing safety-related answers, never label their author as a victim or aggressor.
   const immediate=usable.some(s=>s.field==='helpNow'&&s.value==='즉시'||relationshipFields.has(s.field));
@@ -70,7 +71,8 @@ export function groundClassAnalysis(analysis,rows,month){
   return {...item,pattern:`${[...new Set(sources.map(s=>s.label))].join('·')} 관련 응답 ${students.size}명 · 원문 확인`,
    teacher_check:advice.behavior,evidence:sources.map(s=>`[학생 원문] ${sentence(s)}`),source_refs:sources.map(s=>s.ref)};
  });
- return {...analysis,priority_students:priority,class_patterns:patterns,
+ const review=globalThis.IeumSurveyReview.coverage(rows,month,{priority_students:priority});
+ return {...analysis,priority_students:priority,class_patterns:patterns,additional_review:review,
   limitations:['즉시 확인은 도움 요청 선택 또는 관계 안전 관련 문항의 원문 확인 우선순위이며, 실제 위험이나 학생의 역할을 확정하지 않습니다.','연결된 응답의 작성 학생 수이며, 학급 전체의 같은 문제 경험 인원이나 진단이 아닙니다.'],
   overall_judgment:`응답 근거가 연결된 학생 ${priority.length}명 · 교사 확인 필요`,_grounding_version:GROUNDING_VERSION};
 }
