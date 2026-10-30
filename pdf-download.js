@@ -43,7 +43,7 @@
           return canvasCache.get(block);
         };
         const heightOf = canvas => canvas.height * contentWidth / canvas.width;
-        const isHeading = block => /^H[1-6]$/.test(block.tagName || '') || block.classList.contains('pdf-section-heading');
+        const isHeading = block => /^H[1-6]$/.test(block.tagName || '') || ['pdf-section-heading', 'pdf-comparison-heading', 'pdf-coaching-page-heading'].some(name => block.classList.contains(name));
         let y = margin;
         const newPage = () => {
             pdf.addPage();

@@ -61,6 +61,13 @@ test('긴 PDF 블록은 여러 페이지로 나누고 각 페이지에 번호를
   assert.deepEqual(result.footers, ['1 / 4', '2 / 4', '3 / 4', '4 / 4']);
   assert.equal(result.removed, true);
 });
+test('학생 한눈에 보기와 코칭 제목은 다음 카드와 분리되지 않는다',async()=>{
+ for(const heading of ['pdf-comparison-heading','pdf-coaching-page-heading']){
+  const block=(height,kind)=>({height,classList:{contains:name=>name===kind},hasAttribute:()=>false});
+  const {api,result}=setup({blocks:[block(210),block(15,heading),block(70)]});
+  await api.downloadPdfDocument('','학생 제목 연결');assert.deepEqual(result.imagePages,[1,2,2]);
+ }
+});
 
 test('PDF 렌더링 실패에도 임시 화면을 제거하고 오류를 전달한다', async () => {
   const {api, result} = setup({fail: true});

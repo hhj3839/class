@@ -5,6 +5,13 @@ const item={text:'가상 코칭 <script>',refs:['E1']};
 const data={card:{id:'card',result:{summary:item,question:item,actions:[{title:'연습하기',steps:['한 문장 말하기'],refs:['E1']}],check_after:'다시 확인',strengths:[item],needs:[],limitations:['단정하지 않기']},basisMonth:'2026-09'},sources:[{id:'E1',label:'고민',month:'2026-09',type:'학생 응답',value:'원문 비밀'}],feedback:[{card_id:'other',note:'다른 학생 비밀'},{card_id:'card',status:'helpful',note:'교사 기록',created_at:'2026-09-11'}]};
 function context(extra={}){return vm.createContext({escapeHTML:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),...extra})}
 function render(value,options){const ctx=context();vm.runInContext(code,ctx);return ctx.buildStudentCoachingPdfSection(value,options)}
+test('코칭 제목은 본문과 묶고 강제 새 페이지를 만들지 않는다',()=>{const html=render(data);assert.match(html,/pdf-section-heading pdf-coaching-page-heading/);assert.ok(!html.includes('data-pdf-page-start'))});
+test('원문 포함은 모든 연결 근거를 중복 없이 보존하고 교사 기록을 제외한다',()=>{
+ const value=structuredClone(data);value.sources=Array.from({length:4},(_,i)=>({id:'E'+i,month:'2026-09',label:'문항'+i,value:('<원문'+i+'>').repeat(50),kind:'survey'}));
+ value.card.result.summary={text:'요약',refs:['E0','E1','E2','E3','E0']};value.card.result.question={text:'질문',refs:['E1']};
+ const html=render(value,{includeOriginals:true});for(let i=0;i<4;i++){assert.ok(html.includes('문항'+i));assert.ok(html.includes(('&lt;원문'+i+'&gt;').repeat(50)))}
+ assert.equal((html.match(/pdf-coaching-evidence/g)||[]).length,4);assert.ok(!render(value).includes('&lt;원문'));
+});
 test('PDF는 세 조건부 대화와 마지막 선택권 문장을 생략하지 않는다',()=>{const result=structuredClone(data.card.result);result.actions=Array.from({length:3},(_,i)=>({title:`대화 ${i+1}`,steps:['학생의 답을 기다립니다.'],refs:['E1']}));result.check_after='학생의 이야기를 듣습니다. '.repeat(15)+'지금 시도하지 않아도 괜찮습니다.';const html=render({...data,card:{result}});assert.ok(html.includes('대화 3'));assert.ok(html.includes('지금 시도하지 않아도 괜찮습니다.'));assert.ok(!html.includes('지도 방향'))});
 test('코칭 PDF는 학생 설문 코칭만 출력하고 HTML을 이스케이프한다',()=>{
  const html=render(data);for(const title of ['함께 탐색할 주제','대화를 여는 질문','답에 따라 이어갈 대화','대화 마무리'])assert.ok(html.includes(title));
