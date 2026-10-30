@@ -35,3 +35,19 @@
   flex-shrink: 0;
   accent-color: var(--blue);
 }
+
+.student-ui .survey-field-error {
+  margin: 6px 0 14px;
+  color: #9c3030;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.student-ui .survey-field-error:empty,
+.student-ui .survey-field-error[hidden] { display: none; }
+
+.student-ui .survey-field-invalid {
+  border-left: 3px solid #9c3030;
+  padding-left: 12px;
+  scroll-margin-block: 24px;
+}

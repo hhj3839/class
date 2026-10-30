@@ -14,6 +14,7 @@ for(const width of [360,768,1440])test(`설문 실패 복구·제출 후 임시 
   await expect(page.locator('#surveyTitle')).toContainText('2026년 9월');
   await page.locator('#studentSelect').selectOption('1');await page.locator('#verifyStudent').click();
   for(const key of ['study','listening','respect','manners','responsibility'])await page.locator(`input[name="rating_${key}"][value="4"]`).check();
+  await page.locator('input[name="helpNow"][value="괜찮음"]').check();
   await page.locator('#worryDetail').fill('가상 학생의 점검 응답');await page.locator('#selfSmile').click();await page.locator('#confirmAnswer').check();
   await page.locator('#submitSurvey').click();await expect(page.locator('#submitMessage')).toContainText('제출하지 못했습니다');
   const drafts=()=>page.evaluate(()=>Object.keys(sessionStorage).filter(key=>key.startsWith('ieum-student-draft:')).length);
