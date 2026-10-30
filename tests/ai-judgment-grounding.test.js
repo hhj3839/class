@@ -36,3 +36,8 @@ test('현재 버전 결과 재검증도 같은 내용이며 구버전과 버전�
  const rows=[row(3,{helpNow:'이번 주'})],fresh=groundClassAnalysis(priority(['r3|helpNow']),rows,'2026-09');
  assert.deepEqual(groundClassAnalysis(fresh,rows,'2026-09'),fresh);
 });
+test('모르겠다는 말 뒤에 구체적 어려움을 적은 응답은 제외하지 않는다',async()=>{
+ const {groundClassAnalysis}=await import('../supabase/functions/analyze-class/grounding.mjs');
+ const result=groundClassAnalysis(priority(['r3|studentState.worryDetail']),[row(3,{studentState:{worryDetail:'모르겠지만 친구 때문에 도움이 필요하다'}})],'2026-09');
+ assert.match(result.priority_students[0].attention_reason,/도움이 필요하다/);
+});

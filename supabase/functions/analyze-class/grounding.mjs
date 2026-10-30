@@ -12,7 +12,7 @@ const supportFields=new Set(['helpNow','studentState.worryDetail','unresolved.de
 const relationshipFields=new Set(['unresolved.detail','peerObservations.hurt.detail','peerObservations.needsHelp.detail']);
 const hasContent=source=>source.field==='helpNow'
  ? ['이번 주','즉시'].includes(source.value)
- : !noConcern(source.value)&&! /^(모르겠|몰라|잘\s*모르|\?)/.test(source.value);
+ : !noConcern(source.value)&&! /^(모르겠어요|모르겠습니다|모름|몰라요|몰라|잘\s*모르겠어요|\?+)[.!。?\s]*$/.test(source.value);
 // These are requests to check the cited survey, not inferred events or diagnoses.
 function guidance(sources){
  if(sources.some(s=>relationshipFields.has(s.field)))return {
