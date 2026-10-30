@@ -1,5 +1,6 @@
 import { groundClassAnalysis, fingerprintRows, GROUNDING_VERSION } from './grounding.mjs';
 import { redactStudentNames } from './privacy.mjs';
+import { localizeAnalysis } from './localization.mjs';
 import './relationship-data.js';
 import '../../../enrollment-core.js';
 import '../../../relationship-changes.js';
@@ -28,10 +29,7 @@ const internalLabelMap:[RegExp,string][]=[
   [/도움 요청가/g,'도움 요청이'],[/도움 요청는/g,'도움 요청은'],[/도움 요청를/g,'도움 요청을']
 ];
 const localizeAnalysisValues=(value:unknown):unknown=>{
-  if(typeof value==='string')return internalLabelMap.reduce((result,[pattern,label])=>result.replace(pattern,label),value);
-  if(Array.isArray(value))return value.map(localizeAnalysisValues);
-  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value as Record<string,unknown>).map(([key,item])=>[key,localizeAnalysisValues(item)]));
-  return value;
+  return localizeAnalysis(value,internalLabelMap);
 };
 const studentNumbersIn=(value:unknown)=>{const source=String(value||''),direct=[...source.matchAll(/학생-(\d+)/g)].map(match=>Number(match[1])),compact=[...source.matchAll(/학생-(\d+(?:\s*[·,/]\s*\d+)+)/g)].flatMap(match=>[...match[1].matchAll(/\d+/g)].map(value=>Number(value[0])));return[...new Set([...direct,...compact])]};
 const monthLabels=(month:string)=>{const [year,value]=month.split('-');return[month,`${year}년 ${Number(value)}월`,`${Number(value)}월`]};

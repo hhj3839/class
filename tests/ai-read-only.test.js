@@ -7,7 +7,7 @@ const source=fs.readFileSync('supabase/functions/analyze-class/index.ts','utf8')
 for(const analysisType of ['class','relationship'])for(const cached of [false,true]){
   test(`${analysisType}: lookup ${cached?'hit':'miss'} never calls AI or reserves quota`,async()=>{
     let handler;const requests=[];
-    const context={...await import('../supabase/functions/analyze-class/grounding.mjs'),Response,Request,console,TextEncoder,AbortController,setTimeout,clearTimeout,
+    const context={...await import('../supabase/functions/analyze-class/localization.mjs'),...await import('../supabase/functions/analyze-class/grounding.mjs'),Response,Request,console,TextEncoder,AbortController,setTimeout,clearTimeout,
       Deno:{serve:fn=>handler=fn,env:{get:name=>name==='OPENAI_API_KEY'?undefined:'test'}},
       fetch:async(url)=>{requests.push(url);if(url.endsWith('/auth/v1/user'))return Response.json({id:'teacher'});
         if(url.includes('/rpc/teacher_get_cached_'))return Response.json(cached?[{id:'saved',result_json:{summary:'저장 결과'},created_at:'2026-09-01'}]:[]);
