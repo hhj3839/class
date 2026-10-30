@@ -20,6 +20,7 @@ const scoreValues=source=>{
 };
 export function validateEvidenceClaims(text,refs,sources){
  const cited=sources.filter(source=>refs.includes(source.id));
+ const absent=value=>/^(없음|없다|없어요|없습니다|해당\s*없음|없|x|×|\-)[.!。\s]*$/i.test(String(value||'').trim());
  for(const sentence of String(text).split(/(?<=[.!?。])\s+/u)){
    const mentions=[...sentence.matchAll(/(?<!\d)(?:(\d{4})년\s*)?(1[0-2]|[1-9])월/g)];
    const dated=mentions.length===1?cited.filter(source=>source.month?.endsWith('-'+mentions[0][2].padStart(2,'0'))&&(!mentions[0][1]||source.month.startsWith(mentions[0][1]+'-'))):cited;
@@ -27,6 +28,11 @@ export function validateEvidenceClaims(text,refs,sources){
    const asserted=/적었|썼|선택했|응답했|평가했|이라고\s*했|이라고\s*적/.test(sentence)||scoreClaims.length>0;
    const named=fieldRules.filter(([pattern])=>pattern.test(sentence)).map(([,field])=>field);
    if(asserted){
+     const relevant=named.length?dated.filter(source=>named.includes(source.field)):dated;
+     if(relevant.length&&relevant.every(source=>absent(source.value))&&!/없음|없다|없어요|없습니다|없다고|응답하지|미응답/.test(sentence))throw new Error('없음 응답에 없는 어려움이나 사실을 추가할 수 없습니다.');
+     if(/(?:즉시|바로)\s*도움\s*요청/.test(sentence)&&!dated.some(source=>source.field==='helpNow'&&/^(즉시|바로\s*도와주세요)[.!\s]*$/.test(source.value)))throw new Error('도움 요청 선택값 불일치');
+     for(const match of sentence.matchAll(/[“‘]([^”’]+)[”’]/g))if(!dated.some(source=>String(source.displayValue||source.value).includes(match[1])))throw new Error('인용한 학생 원문 불일치');
+     if(relevant.length&&relevant.every(source=>source.field?.startsWith('peerObservations.'))&&!/친구에|친구의|친구가|다른 친구|대상|작성한|서술|확인/.test(sentence))throw new Error('친구 관련 응답의 대상 확인 필요');
      for(const field of named)if(!dated.some(source=>source.field===field))throw new Error('코칭 문장의 문항과 연결된 근거가 일치하지 않습니다.');
      if(scoreClaims.length&&mentions.length>1)throw new Error('점수 비교는 월별로 문장을 나누어야 합니다.');
      if(scoreClaims.length&&named.length>1)throw new Error('점수 설명은 문항별로 문장을 나누어야 합니다.');

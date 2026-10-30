@@ -30,7 +30,7 @@ Deno.serve(async(request:Request)=>{
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
-    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
+    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',statement_scope:source.field?.startsWith('peerObservations.')?'작성 학생이 다른 친구에 관해 남긴 진술; 작성자 본인의 행동·특성 근거 아님':'해당 문항의 응답; 사실 여부는 교사 확인',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
     masked.urgent_refs=urgentEvidence(evidence.sources).map((source:any)=>source.id);
     // Redaction must never rename structural evidence identifiers.
