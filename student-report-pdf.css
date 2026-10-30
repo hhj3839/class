@@ -10,8 +10,12 @@
 .pdf-render-root .pdf-comparison-heading{padding-top:0;padding-bottom:0;margin-bottom:4px}
 .pdf-render-root .pdf-comparison-heading h2{margin:0;font-size:21px}
 .pdf-render-root .pdf-comparison-note{font-size:12px;line-height:1.55;color:#665e70;padding-top:0;padding-bottom:0}
-.pdf-render-root .pdf-coaching-page-heading h2{font-size:24px;margin-bottom:8px}
+.pdf-render-root .pdf-coaching-page-heading h2{font-size:21px;margin:0 0 4px}
 .pdf-render-root .pdf-coaching-page-heading p{font-size:13px;line-height:1.55;color:#665e70}
 .pdf-render-root article.pdf-coaching-compact{padding:8px 16px;margin-bottom:8px;line-height:1.5}
 .pdf-render-root .pdf-coaching-compact h3{margin:0 0 7px;font-size:18px}
 .pdf-render-root .pdf-coaching-compact p{margin:5px 0}
+.pdf-render-root .pdf-coaching-page-heading p{margin:4px 0}
+.pdf-render-root .pdf-coaching-compact small{display:block;font-size:12px;line-height:1.4;margin-top:4px;overflow-wrap:anywhere}
+.pdf-render-root .pdf-coaching-evidence h3{font-size:15px;margin-bottom:4px}
+.pdf-render-root .pdf-coaching-evidence p{white-space:pre-wrap;overflow-wrap:anywhere}
