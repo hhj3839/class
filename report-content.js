@@ -59,6 +59,9 @@
           ? `<div class="pdf-block pdf-section-heading"><h3>이번 달 우리 반에서 보이는 흐름</h3></div>${patterns
               .map(
                 (item) =>
+                  item._parent_support && item.support_directions?.length
+                  ? `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(item.evidence || []).map(value => show(cleanAiEvidenceText(value))).join('<br>')}</p></article>${item.support_directions.map(direction => `<article class="pdf-block pdf-pattern-card"><h4>교실에서 살펴볼 점 · ${show(direction.title)}</h4>${renderSupportDirections({_parent_support:true,support_directions:[direction]},show,conciseAiSentence)}</article>`).join('')}`
+                  :
                   `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(
                     item.evidence || []
                   )

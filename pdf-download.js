@@ -35,6 +35,15 @@
               ? [...child.querySelectorAll('.pdf-block')]
               : [child],
           );
+        const canvasCache = new Map();
+        const canvasFor = async block => {
+          if (!canvasCache.has(block)) canvasCache.set(block, await html2canvas(block, {
+            scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true,
+          }));
+          return canvasCache.get(block);
+        };
+        const heightOf = canvas => canvas.height * contentWidth / canvas.width;
+        const isHeading = block => /^H[1-6]$/.test(block.tagName || '') || block.classList.contains('pdf-section-heading');
         let y = margin;
         const newPage = () => {
             pdf.addPage();
@@ -47,12 +56,7 @@
               (pdf.getNumberOfPages() === 1 || y > margin + usableHeight * 0.55)
             )
               newPage();
-            const canvas = await html2canvas(block, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-              }),
+            const canvas = await canvasFor(block),
               imageWidth = contentWidth,
               imageHeight = (canvas.height * imageWidth) / canvas.width;
             if (imageHeight <= usableHeight) {
@@ -112,7 +116,19 @@
               y += sliceMm + 4;
             }
           };
-        for (const block of blocks) await renderBlock(block);
+        for (let index = 0; index < blocks.length; index++) {
+          const block = blocks[index];
+          if (isHeading(block) && index + 1 < blocks.length) {
+            let groupHeight = heightOf(await canvasFor(block));
+            for (let next = index + 1; next < blocks.length; next++) {
+              groupHeight += 4 + heightOf(await canvasFor(blocks[next]));
+              if (!isHeading(blocks[next])) break;
+            }
+            if (groupHeight <= usableHeight && y + groupHeight > maxY && y > margin) newPage();
+          }
+          await renderBlock(block);
+          canvasCache.delete(block);
+        }
         const total = pdf.getNumberOfPages();
         for (let number = 1; number <= total; number++) {
           pdf.setPage(number);
