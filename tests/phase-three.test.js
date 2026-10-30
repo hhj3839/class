@@ -82,14 +82,14 @@ test('학생 관계 선택 접근성 문구는 이름 받침에 맞는 조사를
   assert.match(student,/\(last-0xac00\)%28!==0/);
   assert.match(student,/hasFinal\?'과':'와'/);
   assert.match(student,/aria-label="\$\{relationshipLabel\(student\.name\)\}"/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261030-1/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261030-2/);
 });
 
 test('학생 설문의 태블릿 터치 선택 영역은 최소 44px이다',()=>{
   const touchCss=fs.readFileSync('student-touch.css','utf8');
   assert.match(touchCss,/\.help-now label \{[\s\S]*min-height: 44px/);
   assert.match(touchCss,/\.rating-options label \{[\s\S]*min-height: 48px/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student-touch\.css\?v=20261030-1/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student-touch\.css\?v=20261030-2/);
 });
 
 test('학생 제출은 고유 ID로 네트워크 재시도 중복을 방지한다',()=>{
@@ -102,7 +102,7 @@ test('학생 제출은 고유 ID로 네트워크 재시도 중복을 방지한�
   assert.match(idempotent,/unique index if not exists survey_responses_submission_id_key/);
   assert.match(idempotent,/on conflict\(submission_id\) where submission_id is not null do nothing/);
   assert.match(idempotent,/r\.class_id=target_class and r\.student_id=target_student_id/);
-  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261030-1/);
+  assert.match(fs.readFileSync('student.html','utf8'),/student\.js\?v=20261030-2/);
 });
 
 test('학생 작성 내용은 화면 전환 직전에 저장하고 연결 복구 시 명단을 다시 불러온다',()=>{
