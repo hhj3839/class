@@ -18,8 +18,7 @@ test('없음만으로 주의 학생을 만들지 않는다',async()=>{
 });
 test('친구 관련 서술은 작성 학생의 성장으로 변환하지 않는다',async()=>{
  const {groundClassAnalysis}=await import('../supabase/functions/analyze-class/grounding.mjs');
- const result=groundClassAnalysis(card(['r3|peerObservations.growth.detail']),[row(3,{peerObservations:{growth:{detail:'다른 친구가 욕을 줄였다'}}})],'2026-09');
- assert.match(result.priority_students[0].attention_reason,/다른 친구에 관한 응답; 대상 확인 필요/);
+ assert.throws(()=>groundClassAnalysis(card(['r3|peerObservations.growth.detail']),[row(3,{peerObservations:{growth:{detail:'다른 친구가 욕을 줄였다'}}})],'2026-09'),/뒷받침하는 응답 없음/);
 });
 test('학급 흐름 인원은 원문 작성 학생을 중복 없이 센다',async()=>{
  const {groundClassAnalysis}=await import('../supabase/functions/analyze-class/grounding.mjs');
