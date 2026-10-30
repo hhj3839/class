@@ -59,7 +59,9 @@
             const canvas = await canvasFor(block),
               imageWidth = contentWidth,
               imageHeight = (canvas.height * imageWidth) / canvas.width;
-            if (imageHeight <= usableHeight) {
+            const canSharePage = imageHeight > usableHeight * 0.4 &&
+              y + imageHeight > maxY && maxY - y >= 30;
+            if (imageHeight <= usableHeight && !canSharePage) {
               if (y + imageHeight > maxY) newPage();
               pdf.addImage(
                 canvas.toDataURL('image/png'),
@@ -74,17 +76,39 @@
               y += imageHeight + 4;
               return;
             }
-            const pixelsPerMm = canvas.width / imageWidth,
-              maxSlicePixels = Math.floor(usableHeight * pixelsPerMm);
-            for (
-              let offset = 0;
-              offset < canvas.height;
-              offset += maxSlicePixels
-            ) {
-              const sliceHeight = Math.min(
-                  maxSlicePixels,
-                  canvas.height - offset,
-                ),
+            const pixelsPerMm = canvas.width / imageWidth;
+            // Keep text lines and normal-sized table rows intact. Use remaining
+            // page space instead of abandoning the preceding section heading.
+            const protectedRanges = [];
+            if (document.createTreeWalker && block.getBoundingClientRect) {
+              const rect = block.getBoundingClientRect(), scale = canvas.width / rect.width;
+              const protect = box => {
+                if (box.height > 0 && box.height * scale <= usableHeight * pixelsPerMm)
+                  protectedRanges.push([(box.top - rect.top) * scale, (box.bottom - rect.top) * scale]);
+              };
+              const walker = document.createTreeWalker(block, 4);
+              while (walker.nextNode()) {
+                const range = document.createRange();
+                range.selectNodeContents(walker.currentNode);
+                for (const box of range.getClientRects()) protect(box);
+              }
+              for (const row of block.querySelectorAll('tr')) protect(row.getBoundingClientRect());
+            }
+            let offset = 0;
+            while (offset < canvas.height) {
+              const maxSlicePixels = Math.floor((maxY - y) * pixelsPerMm);
+              let end = Math.min(canvas.height, offset + maxSlicePixels);
+              let previous;
+              do {
+                previous = end;
+                for (const [top, bottom] of protectedRanges)
+                  if (top < end && bottom > end) end = Math.min(end, Math.floor(top));
+              } while (end !== previous);
+              if (end <= offset) {
+                if (y > margin) { newPage(); continue; }
+                throw new Error('PDF 내용을 페이지 안에 배치할 수 없습니다.');
+              }
+              const sliceHeight = end - offset,
                 slice = document.createElement('canvas');
               slice.width = canvas.width;
               slice.height = sliceHeight;
@@ -101,7 +125,6 @@
                   canvas.width,
                   sliceHeight,
                 );
-              if (y > margin) newPage();
               const sliceMm = sliceHeight / pixelsPerMm;
               pdf.addImage(
                 slice.toDataURL('image/png'),
@@ -114,6 +137,8 @@
                 'FAST',
               );
               y += sliceMm + 4;
+              offset = end;
+              if (offset < canvas.height) newPage();
             }
           };
         for (let index = 0; index < blocks.length; index++) {
@@ -121,7 +146,8 @@
           if (isHeading(block) && index + 1 < blocks.length) {
             let groupHeight = heightOf(await canvasFor(block));
             for (let next = index + 1; next < blocks.length; next++) {
-              groupHeight += 4 + heightOf(await canvasFor(blocks[next]));
+              const nextHeight = heightOf(await canvasFor(blocks[next]));
+              groupHeight += 4 + (nextHeight > usableHeight * 0.4 ? 30 : nextHeight);
               if (!isHeading(blocks[next])) break;
             }
             if (groupHeight <= usableHeight && y + groupHeight > maxY && y > margin) newPage();

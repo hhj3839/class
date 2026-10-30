@@ -33,3 +33,15 @@ test('학년 말 본문은 AI 없이 학생 요약·월별 응답을 포함하�
   assert.match(empty, /등록된 학생 자료가 없습니다/);
   assert.doesNotMatch(empty, /&lt;가상&gt;/);
 });
+
+test('월간 PDF는 학생별 전체 근거와 긴 학급 지원 방향의 끝을 보존한다', () => {
+ const {state,api}=setup();
+ const evidence=['<첫 원문>','긴 근거 '.repeat(100)+'근거끝'];
+ const support='학생이 원하는 도움을 확인합니다. '.repeat(20)+'지원끝';
+ state.ai={analysis:{priority_students:[{student:'학생-1',priority:'관찰',evidence}],class_patterns:[{pattern:'학습',evidence,teacher_check:support}]}};
+ const html=api.buildAiReportSection('class',0,false);
+ assert.equal((html.match(/근거끝/g)||[]).length,2);
+ assert.match(html,/&lt;첫 원문&gt;/);
+ assert.ok(html.includes(support));
+ assert.doesNotMatch(html,/<첫 원문>/);
+});
