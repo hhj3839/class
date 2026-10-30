@@ -6,7 +6,8 @@ const {create} = require('../student-response-data.js');
 const source = fs.readFileSync('app.js', 'utf8');
 const monthOf = row => row.survey_month.slice(0, 7);
 const payloadOf = row => row.payload_json || {};
-const context = vm.createContext({monthOf, payloadOf});
+const IeumRelationshipData = require('../supabase/functions/analyze-class/relationship-data.js');
+const context = vm.createContext({monthOf, payloadOf, IeumRelationshipData});
 vm.runInContext(source.slice(source.indexOf('function latestByStudent('), source.indexOf('function quoted(')), context);
 function setup() {
   const state = {students: [{number: 1, name: '이음'}, {number: 2, name: '김이음'}, {number: 3, name: '가상'}], rows: []};
@@ -17,6 +18,20 @@ function setup() {
 function row(month, number, payload = {}, extra = {}) {
   return {survey_month: `${month}-01`, student_number: number, submitted_at: `${month}-02T00:00:00Z`, payload_json: payload, ...extra};
 }
+
+test('동일 제출 시각에도 학생 상세와 관계 분석은 같은 응답을 선택한다', () => {
+  const records = ['a', 'b'].map(id => row('2026-09', 1, {}, {id}));
+  for (const rows of [records, [...records].reverse()]) {
+    const detail = context.latestByStudent(rows, '2026-09').get(1);
+    assert.equal(detail.id, 'b');
+    assert.equal(detail, IeumRelationshipData.latestRows(rows).get('2026-09:1'));
+  }
+});
+
+test('최신 삭제·분석 제외 기록 대신 이전 유효 응답을 선택한다', () => {
+  const records = [row('2026-09', 1, {}, {id:'a'}), row('2026-09', 1, {}, {id:'b', deleted_at:'2026-10-01'}), row('2026-09', 1, {}, {id:'c', analysis_excluded:true})];
+  assert.equal(context.latestByStudent(records, '2026-09').get(1).id, 'a');
+});
 test('월별 계산은 최신 유효 제출을 사용하고 미참여 월을 만들지 않는다', () => {
   const {state, api} = setup();
   state.rows = [row('2026-06', 1), row('2026-06', 1, {}, {id: 'latest', submitted_at: '2026-06-03T00:00:00Z'}), row('2026-07', 1, {}, {analysis_excluded: true}), row('2026-08', 2)];
