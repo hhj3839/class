@@ -18,7 +18,10 @@ test('우리 반 응답 흐름은 규칙 기반 지표를 AI 결과와 분리한
   assert.match(app,/학교생활 자기평가/);
   assert.match(app,/친구 관계 응답/);
   assert.match(app,/교사와 대화 희망/);
-  assert.match(app,/바로 확인할 응답/);
+  assert.match(app,/도움 요청 선택/);
+  assert.match(app,/AI 확인 대상과 별도/);
+  assert.doesNotMatch(app,/즉시 확인 신호 기준/);
+  assert.match(app,/helpNow:'도움 요청'/);
 });
 
 test('AI 학생 지원은 교사가 바로 쓰는 세 가지 역할로 구성한다',()=>{
