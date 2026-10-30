@@ -21,7 +21,7 @@ async function harness(type,{cached=null,authorized=true,force=false,roster=stud
     throw new Error(`Unexpected request in mock: ${url}`);
   };
   const {redactStudentNames}=await import('../supabase/functions/analyze-class/privacy.mjs');
-  vm.runInNewContext(source,{IeumRelationshipChanges:require('../relationship-changes.js'),DOMException,IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
+  vm.runInNewContext(source,{...await import('../supabase/functions/analyze-class/grounding.mjs'),IeumRelationshipChanges:require('../relationship-changes.js'),DOMException,IeumEnrollment:require('../enrollment-core.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,console:{error(){}},Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/analyze',{method:'POST',headers:{Authorization:'Bearer test-only','Content-Type':'application/json'},body:JSON.stringify({classId:'fixture',month,analysisType:type,force})}));
   return{status:response.status,result:await response.json(),requestBody,saved,calls};
 }
@@ -62,12 +62,20 @@ test('과거 캐시는 새 버전으로 위장하지 않고 유료 호출 없이
   const result=await harness('relationship',{cached:{id:'old',model:'old-model',result_json:{insights:[]}}});
   assert.equal(result.result.meta.analysisVersion,'이전 저장 형식');assert.equal(result.result.meta.upgradeRecommended,true);assert.equal(result.requestBody,undefined);
 });
-test('현재 버전 캐시는 저장된 버전을 유지하고 다시 호출하지 않는다',async()=>{
+test('검증 이전 캐시는 표시하지 않고 다시 호출하지 않는다',async()=>{
   const result=await harness('class',{cached:{id:'current',model:'gpt-5.6-terra',result_json:{_analysis_version:'2026.09.09-student-support-v18'}}});
-  assert.equal(result.result.meta.upgradeRecommended,false);assert.equal(result.requestBody,undefined);
+  assert.equal(result.result.validationBlocked,true);assert.equal(result.result.analysis,null);assert.equal(result.requestBody,undefined);
 });
 test('인증 실패 시 응답 데이터나 OpenAI를 호출하지 않는다',async()=>{
   const result=await harness('class',{authorized:false});assert.equal(result.status,401);assert.equal(result.calls.length,1);assert.equal(result.saved,undefined);
+});
+
+test('새 검증 저장 결과는 현재 응답 지문과 대조하고 변경되면 무료 조회에서 숨긴다',async()=>{
+ const {GROUNDING_VERSION,fingerprintRows}=await import('../supabase/functions/analyze-class/grounding.mjs');
+ const cached={id:'verified',result_json:{_grounding_version:GROUNDING_VERSION,_source_fingerprint:await fingerprintRows(data.normalizeResponses(rows),'2026-07'),priority_students:[],class_patterns:[]}};
+ const valid=await harness('class',{cached});assert.equal(valid.result.empty,undefined);assert.equal(valid.requestBody,undefined);
+ const changed=rows.map(row=>({...row,payload_json:{...row.payload_json,helpNow:'이번 주'}}));
+ const stale=await harness('class',{cached,responseRows:changed});assert.equal(stale.result.validationBlocked,true);assert.equal(stale.result.analysis,null);assert.equal(stale.requestBody,undefined);assert.equal(stale.saved,undefined);
 });
 
 test('관계 AI 새 연결은 동일 학생의 직전 달 네 방향 관측으로 확인한다',async()=>{

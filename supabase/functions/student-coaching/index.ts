@@ -20,6 +20,8 @@ Deno.serve(async(request:Request)=>{
     const quotaStamp=()=>({quotaMonth:new Date(Date.now()+9*60*60*1000).toISOString().slice(0,7),quotaCheckedAt:Date.now()});
     let quota=quotaStamp();
     const args={p_class_id:classId,p_student_id:body.studentId},context=await rpc('teacher_get_student_coaching_context_auth',args),evidence=buildEvidence(context,(globalThis as any).IeumRelationshipData,(globalThis as any).IeumRelationshipChanges.compare);
+    const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
+    evidence.sources.forEach((source:any)=>{source.quoteValue=String(redactStudentNames(source.displayValue||source.value,privacyRoster)).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[이메일 비공개]').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g,'[연락처 비공개]')});
     const safetyPriority=urgentEvidence(evidence.sources).length>0;
     const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.validationVersion!==VALIDATION_VERSION||typeof existing.result_json?.version!=='string');
     if(existing&&!stale){try{existing.result_json={...validateCard(existing.result_json,evidence.sources),version:existing.result_json.version}}catch{stale=true}}
@@ -29,8 +31,7 @@ Deno.serve(async(request:Request)=>{
     if(!evidence.canGenerate)return json({error:'코칭 근거가 될 학생 설문 응답이 부족합니다. 학생이 설문을 제출한 뒤 확인해 주세요.'},422);
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
-    const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
-    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
+    const input={comparison_context:comparisonContext(evidence.sources),limited:evidence.limited,transferred:!!context.student.transferredOn,basis_month:evidence.basisMonth,evidence:evidence.sources.map((source:any)=>({id:source.id,type:source.type,month:source.month,question:source.label,input_kind:source.inputKind||'계산 결과',statement_scope:source.field?.startsWith('peerObservations.')?'작성 학생이 다른 친구에 관해 남긴 진술; 작성자 본인의 행동·특성 근거 아님':'해당 문항의 응답; 사실 여부는 교사 확인',safety_context:source.safetyContext||null,text:(source.displayValue||source.value).slice(0,500)}))};
     const masked=redactStudentNames(input,privacyRoster);
     masked.urgent_refs=urgentEvidence(evidence.sources).map((source:any)=>source.id);
     // Redaction must never rename structural evidence identifiers.
