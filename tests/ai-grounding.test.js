@@ -35,4 +35,6 @@ test('코칭의 없음 왜곡·선택값 왜곡·가짜 원문 인용을 차단�
  assert.throws(()=>validateEvidenceClaims('학교생활 고민으로 친구 때문에 힘들다고 적었습니다.',['E1'],[{id:'E1',field:'studentState.worryDetail',value:'없음'}]),/없음/);
  assert.throws(()=>validateEvidenceClaims('즉시 도움 요청을 선택했습니다.',['E1'],[{id:'E1',field:'helpNow',value:'이번 주'}]),/선택값/);
  assert.throws(()=>validateEvidenceClaims('학교생활 고민에 “친구가 때렸다”라고 적었습니다.',['E1'],[{id:'E1',field:'studentState.worryDetail',value:'공부'}]),/원문/);
+ assert.doesNotThrow(()=>validateEvidenceClaims('학교생활 고민에 “학생-2와 연습”이라고 적었습니다.',['E1'],[{id:'E1',field:'studentState.worryDetail',value:'가상친구와 연습',quoteValue:'학생-2와 연습'}]));
+ assert.throws(()=>validateEvidenceClaims('학교생활 고민은 없음이라고 했지만 불안하다고 응답했습니다.',['E1'],[{id:'E1',field:'studentState.worryDetail',value:'없음'}]),/단정/);
 });
