@@ -1,5 +1,17 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const row=(n,value,extra={})=>({id:'p'+n,student_number:n,survey_month:'2026-09-01',submitted_at:'2026-09-01',payload_json:{studentState:{parentWish:value,worryDetail:'학습 도움 요청'}},...extra});
+test('요청별 지원 방향은 해당 원문에만 연결하고 원인·가정 상황을 단정하지 않는다',async()=>{
+ const {parentSupportPattern:pattern}=await import('../supabase/functions/analyze-class/parent-support.mjs');
+ const source=(n,value)=>({student:'학생-'+n,field:'studentState.parentWish',value,ref:'p'+n+'|studentState.parentWish'});
+ const result=pattern([source(1,'공부를 알려주세요'),source(2,'학원 끝어주세요'),source(3,'화를 적게 내주세요')]);
+ assert.deepEqual(result.support_directions.map(d=>d.title),['학습 도움 요청','학원 관련 요청','화 표현 관련 요청']);
+ result.support_directions.forEach((d,i)=>assert.deepEqual(d.source_refs,['p'+(i+1)+'|studentState.parentWish']));
+ assert.match(result.support_directions[1].check,/부담이나 중단 필요성을 단정하지 않습니다/);
+ assert.match(result.support_directions[2].check,/가정 상황을 단정하지 않습니다/);
+ assert.match(result.support_directions[2].support,/개인 응답은 공개하지 않습니다/);
+ assert.equal(pattern([source(1,'제 말을 들어주세요')]).support_directions.length,0);
+ assert.equal(pattern([source(1,'공부가 재미있고 학원이 좋아요. 사랑해요')]),null);
+});
 test('부모 지원 요청과 애정·물품 희망·도움 불필요 구분',async()=>{
  const {parentSupportCandidate:check}=await import('../supabase/functions/analyze-class/parent-support.mjs');
  for(const value of ['공부를 알려주세요','학원 끝어주세요','화를 적게 내주세요','제 말을 들어주세요','함께 시간을 보내주세요','때리지 마세요'])assert.equal(check(value),true,value);
