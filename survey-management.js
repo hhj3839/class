@@ -150,7 +150,7 @@
               ? Math.round((submitted.length / total) * 100)
               : 0;
             const missing = enrollment.missing;
-            const duplicateCount = Math.max(0, rows.length - submitted.length);
+            const duplicateCount = Math.max(0, rows.length - submittedNumbers.size);
             const submittedNames = classSettings.students
               .filter((student) => submittedSet.has(Number(student.number)))
               .map(

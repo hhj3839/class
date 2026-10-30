@@ -50,6 +50,17 @@ test('설문 모듈은 분석 제외·중복 제출을 학생 단위로 집계�
   assert.equal(nodes.get('#responseList').innerHTML, '');
 });
 
+test('전출 집계 제외 기록은 재제출로 세지 않고 실제 중복만 센다', () => {
+  const {view, state, nodes} = setup();
+  state.settings.students[1].transferredOn = '2026-09-01';
+  const rows = [1, 2].map(student_number => ({student_number, survey_month:'2026-10-01'}));
+  view.renderResponses(rows);
+  assert.match(nodes.get('#surveyParticipation').textContent, /1 \/ 1명/);
+  assert.doesNotMatch(nodes.get('#monthlySurveyAccordion').innerHTML, /다시 제출한 기록/);
+  view.renderResponses([...rows, rows[1]]);
+  assert.match(nodes.get('#monthlySurveyAccordion').innerHTML, /다시 제출한 기록 1건/);
+});
+
 test('설문 모듈은 계정 변경 후 최신 학급과 월을 전달받아 렌더링한다', () => {
   const {view, state, nodes} = setup();
   state.settings = {students: [{number: 3, name: '새 학급'}], participationToken: 'fixture-token'};
