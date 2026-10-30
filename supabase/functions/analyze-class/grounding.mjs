@@ -1,5 +1,6 @@
 // Factual display is reconstructed from current survey fields, never from an AI paraphrase.
 import '../../../survey-review.js';
+import {parentSupportCandidate,parentSupportPattern} from './parent-support.mjs';
 export const GROUNDING_VERSION='2026.10.30-survey-grounding-v2';
 export async function fingerprintRows(rows,month){
  const canonical=rows.filter(row=>String(row.survey_month).slice(0,7)===month).map(row=>({id:row.id,student:row.student_number,payload:row.payload_json})).sort((a,b)=>String(a.id).localeCompare(String(b.id)));
@@ -53,7 +54,7 @@ export function groundClassAnalysis(analysis,rows,month){
  const priority=(analysis.priority_students||[]).slice(0,3).map(item=>{
   const sources=resolve(item.source_refs);
   if(sources.some(source=>source.student!==item.student))throw new Error('분석 작성 학생과 근거 불일치');
-  const usable=sources.filter(s=>supportFields.has(s.field)&&hasContent(s)&&(s.field!=='studentState.parentWish'||/도와|도움|알려|힘들|무서|어려|걱정|그만|화.*(?:적게|줄)|학원/.test(s.value)));
+  const usable=sources.filter(s=>supportFields.has(s.field)&&hasContent(s)&&(s.field!=='studentState.parentWish'||parentSupportCandidate(s.value)));
   if(!usable.length)throw new Error('어려움 판단을 뒷받침하는 응답 없음');
   // Prioritize reviewing safety-related answers, never label their author as a victim or aggressor.
   const immediate=usable.some(s=>s.field==='helpNow'&&s.value==='즉시'||relationshipFields.has(s.field));
@@ -64,7 +65,7 @@ export function groundClassAnalysis(analysis,rows,month){
    coaching_questions:[advice.question],coaching_directions:[advice.behavior],
    evidence,source_refs:usable.map(s=>s.ref)};
  });
- const patterns=(analysis.class_patterns||[]).map(item=>{
+ const patterns=(analysis.class_patterns||[]).filter(item=>!item._parent_support).map(item=>{
   const sources=resolve(item.source_refs).filter(hasContent),students=new Set(sources.map(s=>s.student));
   if(!sources.length)throw new Error('학급 흐름을 뒷받침하는 응답 없음');
   const advice=guidance(sources);
@@ -72,6 +73,13 @@ export function groundClassAnalysis(analysis,rows,month){
    teacher_check:advice.behavior,evidence:sources.map(s=>`[학생 원문] ${sentence(s)}`),source_refs:sources.map(s=>s.ref)};
  });
  const review=globalThis.IeumSurveyReview.coverage(rows,month,{priority_students:priority});
+ // Rebuild from current, latest valid originals on every generation AND cached lookup.
+ // Reserve one visible class-support slot without replacing any of the three student cards.
+ const parentSources=globalThis.IeumSurveyReview.collect(rows,month);
+ const parentPattern=parentSupportPattern(parentSources);
+ if(parentPattern){patterns.unshift(parentPattern);patterns.splice(3)}
+ const parentRefs=parentSources.filter(s=>s.field==='studentState.parentWish'&&parentSupportCandidate(s.value)).map(s=>s.ref);
+ if(parentRefs.some(ref=>!patterns.some(item=>item.source_refs.includes(ref))))throw new Error('부모님께 바라는 점 지원 근거 누락');
  return {...analysis,priority_students:priority,class_patterns:patterns,additional_review:review,
   limitations:['즉시 확인은 도움 요청 선택 또는 관계 안전 관련 문항의 원문 확인 우선순위이며, 실제 위험이나 학생의 역할을 확정하지 않습니다.','연결된 응답의 작성 학생 수이며, 학급 전체의 같은 문제 경험 인원이나 진단이 아닙니다.'],
   overall_judgment:`응답 근거가 연결된 학생 ${priority.length}명 · 교사 확인 필요`,_grounding_version:GROUNDING_VERSION};
