@@ -2,6 +2,7 @@ import '../analyze-class/relationship-data.js';
 import '../../../relationship-changes.js';
 import { coachingApiError, coachingValidationError } from './api-errors.mjs';
 import { redactStudentNames } from '../analyze-class/privacy.mjs';
+import { stableEvidence, persistEvidence, restoreEvidence } from './saved-evidence.mjs';
 import { buildEvidence, comparisonContext, validateCard, schemaForEvidence, urgentEvidence, instructions, VERSION, VALIDATION_VERSION, MODEL } from './coaching.mjs';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{...cors,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
@@ -23,11 +24,12 @@ Deno.serve(async(request:Request)=>{
     const privacyRoster=[...context.roster,...(context.responses||[]).map((row:any)=>({number:row.student_number,name:row.student_name}))];
     evidence.sources.forEach((source:any)=>{source.quoteValue=String(redactStudentNames(source.displayValue||source.value,privacyRoster)).replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[이메일 비공개]').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g,'[연락처 비공개]')});
     const safetyPriority=urgentEvidence(evidence.sources).length>0;
-    const existing=context.card;let stale=!!existing&&(existing.source_hash!==context.sourceHash||existing.result_json?.validationVersion!==VALIDATION_VERSION||typeof existing.result_json?.version!=='string');
-    if(existing&&!stale){try{existing.result_json={...validateCard(existing.result_json,evidence.sources),version:existing.result_json.version}}catch{stale=true}}
+    const stableSources=await stableEvidence(evidence.sources,body.studentId);
+    const existing=context.card;let stale=false;
+    if(existing){try{existing.result_json=await restoreEvidence(existing,context.sourceHash,stableSources,validateCard)}catch{stale=true}}
     const responseView=(card:any,cached:boolean)=>({...quota,safetyPriority,previousGuidance:!!card&&!stale&&card.result_json?.version!==VERSION,card:card&&!stale?{id:card.id,result:card.result_json,generatedAt:card.completed_at||card.created_at,model:card.model,basisMonth:card.basis_month}:null,stale,hasSavedCard:!!card,remaining:context.remaining,basisMonth:evidence.basisMonth,canGenerate:evidence.canGenerate,limited:evidence.limited,sources:evidence.sources,feedback:context.feedback||[],cached});
-    if(action==='load')return json(responseView(existing,true));
-    if(existing&&!stale&&!body.force)return json(responseView(existing,true));
+    if(action==='load')return json({...responseView(existing,true),sources:stableSources});
+    if(existing&&!stale&&!body.force)return json({...responseView(existing,true),sources:stableSources});
     if(!evidence.canGenerate)return json({error:'코칭 근거가 될 학생 설문 응답이 부족합니다. 학생이 설문을 제출한 뒤 확인해 주세요.'},422);
     const key=Deno.env.get('OPENAI_API_KEY');if(!key)return json({error:'서버 AI 키 설정이 필요합니다.'},503);
     runId=await rpc('teacher_begin_student_coaching_auth',{...args,p_source_hash:context.sourceHash,p_basis_month:evidence.basisMonth});
@@ -44,13 +46,13 @@ Deno.serve(async(request:Request)=>{
     if(result?.status!=='completed')throw new Error('AI 코칭 결과가 완성되지 않았습니다. 다시 시도해 주세요.');
     const output=result.output?.flatMap((item:any)=>item.content||[]).find((item:any)=>item.type==='output_text')?.text;
     let card;
-    try{card=validateCard(JSON.parse(output||'null'),evidence.sources)}
+    try{card=await persistEvidence(validateCard(JSON.parse(output||'null'),evidence.sources),stableSources)}
     catch(error){throw coachingValidationError(error)}
     await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:card,p_model:MODEL,p_success:true});
     quota=quotaStamp();
     const refreshed=await rpc('teacher_get_student_coaching_context_auth',args);
     if(refreshed.sourceHash!==context.sourceHash)return json({...quota,safetyPriority,card:null,stale:true,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:[],feedback:[],cached:false});
-    return json({...quota,safetyPriority,card:{id:runId,result:card,generatedAt:refreshed.card?.completed_at,basisMonth:evidence.basisMonth,model:MODEL},stale:false,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:evidence.sources,feedback:refreshed.feedback||[],cached:false});
+    return json({...quota,safetyPriority,card:{id:runId,result:card,generatedAt:refreshed.card?.completed_at,basisMonth:evidence.basisMonth,model:MODEL},stale:false,hasSavedCard:true,remaining:refreshed.remaining,basisMonth:evidence.basisMonth,canGenerate:true,limited:evidence.limited,sources:stableSources,feedback:refreshed.feedback||[],cached:false});
   }catch(error){
     if(runId&&rpc)await rpc('teacher_finish_student_coaching_auth',{p_class_id:classId,p_card_id:runId,p_result:{},p_model:MODEL,p_success:false}).catch(()=>null);
     const message=error instanceof Error?error.message:'학생 코칭 처리에 실패했습니다.';
