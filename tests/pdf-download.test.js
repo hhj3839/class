@@ -80,3 +80,20 @@ test('PDF 라이브러리 누락은 DOM 생성 전에 보고한다', async () =>
   const api = create({document: {createElement() {throw Error('DOM must not change');}}, getCanvasRenderer: () => undefined, getPdfConstructor: () => undefined});
   await assert.rejects(api.downloadPdfDocument('', '보고서'), /PDF 구성 요소/);
 });
+
+test('한 페이지보다 긴 본문은 제목 뒤 남은 공간부터 사용한다', async () => {
+ const block=(height,tagName='P')=>({height,tagName,classList:{contains:()=>false},hasAttribute:()=>false});
+ const {api,result}=setup({blocks:[block(160),block(15,'H2'),block(500)]});
+ await api.downloadPdfDocument('','긴 월간 보고서');
+ assert.deepEqual(result.imagePages,[1,1,1,2,3]);
+ assert.equal(result.images[2][3],199);
+ assert.equal(result.images.slice(2).reduce((sum,image)=>sum+image[5],0),500);
+});
+
+test('큰 근거 카드는 앞쪽 여백을 버리지 않고 이어서 배치한다',async()=>{
+ const block=(height,tagName='P')=>({height,tagName,classList:{contains:()=>false},hasAttribute:()=>false});
+ const {api,result}=setup({blocks:[block(160),block(15,'H2'),block(200)]});
+ await api.downloadPdfDocument('','여백 검증');
+ assert.deepEqual(result.imagePages,[1,1,1,2]);
+ assert.equal(result.images[2][5]+result.images[3][5],200);
+});

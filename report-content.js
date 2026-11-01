@@ -50,7 +50,7 @@
                   question = (item.coaching_questions ||
                     item.teacher_checks ||
                     [])[0];
-                return `<article class="pdf-block pdf-student-card"><h4>${show(item.student)} · ${show(item.priority)}</h4><p><b>담임 참고</b><br>${show(conciseAiSentence(item.attention_reason || (item.possible_interpretations || [])[0] || '실제 상황 확인이 필요합니다.'))}</p>${(item.protective_factors || []).length ? `<p><b>참고사항</b><br>${show(conciseAiSentence(item.protective_factors[0], 70))}</p>` : ''}<p><b>교실에서 살펴볼 점</b><br>${show(observation || conciseAiSentence((item.teacher_checks || [])[0] || '교실에서 평소와 다른 모습을 살펴보세요.', 70))}</p><p><b>학생 코칭</b><br>${show(conciseAiSentence(question || '요즘 학교생활에서 내가 도와주면 좋을 일이 있을까?', 60))}</p></article>`;
+                return `<article class="pdf-block pdf-student-card"><h4>${show(item.student)} · ${show(item.priority)}</h4><p><b>담임 참고</b><br>${show(conciseAiSentence(item.attention_reason || (item.possible_interpretations || [])[0] || '실제 상황 확인이 필요합니다.'))}</p>${(item.protective_factors || []).length ? `<p><b>참고사항</b><br>${show(conciseAiSentence(item.protective_factors[0], 70))}</p>` : ''}<p><b>교실에서 살펴볼 점</b><br>${show(observation || conciseAiSentence((item.teacher_checks || [])[0] || '교실에서 평소와 다른 모습을 살펴보세요.', 70))}</p><p><b>학생 코칭</b><br>${show(conciseAiSentence(question || '요즘 학교생활에서 내가 도와주면 좋을 일이 있을까?', 60))}</p></article>${(item.evidence || []).length ? `<article class="pdf-block pdf-pattern-card"><h4>${show(item.student)} · 분석 근거</h4><p>${item.evidence.map(value => show(cleanAiEvidenceText(value))).join('<br>')}</p></article>` : ''}`;
               })
               .join('')
           : '<p class="pdf-block">이 범위에서 먼저 살펴볼 학생이 따로 없습니다.</p>'
@@ -60,7 +60,7 @@
               .map(
                 (item) =>
                   item._parent_support && item.support_directions?.length
-                  ? `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(item.evidence || []).map(value => show(cleanAiEvidenceText(value))).join('<br>')}</p></article>${item.support_directions.map(direction => `<article class="pdf-block pdf-pattern-card"><h4>교실에서 살펴볼 점 · ${show(direction.title)}</h4>${renderSupportDirections({_parent_support:true,support_directions:[direction]},show,conciseAiSentence)}</article>`).join('')}`
+                  ? `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(item.evidence || []).map(value => show(cleanAiEvidenceText(value))).join('<br>')}</p></article>${item.support_directions.map(direction => `<article class="pdf-block pdf-pattern-card"><h4>교실에서 살펴볼 점 · ${show(direction.title)}</h4>${renderSupportDirections({_parent_support:true,support_directions:[direction]},show,value => value)}</article>`).join('')}`
                   :
                   `<article class="pdf-block pdf-pattern-card"><h4>${show(conciseAiSentence(item.pattern))}</h4><p><b>분석 근거</b><br>${(
                     item.evidence || []
@@ -68,7 +68,7 @@
                     .map((value) => show(cleanAiEvidenceText(value)))
                     .join(
                       '<br>',
-                    )}</p><section><b>교실에서 살펴볼 점</b>${renderSupportDirections(item, show, conciseAiSentence)}</section></article>`,
+                    )}</p><section><b>교실에서 살펴볼 점</b>${renderSupportDirections(item, show, value => value)}</section></article>`,
               )
               .join('')}`
           : ''
