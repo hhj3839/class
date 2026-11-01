@@ -5,6 +5,19 @@ const item={text:'가상 코칭 <script>',refs:['E1']};
 const data={card:{id:'card',result:{summary:item,question:item,actions:[{title:'연습하기',steps:['한 문장 말하기'],refs:['E1']}],check_after:'다시 확인',strengths:[item],needs:[],limitations:['단정하지 않기']},basisMonth:'2026-09'},sources:[{id:'E1',label:'고민',month:'2026-09',type:'학생 응답',value:'원문 비밀'}],feedback:[{card_id:'other',note:'다른 학생 비밀'},{card_id:'card',status:'helpful',note:'교사 기록',created_at:'2026-09-11'}]};
 function context(extra={}){return vm.createContext({escapeHTML:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),...extra})}
 function render(value,options){const ctx=context();vm.runInContext(code,ctx);return ctx.buildStudentCoachingPdfSection(value,options)}
+
+test('보충 설명에만 연결된 근거도 원문까지 보존하고 중복과 빈 주의사항을 제외한다',()=>{
+ const value=structuredClone(data),result=value.card.result;
+ result.strengths=[{text:'책임감은 학생의 자기평가 <강점>',refs:['E2']}];
+ result.needs=[{text:'추가 확인 <어려움>',refs:['E3','E2']}];
+ result.limitations=['-', ' • ', '', '실제 행동 확인과 구분 <주의>'];
+ value.sources.push({id:'E2',kind:'survey',label:'책임감',month:'2026-09',value:'5점 · <가상 이유>'},{id:'E3',kind:'survey',label:'도움 요청',month:'2026-09',value:'<가상 요청>'});
+ const html=render(value,{includeOriginals:true});
+ for(const text of ['학생이 표현한 모습과 바람','추가로 확인할 어려움','책임감은 학생의 자기평가 &lt;강점&gt;','추가 확인 &lt;어려움&gt;','5점 · &lt;가상 이유&gt;','&lt;가상 요청&gt;','실제 행동 확인과 구분 &lt;주의&gt;'])assert.ok(html.includes(text),text);
+ assert.equal((html.match(/pdf-coaching-evidence/g)||[]).length,3);
+ assert.equal((html.match(/<h3>해석할 때 주의할 점<\/h3>/g)||[]).length,1);
+ assert.ok(!render(value).includes('&lt;가상 이유&gt;'));
+});
 test('코칭 제목은 본문과 묶고 강제 새 페이지를 만들지 않는다',()=>{const html=render(data);assert.match(html,/pdf-section-heading pdf-coaching-page-heading/);assert.ok(!html.includes('data-pdf-page-start'))});
 test('원문 포함은 모든 연결 근거를 중복 없이 보존하고 교사 기록을 제외한다',()=>{
  const value=structuredClone(data);value.sources=Array.from({length:4},(_,i)=>({id:'E'+i,month:'2026-09',label:'문항'+i,value:('<원문'+i+'>').repeat(50),kind:'survey'}));

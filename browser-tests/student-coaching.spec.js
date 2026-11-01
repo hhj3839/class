@@ -25,10 +25,15 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
   if(width===1440){
     await page.evaluate(()=>{allResponses.push({student_number:1,survey_month:'2026-06-01',submitted_at:'2026-06-02',payload_json:{studentState:{worryDetail:'발표가 걱정돼요.'},helpNow:'이야기하고 싶어요.'}},{student_number:2,survey_month:'2026-06-01',submitted_at:'2026-06-02',payload_json:{relationships:[{targetNumber:1,score:3}]}},{student_number:2,survey_month:'2026-09-01',submitted_at:'2026-09-02',payload_json:{relationships:[{targetNumber:1,score:4}]}})});
     const callsBefore=generated;
+    result.strengths=[item('자기평가에서 발표하려고 노력했다고 적었습니다.')];
+    await page.locator('.coaching-ai-head [data-coaching-reload]').click();
+    await page.locator('.coaching-analysis > summary').click();
+    await expect(page.locator('.coaching-analysis')).toContainText(result.strengths[0].text);
     await page.evaluate(()=>{window.__pdfOriginal=downloadPdfDocument;downloadPdfDocument=async(content,name)=>{window.__pdfContent=content;await window.__pdfOriginal(content,name)}});
     const download=page.waitForEvent('download');await page.locator('#printStudentReport').click();const file=await download;
     await file.saveAs(testInfo.outputPath('student-coaching.pdf'));
     const content=await page.evaluate(()=>window.__pdfContent);
+    for(const text of [result.strengths[0].text,result.needs[0].text,result.limitations[0]])expect(content).toContain(text);
     expect(content).toContain('학생 한눈에 보기');expect(content).toContain('학생 코칭');expect(content).toContain('모둠에서 말하기 어려워요.');expect(content).toContain('함께 탐색할 주제');expect(content).not.toContain('교사 관찰');expect(content).not.toContain('교사의 적용 결과');expect(content).not.toContain('짝과 연습한 뒤 자신의 생각을 이야기함.');expect(content).not.toContain('최근 달과 이전 누적 기록');expect(generated).toBe(callsBefore);
     await expect(page.locator('.pdf-render-root')).toHaveCount(0);
     // 긴 학생 원문과 세 조건부 대화에서도 실제 PDF 다운로드를 검증합니다.
@@ -52,6 +57,10 @@ for(const width of [360,768,1440])test(`학생 코칭 생성·근거·적용 결
   safetyPriority=true;
   await page.locator('.coaching-ai-head [data-coaching-reload]').click();await expect(page.locator('.coaching-dialogue-help')).toContainText('안전 확인은 먼저 진행');
   expect(generated).toBe(1);safetyPriority=false;
+  const ordinaryTitle=result.actions[0].title;
+  result.actions[0].title='교사가 지금 안전을 확인하기';
+  await page.locator('.coaching-ai-head [data-coaching-reload]').click();await expect(page.locator('.coaching-dialogue-help')).toContainText('필요한 보호는 미루지 않습니다');
+  expect(generated).toBe(1);result.actions[0].title=ordinaryTitle;
   await page.locator('.coaching-ai-head [data-coaching-reload]').click();await expect(page.locator('.coaching-dialogue-help')).toContainText('정하지 않아도 괜찮습니다');
   externalUsage=4;
   await page.locator('#studentDetailSelect').selectOption('2');await expect(page.locator('#studentCoachingContent')).toContainText('코칭을 만들 근거가 부족');await expect(page.locator('[data-coaching-generate]')).toBeDisabled();await expect(page.locator('#studentCoachingContent')).not.toContainText('발표가 편해지는');
