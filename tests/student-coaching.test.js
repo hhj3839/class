@@ -79,9 +79,9 @@ test('후속 질문 지침은 중립적 표현과 선택 전·실행 후를 구�
 test('이전 대화형 카드도 새 질문 기준으로 자동 변환하거나 재생성하지 않는다',async()=>{const context=makeContext();context.card={id:'v4',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-student-led-dialogue-v4'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined)});
 const makeContext=()=>({student:{studentId,number:1,name:'가상학생가'},roster:[{number:1,name:'가상학생가'},{number:2,name:'가상학생나'}],responses:[{id:'own',student_id:studentId,student_number:1,survey_month:'2026-09-01',submitted_at:'2026-09-02T00:00:00Z',payload_json:{studentState:{worryDetail:'가상학생나와 발표 연습을 하고 싶어요. test@example.invalid 010-1234-5678'},relationships:[]}},{id:'other',student_id:otherId,student_number:2,survey_month:'2026-09-01',submitted_at:'2026-09-02T00:00:00Z',payload_json:{studentState:{worryDetail:'관련 없는 다른 학생의 비공개 고민'},relationships:[{targetNumber:1,score:1},{targetNumber:1,score:5}]}}],observations:[],sourceHash:'source-v1',card:null,feedback:[],remaining:10});
 
-test('이전 검증 버전의 저장 코칭은 무료 조회에서 숨기고 재생성하지 않는다',async()=>{
+test('알려진 이전 근거 구성은 동일 자료에서 재검증 후 무료 복원한다',async()=>{
  const context=makeContext();context.card={id:'old',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.22-relationship-questions-v11',validationVersion:'2026.09.13-safety-evidence-v1'}};
- const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0);
+ const result=await harness({context});assert.equal(result.result.stale,false);assert.equal(result.result.card.id,'old');assert.match(result.result.card.result.summary.refs[0],/^S[0-9a-f]{64}$/);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0);
 });
 const validCard=()=>({summary:{text:'설문에서 발표 연습을 하고 싶다고 적었습니다.',refs:['E1']},strengths:[],needs:[],question:{text:'요즘 발표할 때는 어떠니?',refs:['E1']},actions:[{title:'어려움을 이야기하면',steps:['학생이 말한 상황을 되짚어 맞는지 확인합니다.','조금 편했던 때에는 무엇이 달랐니?'],refs:['E1']}],check_after:'원하면 학생이 해 보고 싶은 방법을 골라도 됩니다. 해 보니 어땠고 무엇을 바꾸고 싶니?',limitations:['현재 자료만으로 원인을 확정할 수 없습니다.']});
 test('이전 지도형 카드는 대화형으로 위장하지 않고 자동 생성도 하지 않는다',async()=>{const context=makeContext();context.card={id:'old',source_hash:context.sourceHash,result_json:{...validCard(),version:'2026.09.12-grounded-coaching-v3'}};const result=await harness({context});assert.equal(result.result.stale,true);assert.equal(result.result.card,null);assert.equal(result.aiBody,undefined);assert.equal(result.saved.length,0)});
@@ -98,7 +98,8 @@ async function harness({action='load',authorized=true,context=makeContext(),outp
     throw Error('Unexpected mock request');
   };
   const source=stripTypeScriptTypes(fs.readFileSync('supabase/functions/student-coaching/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
-  vm.runInNewContext(source,{...api,coachingApiError,coachingValidationError,Error,IeumRelationshipChanges:require('../relationship-changes.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
+  const savedEvidence=await import('../supabase/functions/student-coaching/saved-evidence.mjs');
+  vm.runInNewContext(source,{...api,...savedEvidence,coachingApiError,coachingValidationError,Error,IeumRelationshipChanges:require('../relationship-changes.js'),IeumRelationshipData:data,redactStudentNames,Response,Request,AbortSignal,fetch,Deno:{env:{get:name=>name==='SUPABASE_URL'?'https://mock.invalid':name==='OPENAI_API_KEY'&&!key?undefined:'test-only'},serve:fn=>handler=fn}});
   const response=await handler(new Request('https://mock.invalid/coaching',{method:'POST',headers:{Authorization:'Bearer test-only'},body:JSON.stringify({classId:'fixture',studentId,action,force})}));return{status:response.status,result:await response.json(),calls,aiBody,saved};
 }
 test('학생 코칭 근거는 선택 학생 자료와 계산값만 포함한다',async()=>{const api=await import('../supabase/functions/student-coaching/coaching.mjs'),result=api.buildEvidence(makeContext(),data);assert.equal(result.sources.length,2);assert.match(result.sources[1].value,/평균 5.00점/);assert.doesNotMatch(JSON.stringify(result.sources),/관련 없는/);assert.equal(result.limited,true)});
@@ -182,6 +183,7 @@ test('코칭 요청에 관계 관측 계산을 E근거로 보내고 다른 학�
  const calculation=result.result.sources.find(source=>source.field==='relationship_context');
  assert.ok(calculation);assert.equal(calculation.kind,'calculation');
  const input=JSON.parse(result.aiBody.input);
- assert.ok(input.evidence.some(source=>source.id===calculation.id&&source.input_kind==='관계 관측 계산'));
+ assert.ok(input.evidence.some(source=>source.id===calculation.legacyId&&source.input_kind==='관계 관측 계산'));
+ assert.match(calculation.id,/^S[0-9a-f]{64}$/);
  assert.match(result.aiBody.instructions,/점수나 다른 친구의 평가를 학생에게 공개하는 질문/);
 });

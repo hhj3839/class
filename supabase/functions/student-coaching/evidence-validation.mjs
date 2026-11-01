@@ -33,7 +33,7 @@ export function validateEvidenceClaims(text,refs,sources){
      if(relevant.length&&relevant.every(source=>absent(source.value))&&/힘들|불안|괴롭|갈등|숨기|감추|해결됐|해결되었|안정적/.test(sentence))throw new Error('없음 응답으로 감정이나 해결 여부를 단정할 수 없습니다.');
      if(/(?:즉시|바로)\s*도움\s*요청/.test(sentence)&&!dated.some(source=>source.field==='helpNow'&&/^(즉시|바로\s*도와주세요)[.!\s]*$/.test(source.value)))throw new Error('도움 요청 선택값 불일치');
      for(const match of sentence.matchAll(/[“‘"']([^”’"']+)[”’"']/g))if(!dated.some(source=>[source.displayValue||source.value,source.quoteValue].some(value=>typeof value==='string'&&value.includes(match[1]))))throw new Error('인용한 학생 원문 불일치');
-     if(relevant.length&&relevant.every(source=>source.field?.startsWith('peerObservations.'))&&!/친구에|친구의|친구가|다른 친구|대상|작성한|서술|확인/.test(sentence))throw new Error('친구 관련 응답의 대상 확인 필요');
+     if(relevant.length&&relevant.every(source=>source.field?.startsWith('peerObservations.'))&&!/친구에|친구의|친구가|다른 친구|다른 학생|대상|작성한|서술|확인/.test(sentence))throw new Error('친구 관련 응답의 대상 확인 필요');
      for(const field of named)if(!dated.some(source=>source.field===field))throw new Error('코칭 문장의 문항과 연결된 근거가 일치하지 않습니다.');
      if(scoreClaims.length&&mentions.length>1)throw new Error('점수 비교는 월별로 문장을 나누어야 합니다.');
      if(scoreClaims.length&&named.length>1)throw new Error('점수 설명은 문항별로 문장을 나누어야 합니다.');
