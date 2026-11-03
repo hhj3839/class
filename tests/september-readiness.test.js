@@ -48,5 +48,9 @@ test('장애 기록과 Pages 배포는 개인정보 없는 진단과 최신 Acti
   assert.match(pages,/actions\/checkout@v5/);
   assert.match(pages,/actions\/configure-pages@v5/);
   assert.match(pages,/actions\/upload-pages-artifact@v4/);
-  assert.match(pages,/actions\/deploy-pages@v4/);
+  assert.match(pages,/actions\/deploy-pages@v5\.0\.1/);
+  const jobTimeoutMs=Number(pages.match(/timeout-minutes:\s*(\d+)/)?.[1])*60000;
+  const deploymentTimeoutMs=Number(pages.match(/\btimeout:\s*(\d+)/)?.[1]);
+  assert.ok(deploymentTimeoutMs>0,'배포 액션의 제한 시간을 명시해야 한다');
+  assert.ok(jobTimeoutMs>=deploymentTimeoutMs+120000,'작업은 배포 액션의 종료·취소 시간보다 충분히 길어야 한다');
 });
