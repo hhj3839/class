@@ -20,7 +20,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Leave setup and cancellation time beyond deploy-pages' own 10-minute limit.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
@@ -29,4 +30,6 @@ jobs:
           path: .
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
+        with:
+          timeout: 600000
