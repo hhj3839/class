@@ -1,5 +1,7 @@
 # 익명 RPC 권한 강화 — 2026-11-03
 
+후속: [남은 운영 스키마 차이](SUPABASE_SCHEMA_RECONCILIATION_20261103.md)를 정리해 현재 이력은 32건이다. 아래의 운영 전용 테이블·월 기본값 후속 과제는 완료했으며, 본문의 권한 강화 검증 기록은 당시 상태를 보존한다.
+
 운영 프로젝트 `wxhcualawzwybsllrkqm`에
 [`20261103095435_restrict_anonymous_rpc_execution.sql`](supabase/migrations/20261103095435_restrict_anonymous_rpc_execution.sql)을 적용했다.
 운영 마이그레이션은 31건이며, 이번 파일 이름은 Supabase 적용 도구가 기록한 버전과 일치한다.
